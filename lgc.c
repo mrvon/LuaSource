@@ -205,7 +205,7 @@ void luaC_checkupvalcolor (global_State *g, UpVal *uv) {
 
 
 /*
-** create a new collectable object (with given type and size) and link
+** create a new collectable object ( withgiven type and size) and link
 ** it to '*list'. 'offset' tells how many bytes to allocate before the
 ** object itself (used only by states).
 */
