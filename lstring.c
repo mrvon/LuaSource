@@ -42,6 +42,8 @@ int luaS_eqlngstr (TString *a, TString *b) {
 /*
 ** equality for strings
 */
+// for long string just compare it. 
+// for short string is store in string table, so always the same instance, it's very easy.
 int luaS_eqstr (TString *a, TString *b) {
   return (a->tsv.tt == b->tsv.tt) &&
          (a->tsv.tt == LUA_TSHRSTR ? eqshrstr(a, b) : luaS_eqlngstr(a, b));
@@ -99,12 +101,12 @@ static TString *createstrobj (lua_State *L, const char *str, size_t l,
                               int tag, unsigned int h, GCObject **list) {
   TString *ts;
   size_t totalsize;  /* total size of TString object */
-  totalsize = sizeof(TString) + ((l + 1) * sizeof(char));
+  totalsize = sizeof(TString) + ((l + 1) * sizeof(char)); /* reserve 1 byte for '\0' */
   ts = &luaC_newobj(L, tag, totalsize, list, 0)->ts;
   ts->tsv.len = l;
   ts->tsv.hash = h;
   ts->tsv.extra = 0;
-  memcpy(ts+1, str, l*sizeof(char));
+  memcpy(ts+1, str, l*sizeof(char));  /* write string into memory after TString object */
   ((char *)(ts+1))[l] = '\0';  /* ending 0 */
   return ts;
 }
