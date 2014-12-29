@@ -49,7 +49,9 @@ int luaS_eqstr (TString *a, TString *b) {
 		(a->tsv.tt == LUA_TSHRSTR ? eqshrstr(a, b) : luaS_eqlngstr(a, b));
 }
 
-
+/*
+** calculate string hash value
+*/
 unsigned int luaS_hash (const char *str, size_t l, unsigned int seed) {
 	unsigned int h = seed ^ cast(unsigned int, l);
 	size_t l1;
