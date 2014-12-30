@@ -184,7 +184,8 @@ LUA_API void lua_remove (lua_State *L, int idx) {
 	lua_lock(L);
 	p = index2addr(L, idx);
 	api_checkstackindex(L, idx, p);
-	while (++p < L->top) setobjs2s(L, p-1, p);
+	while (++p < L->top) 
+		setobjs2s(L, p-1, p);
 	L->top--;
 	lua_unlock(L);
 }

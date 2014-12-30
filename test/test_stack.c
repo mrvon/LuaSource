@@ -46,9 +46,32 @@ void test_stack() {
 	lua_pushnil(L);
 	stack_dump(L);
 
+	lua_settop(L, -1);
+	lua_insert(L, -1);
+	lua_copy(L, -1, -1);
+	stack_dump(L);
+
 	fprintf(stdout, "STACK index 1: %s\n", lua_tostring(L, 1));
 	fprintf(stdout, "STACK index 2: %s\n", lua_tostring(L, 2));
 	fprintf(stdout, "STACK top index: %d\n", lua_gettop(L));
+
+	lua_pushvalue(L, -1);
+	stack_dump(L);
+
+	lua_remove(L, 1);
+	stack_dump(L);
+
+	lua_insert(L, 1);
+	stack_dump(L);
+
+	lua_replace(L, 2);
+	stack_dump(L);
+
+	lua_pop(L, 1);
+	stack_dump(L);
+
+	lua_copy(L, -1, -2);
+	stack_dump(L);
 
 	lua_settop(L, 1);
 	stack_dump(L);
