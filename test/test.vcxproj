@@ -113,16 +113,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="error.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="simple_interpreter.c" />
+    <ClCompile Include="test_conf.c" />
     <ClCompile Include="test_push.c" />
     <ClCompile Include="test_stack.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h" />
-    <ClInclude Include="simple_interpreter.h" />
-    <ClInclude Include="test_push.h" />
-    <ClInclude Include="test_stack.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test_func.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

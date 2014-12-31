@@ -23,19 +23,21 @@
     <ClCompile Include="test_stack.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="error.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test_conf.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="simple_interpreter.h">
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test_func.h">
       <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="test_push.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="test_stack.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
+    </None>
   </ItemGroup>
 </Project>

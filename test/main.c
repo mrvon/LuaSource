@@ -1,7 +1,7 @@
 #include "main.h"
 
 int main(void) {
-	test_stack();
+	test_conf();
 
 	getchar();
 	return 0;
