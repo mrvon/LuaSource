@@ -113,6 +113,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="call_c_function.c" />
     <ClCompile Include="error.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="simple_interpreter.c" />

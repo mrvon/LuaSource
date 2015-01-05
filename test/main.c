@@ -1,7 +1,8 @@
 #include "main.h"
 
 int main(void) {
-	test_conf();
+	//test_conf();
+	simple_interpreter();
 
 	getchar();
 	return 0;

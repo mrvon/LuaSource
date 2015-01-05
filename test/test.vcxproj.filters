@@ -29,6 +29,9 @@
     <ClCompile Include="test_conf.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="call_c_function.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
