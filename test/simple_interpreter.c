@@ -15,6 +15,8 @@ int simple_interpreter(void) {
 	lua_setglobal(L, "summation");
 	lua_pushcfunction(L, my_pack);
 	lua_setglobal(L, "my_pack");
+	lua_pushcfunction(L, my_reverse);
+	lua_setglobal(L, "my_reverse");
 
 	while(fgets(buff, sizeof(buff), stdin) != NULL) {
 		error = luaL_loadstring(L, buff) || lua_pcall(L, 0, 0, 0);
