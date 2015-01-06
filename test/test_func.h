@@ -10,3 +10,4 @@ void error(lua_State* L, const char* fmt, ...);
 int l_sin(lua_State* L);
 int summation(lua_State* L);
 int luaopen_mylib(lua_State *L);
+int my_pack(lua_State* L);
