@@ -37,8 +37,8 @@ void stack_dump(lua_State *L) {
 void test_stack() {
 	lua_State *L = luaL_newstate();
 
-	lua_pushstring(L, "Hello");
 	lua_pushstring(L, "World");
+	lua_pushstring(L, "Hello");
 	lua_pushnumber(L, 3.14);
 	lua_pushinteger(L, 1024);
 	lua_pushboolean(L, 1);
@@ -67,10 +67,10 @@ void test_stack() {
 	lua_replace(L, 2);
 	stack_dump(L);
 
-	lua_pop(L, 1);
+	lua_copy(L, -1, -2);
 	stack_dump(L);
 
-	lua_copy(L, -1, -2);
+	lua_pop(L, 1);
 	stack_dump(L);
 
 	lua_settop(L, 1);

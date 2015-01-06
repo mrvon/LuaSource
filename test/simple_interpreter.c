@@ -11,8 +11,8 @@ int simple_interpreter(void) {
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
 
-	lua_pushcfunction(L, l_sin);
-	lua_setglobal(L, "mysin");
+	lua_pushcfunction(L, summation);
+	lua_setglobal(L, "summation");
 
 	while(fgets(buff, sizeof(buff), stdin) != NULL) {
 		error = luaL_loadstring(L, buff) || lua_pcall(L, 0, 0, 0);
