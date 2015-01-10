@@ -13,6 +13,7 @@ static const struct luaL_Reg mylib[] = {
 	{"my_foreach", my_foreach},
 	{"l_map", l_map},
 	{"l_split", l_split},
+	{"l_split_ex", l_split_ex},
 	{"t_concat", t_concat},
 	{"new_counter", new_counter},
 	{"t_tuple", t_tuple},
@@ -31,9 +32,9 @@ int simple_interpreter(void) {
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
 
-	lua_pushcfunction(L, l_filter);
-	lua_setglobal(L, "l_filter");
-	
+	lua_pushcfunction(L, l_split_ex);
+	lua_setglobal(L, "l_split_ex");
+
 	while(fgets(buff, sizeof(buff), stdin) != NULL) {
 		error = luaL_loadstring(L, buff) || lua_pcall(L, 0, 0, 0);
 		if(error) {
