@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <string.h>
 #include "lua.h"
@@ -5,25 +6,33 @@
 #include "lualib.h"
 #include "test_func.h"
 
+static const struct luaL_Reg mylib[] = {
+	{"summation", summation},
+	{"my_pack", my_pack},
+	{"my_reverse", my_reverse},
+	{"my_foreach", my_foreach},
+	{"l_map", l_map},
+	{"l_split", l_split},
+	{"t_concat", t_concat},
+	{"new_counter", new_counter},
+	{"t_tuple", t_tuple},
+	{"l_filter", l_filter},
+	{NULL, NULL},
+};
+
+int luaopen_mylib(lua_State *L) {
+	luaL_newlib(L, mylib);
+	return 1;
+}
+
 int simple_interpreter(void) {
 	char buff[256];
 	int error;
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
 
-	lua_pushcfunction(L, summation);
-	lua_setglobal(L, "summation");
-	lua_pushcfunction(L, my_pack);
-	lua_setglobal(L, "my_pack");
-	lua_pushcfunction(L, my_reverse);
-	lua_setglobal(L, "my_reverse");
-	lua_pushcfunction(L, my_foreach);
-	lua_setglobal(L, "my_foreach");
-	lua_pushcfunction(L, l_map);
-	lua_setglobal(L, "l_map");
-	lua_pushcfunction(L, l_split);
-	lua_setglobal(L, "l_split");
-	
+	lua_pushcfunction(L, l_filter);
+	lua_setglobal(L, "l_filter");
 	
 	while(fgets(buff, sizeof(buff), stdin) != NULL) {
 		error = luaL_loadstring(L, buff) || lua_pcall(L, 0, 0, 0);
