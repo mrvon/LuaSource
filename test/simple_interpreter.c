@@ -19,6 +19,11 @@ int simple_interpreter(void) {
 	lua_setglobal(L, "my_reverse");
 	lua_pushcfunction(L, my_foreach);
 	lua_setglobal(L, "my_foreach");
+	lua_pushcfunction(L, l_map);
+	lua_setglobal(L, "l_map");
+	lua_pushcfunction(L, l_split);
+	lua_setglobal(L, "l_split");
+	
 	
 	while(fgets(buff, sizeof(buff), stdin) != NULL) {
 		error = luaL_loadstring(L, buff) || lua_pcall(L, 0, 0, 0);
