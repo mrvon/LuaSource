@@ -789,7 +789,7 @@ LUA_API void lua_rawseti (lua_State *L, int idx, int n) {
 	t = index2addr(L, idx);
 	api_check(L, ttistable(t), "table expected");
 	luaH_setint(L, hvalue(t), n, L->top - 1);
-	luaC_barrierback(L, gcvalue(t), L->top-1);
+	luaC_barrierback(L, gcvalue(t), L->top - 1);
 	L->top--;
 	lua_unlock(L);
 }
