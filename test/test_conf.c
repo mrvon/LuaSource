@@ -39,10 +39,16 @@ int getcolorfield(lua_State *L, const char *key) {
 }
 
 // Assume that table is at the top
-void setcolorfield(lua_State *L, const char* index, int value) {
+void __setcolorfield(lua_State *L, const char* index, int value) {
 	lua_pushstring(L, index);	// key
 	lua_pushnumber(L, (double)value / MAX_COLOR); // value
 	lua_settable(L, -3);
+}
+
+// Assume that table is at the top
+void setcolorfield(lua_State *L, const char* index, int value) {
+	lua_pushnumber(L, (double)value / MAX_COLOR); // values
+	lua_setfield(L, -2, index);
 }
 
 void setcolor(lua_State* L, struct ColorTable* ct) {
