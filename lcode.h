@@ -24,12 +24,12 @@
 ** grep "ORDER OPR" if you change these enums  (ORDER OP)
 */
 typedef enum BinOpr {
-  OPR_ADD, OPR_SUB, OPR_MUL, OPR_DIV, OPR_MOD, OPR_POW,
-  OPR_CONCAT,
-  OPR_EQ, OPR_LT, OPR_LE,
-  OPR_NE, OPR_GT, OPR_GE,
-  OPR_AND, OPR_OR,
-  OPR_NOBINOPR
+	OPR_ADD, OPR_SUB, OPR_MUL, OPR_DIV, OPR_MOD, OPR_POW,
+	OPR_CONCAT,
+	OPR_EQ, OPR_LT, OPR_LE,
+	OPR_NE, OPR_GT, OPR_GE,
+	OPR_AND, OPR_OR,
+	OPR_NOBINOPR
 } BinOpr;
 
 
@@ -75,8 +75,7 @@ LUAI_FUNC void luaK_concat (FuncState *fs, int *l1, int l2);
 LUAI_FUNC int luaK_getlabel (FuncState *fs);
 LUAI_FUNC void luaK_prefix (FuncState *fs, UnOpr op, expdesc *v, int line);
 LUAI_FUNC void luaK_infix (FuncState *fs, BinOpr op, expdesc *v);
-LUAI_FUNC void luaK_posfix (FuncState *fs, BinOpr op, expdesc *v1,
-                            expdesc *v2, int line);
+LUAI_FUNC void luaK_posfix (FuncState *fs, BinOpr op, expdesc *v1, expdesc *v2, int line);
 LUAI_FUNC void luaK_setlist (FuncState *fs, int base, int nelems, int tostore);
 
 
