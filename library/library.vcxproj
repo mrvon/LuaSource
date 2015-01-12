@@ -142,6 +142,32 @@
     <ClCompile Include="..\lvm.c" />
     <ClCompile Include="..\lzio.c" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\lapi.h" />
+    <ClInclude Include="..\lauxlib.h" />
+    <ClInclude Include="..\lcode.h" />
+    <ClInclude Include="..\lctype.h" />
+    <ClInclude Include="..\ldebug.h" />
+    <ClInclude Include="..\ldo.h" />
+    <ClInclude Include="..\lfunc.h" />
+    <ClInclude Include="..\lgc.h" />
+    <ClInclude Include="..\llex.h" />
+    <ClInclude Include="..\llimits.h" />
+    <ClInclude Include="..\lmem.h" />
+    <ClInclude Include="..\lobject.h" />
+    <ClInclude Include="..\lopcodes.h" />
+    <ClInclude Include="..\lparser.h" />
+    <ClInclude Include="..\lstate.h" />
+    <ClInclude Include="..\lstring.h" />
+    <ClInclude Include="..\ltable.h" />
+    <ClInclude Include="..\ltm.h" />
+    <ClInclude Include="..\lua.h" />
+    <ClInclude Include="..\luaconf.h" />
+    <ClInclude Include="..\lualib.h" />
+    <ClInclude Include="..\lundump.h" />
+    <ClInclude Include="..\lvm.h" />
+    <ClInclude Include="..\lzio.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
