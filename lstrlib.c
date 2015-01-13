@@ -44,9 +44,12 @@ static int str_len (lua_State *L) {
 
 /* translate a relative string position: negative means back from end */
 static size_t posrelat (ptrdiff_t pos, size_t len) {
-	if (pos >= 0) return (size_t)pos;
-	else if (0u - (size_t)pos > len) return 0;
-	else return len - ((size_t)-pos) + 1;
+	if (pos >= 0) 
+		return (size_t)pos;
+	else if (0u - (size_t)pos > len)
+		return 0;
+	else 
+		return len - ((size_t)-pos) + 1;
 }
 
 
@@ -59,7 +62,8 @@ static int str_sub (lua_State *L) {
 	if (end > l) end = l;
 	if (start <= end)
 		lua_pushlstring(L, s + start - 1, end - start + 1);
-	else lua_pushliteral(L, "");
+	else
+		lua_pushliteral(L, "");
 	return 1;
 }
 
@@ -82,7 +86,7 @@ static int str_lower (lua_State *L) {
 	luaL_Buffer b;
 	const char *s = luaL_checklstring(L, 1, &l);
 	char *p = luaL_buffinitsize(L, &b, l);
-	for (i=0; i<l; i++)
+	for (i = 0; i < l; i++)
 		p[i] = tolower(uchar(s[i]));
 	luaL_pushresultsize(&b, l);
 	return 1;
@@ -95,7 +99,7 @@ static int str_upper (lua_State *L) {
 	luaL_Buffer b;
 	const char *s = luaL_checklstring(L, 1, &l);
 	char *p = luaL_buffinitsize(L, &b, l);
-	for (i=0; i<l; i++)
+	for (i = 0; i < l; i++)
 		p[i] = toupper(uchar(s[i]));
 	luaL_pushresultsize(&b, l);
 	return 1;
@@ -143,8 +147,8 @@ static int str_byte (lua_State *L) {
 	if (posi + n <= pose)  /* (size_t -> int) overflow? */
 		return luaL_error(L, "string slice too long");
 	luaL_checkstack(L, n, "string slice too long");
-	for (i=0; i<n; i++)
-		lua_pushinteger(L, uchar(s[posi+i-1]));
+	for (i = 0; i < n; i++)
+		lua_pushinteger(L, uchar(s[posi + i - 1]));
 	return n;
 }
 
@@ -154,7 +158,7 @@ static int str_char (lua_State *L) {
 	int i;
 	luaL_Buffer b;
 	char *p = luaL_buffinitsize(L, &b, n);
-	for (i=1; i<=n; i++) {
+	for (i = 1; i <= n; i++) {
 		int c = luaL_checkint(L, i);
 		luaL_argcheck(L, uchar(c) == c, i, "value out of range");
 		p[i - 1] = uchar(c);
@@ -175,7 +179,7 @@ static int str_dump (lua_State *L) {
 	luaL_Buffer b;
 	luaL_checktype(L, 1, LUA_TFUNCTION);
 	lua_settop(L, 1);
-	luaL_buffinit(L,&b);
+	luaL_buffinit(L, &b);
 	if (lua_dump(L, writer, &b) != 0)
 		return luaL_error(L, "unable to dump given function");
 	luaL_pushresult(&b);
