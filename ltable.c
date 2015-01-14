@@ -289,7 +289,7 @@ static void setnodevector (lua_State *L, Table *t, int size) {
             luaG_runerror(L, "table overflow");
         size = twoto(lsize);
         t->node = luaM_newvector(L, size, Node);
-        for (i=0; i<size; i++) {
+        for (i = 0; i < size; i++) {
             Node *n = gnode(t, i);
             gnext(n) = NULL;
             setnilvalue(gkey(n));
@@ -377,7 +377,7 @@ Table *luaH_new (lua_State *L) {
 
 
 void luaH_free (lua_State *L, Table *t) {
-    if (!isdummy(t->node))
+    if (! isdummy(t->node))
         luaM_freearray(L, t->node, cast(size_t, sizenode(t)));
     luaM_freearray(L, t->array, t->sizearray);
     luaM_free(L, t);
@@ -404,7 +404,8 @@ static Node *getfreepos (Table *t) {
 */
 TValue *luaH_newkey (lua_State *L, Table *t, const TValue *key) {
     Node *mp;
-    if (ttisnil(key)) luaG_runerror(L, "table index is nil");
+    if (ttisnil(key))
+		luaG_runerror(L, "table index is nil");
     else if (ttisnumber(key) && luai_numisnan(L, nvalue(key)))
         luaG_runerror(L, "table index is NaN");
     mp = mainposition(t, key);
