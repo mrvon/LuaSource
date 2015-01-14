@@ -72,10 +72,11 @@ void luaS_resize (lua_State *L, int newsize) {
     luaC_runtilstate(L, ~bitmask(GCSsweepstring));
     if (newsize > tb->size) {
         luaM_reallocvector(L, tb->hash, tb->size, newsize, GCObject *);
-        for (i = tb->size; i < newsize; i++) tb->hash[i] = NULL;
+        for (i = tb->size; i < newsize; i++)
+			tb->hash[i] = NULL;
     }
     /* rehash */
-    for (i=0; i<tb->size; i++) {
+    for (i = 0; i < tb->size; i++) {
         GCObject *p = tb->hash[i];
         tb->hash[i] = NULL;
         while (p) {  /* for each node in the list */
@@ -99,35 +100,33 @@ void luaS_resize (lua_State *L, int newsize) {
 /*
 ** creates a new string object
 */
-static TString *createstrobj (lua_State *L, const char *str, size_t l,
-    int tag, unsigned int h, GCObject **list) {
-        TString *ts;
-        size_t totalsize;  /* total size of TString object */
-        totalsize = sizeof(TString) + ((l + 1) * sizeof(char)); /* reserve 1 byte for '\0' */
-        ts = &luaC_newobj(L, tag, totalsize, list, 0)->ts;
-        ts->tsv.len = l;
-        ts->tsv.hash = h;
-        ts->tsv.extra = 0;
-        memcpy(ts+1, str, l*sizeof(char));  /* write string into memory after TString object */
-        ((char *)(ts+1))[l] = '\0';  /* ending 0 */
-        return ts;
+static TString *createstrobj (lua_State *L, const char *str, size_t l, int tag, unsigned int h, GCObject **list) {
+	TString *ts;
+	size_t totalsize;  /* total size of TString object */
+	totalsize = sizeof(TString) + ((l + 1) * sizeof(char)); /* reserve 1 byte for '\0' */
+	ts = &luaC_newobj(L, tag, totalsize, list, 0)->ts;
+	ts->tsv.len = l;
+	ts->tsv.hash = h;
+	ts->tsv.extra = 0;
+	memcpy(ts+1, str, l*sizeof(char));  /* write string into memory after TString object */
+	((char *)(ts+1))[l] = '\0';  /* ending 0 */
+	return ts;
 }
 
 
 /*
 ** creates a new short string, inserting it into string table
 */
-static TString *newshrstr (lua_State *L, const char *str, size_t l,
-    unsigned int h) {
-        GCObject **list;  /* (pointer to) list where it will be inserted */
-        stringtable *tb = &G(L)->strt;
-        TString *s;
-        if (tb->nuse >= cast(lu_int32, tb->size) && tb->size <= MAX_INT/2)
-            luaS_resize(L, tb->size*2);  /* too crowded */
-        list = &tb->hash[lmod(h, tb->size)];
-        s = createstrobj(L, str, l, LUA_TSHRSTR, h, list);
-        tb->nuse++;
-        return s;
+static TString *newshrstr (lua_State *L, const char *str, size_t l, unsigned int h) {
+	GCObject **list;  /* (pointer to) list where it will be inserted */
+	stringtable *tb = &G(L)->strt;
+	TString *s;
+	if (tb->nuse >= cast(lu_int32, tb->size) && tb->size <= MAX_INT/2)
+		luaS_resize(L, tb->size*2);  /* too crowded */
+	list = &tb->hash[lmod(h, tb->size)];
+	s = createstrobj(L, str, l, LUA_TSHRSTR, h, list);
+	tb->nuse++;
+	return s;
 }
 
 
