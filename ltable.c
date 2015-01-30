@@ -98,14 +98,15 @@ static Node *mainposition (const Table *t, const TValue *key) {
     switch (ttype(key)) {
     case LUA_TNUMBER:
         return hashnum(t, nvalue(key));
-    case LUA_TLNGSTR: {
-        TString *s = rawtsvalue(key);
-        if (s->tsv.extra == 0) {  /* no hash? */
-            s->tsv.hash = luaS_hash(getstr(s), s->tsv.len, s->tsv.hash);
-            s->tsv.extra = 1;  /* now it has its hash */
-        }
-        return hashstr(t, rawtsvalue(key));
-                      }
+    case LUA_TLNGSTR:
+		{
+			TString *s = rawtsvalue(key);
+			if (s->tsv.extra == 0) {  /* no hash? */
+				s->tsv.hash = luaS_hash(getstr(s), s->tsv.len, s->tsv.hash);
+				s->tsv.extra = 1;  /* now it has its hash */
+			}
+			return hashstr(t, rawtsvalue(key));
+		}
     case LUA_TSHRSTR:
         return hashstr(t, rawtsvalue(key));
     case LUA_TBOOLEAN:
@@ -345,7 +346,7 @@ static void rehash (lua_State *L, Table *t, const TValue *ek) {
     int nums[MAXBITS+1];  /* nums[i] = number of keys with 2^(i-1) < k <= 2^i */
     int i;
     int totaluse;
-    for (i=0; i<=MAXBITS; i++) nums[i] = 0;  /* reset counts */
+    for (i = 0; i <= MAXBITS; i++) nums[i] = 0;  /* reset counts */
     nasize = numusearray(t, nums);  /* count keys in array part */
     totaluse = nasize;  /* all those keys are integer keys */
     totaluse += numusehash(t, nums, &nasize);  /* count keys in hash part */
@@ -512,7 +513,8 @@ TValue *luaH_set (lua_State *L, Table *t, const TValue *key) {
     const TValue *p = luaH_get(t, key);
     if (p != luaO_nilobject)
         return cast(TValue *, p);
-    else return luaH_newkey(L, t, key);
+    else
+		return luaH_newkey(L, t, key);
 }
 
 
