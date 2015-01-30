@@ -171,8 +171,8 @@ int luaH_next (lua_State *L, Table *t, StkId key) {
     int i = findindex(L, t, key);  /* find original element */
     for (i++; i < t->sizearray; i++) {  /* try first array part */
         if (!ttisnil(&t->array[i])) {  /* a non-nil value? */
-            setnvalue(key, cast_num(i+1));
-            setobj2s(L, key+1, &t->array[i]);
+            setnvalue(key, cast_num(i + 1));
+            setobj2s(L, key + 1, &t->array[i]);
             return 1;
         }
     }
@@ -566,7 +566,7 @@ int luaH_getn (Table *t) {
         /* there is a boundary in the array part: (binary) search for it */
         unsigned int i = 0;
         while (j - i > 1) {
-            unsigned int m = (i+j)/2;
+            unsigned int m = (i + j) / 2;
             if (ttisnil(&t->array[m - 1])) j = m;
             else i = m;
         }
@@ -575,7 +575,8 @@ int luaH_getn (Table *t) {
     /* else must find a boundary in hash part */
     else if (isdummy(t->node))  /* hash part is empty? */
         return j;  /* that is easy... */
-    else return unbound_search(t, j);
+    else 
+		return unbound_search(t, j);
 }
 
 
