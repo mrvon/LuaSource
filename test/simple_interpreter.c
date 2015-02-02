@@ -18,6 +18,7 @@ static const struct luaL_Reg mylib[] = {
 	{"new_counter", new_counter},
 	{"t_tuple", t_tuple},
 	{"l_filter", l_filter},
+	{"my_getn", my_getn},
 	{NULL, NULL},
 };
 
@@ -32,8 +33,8 @@ int simple_interpreter(void) {
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
 
-	lua_pushcfunction(L, l_split_ex);
-	lua_setglobal(L, "l_split_ex");
+	lua_pushcfunction(L, my_getn);
+	lua_setglobal(L, "my_getn");
 
 	while(fgets(buff, sizeof(buff), stdin) != NULL) {
 		error = luaL_loadstring(L, buff) || lua_pcall(L, 0, 0, 0);

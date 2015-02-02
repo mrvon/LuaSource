@@ -23,7 +23,7 @@ struct ColorTable {
 };
 
 // Assume that table is one the stack top
-int getcolorfield(lua_State *L, const char *key) {
+int __getcolorfield(lua_State *L, const char *key) {
 	int result = 0;
 
 	lua_pushstring(L, key);		// push key
@@ -36,6 +36,22 @@ int getcolorfield(lua_State *L, const char *key) {
 	result = (int)(lua_tonumber(L, -1) * MAX_COLOR);
 	lua_pop(L, 1); // remove number
 	return result;
+}
+
+// Assume that table is one the stack top
+int getcolorfield(lua_State *L, const char *key) {
+    int result = 0;
+
+    lua_getfield(L, -1, key);   // get background[key]
+
+    if (! lua_isnumber(L, -1)) {
+        error(L, "invalid component in background color");
+        return 0;
+    }
+
+    result = (int)(lua_tonumber(L, -1) * MAX_COLOR);
+    lua_pop(L, 1); // remove number
+    return result;
 }
 
 // Assume that table is at the top
@@ -197,8 +213,8 @@ void load_conf(lua_State *L, const char *fname) {
 	int g = 0;
 	int b = 0;
 
-	double x = 1.5;
-	double y = 2.9;
+	double x = 0;
+	double y = 0;
 	double z = 0;
 
 	const char* h_str = "hello";
@@ -271,6 +287,8 @@ void load_conf(lua_State *L, const char *fname) {
 	lua_pop(L, 1);
 	printf("red: %d, green: %d, blue: %d\n", r, g, b);
 
+	x = 1.5;
+	y = 2.9;
 	z = call_f(L, x, y);
 	printf("f(%g, %g) -> %g\n", x, y, z);
 

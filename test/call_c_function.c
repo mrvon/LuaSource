@@ -218,3 +218,13 @@ int t_concat(lua_State *L) {
 
 	return 1;
 }
+
+int my_getn(lua_State *L) {
+	int n = 0;
+
+	luaL_checktype(L, 1, LUA_TTABLE);
+	n = lua_rawlen(L, -1);
+	lua_pushinteger(L, n);
+
+	return 1;
+}
