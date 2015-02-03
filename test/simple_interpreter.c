@@ -15,7 +15,7 @@ static const struct luaL_Reg mylib[] = {
 	{"l_split", l_split},
 	{"l_split_ex", l_split_ex},
 	{"t_concat", t_concat},
-	{"new_counter", new_counter},
+	{"create_counter", create_counter},
 	{"t_tuple", t_tuple},
 	{"l_filter", l_filter},
 	{"my_concat", my_concat},

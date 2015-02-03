@@ -127,15 +127,17 @@ void test_reg() {
 }
 
 static int counter(lua_State *L) {
-	int val = lua_tointeger(L, lua_upvalueindex(1));
-	lua_pushinteger(L, ++val);				// new value
-	lua_pushvalue(L, -1);					// duplicate it
-	lua_replace(L, lua_upvalueindex(1));	// update upvalue
-	return 1;								// return new value
+	int val = lua_tointeger(L, lua_upvalueindex(1)); // old value
+	lua_pushinteger(L, ++val);                       // new value
+	lua_pushvalue(L, -1);                            // duplicate it
+	lua_replace(L, lua_upvalueindex(1));             // update upvalue
+	return 1;                                        // return new value
 }
 
-int new_counter(lua_State *L) {
+int create_counter(lua_State *L) {
+    // initial value for upvalue
 	lua_pushinteger(L, 0);
+
 	lua_pushcclosure(L, &counter, 1);
 	return 1;
 }

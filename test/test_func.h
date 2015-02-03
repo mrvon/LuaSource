@@ -18,7 +18,7 @@ int l_filter(lua_State* L);
 int l_split(lua_State* L);
 int l_split_ex(lua_State *L);
 int t_concat(lua_State *L);
-int new_counter(lua_State *L);
+int create_counter(lua_State *L);
 int t_tuple(lua_State *L);
 int my_concat(lua_State *L);
 int my_getn(lua_State *L);
