@@ -59,28 +59,19 @@ int my_foreach(lua_State* L) {
 	luaL_checktype(L, -2, LUA_TTABLE);
 
 	lua_pushnil(L);	// first key
-	stack_dump(L);
-
 	while(lua_next(L, -3) != 0) {
 		// uses 'key' (at index -2) and 'value' (at index - 1)
-		stack_dump(L);
-
 		lua_pushvalue(L, -3);
 		lua_pushvalue(L, -3);
 
-		stack_dump(L);
-
 		lua_insert(L, -3);
 		lua_insert(L, -3);
-
-		stack_dump(L);
 
 		// do the call (2 arguments, 0 result)
 		if (lua_pcall(L, 2, 0, 0) != LUA_OK) {
 			error(L, "error running function 'f': %s\n", lua_tostring(L, -1));
 			return 0;
 		}
-		stack_dump(L);
 	}
 	lua_pop(L, 0);
 
@@ -196,26 +187,25 @@ int t_concat(lua_State *L) {
 	int i = 0;
 	int n = 0;
 
-	stack_dump(L);
-
 	luaL_checktype(L, 1, LUA_TTABLE);
 	n = luaL_len(L, 1);
-	stack_dump(L);
 
 	luaL_buffinit(L, &b);
-	stack_dump(L);
 
 	for (i = 1; i <= n; ++i) {
 		lua_rawgeti(L, 1, i);	// get string from table
-		stack_dump(L);
 		luaL_addvalue(&b);		// add it to the buffer
-		stack_dump(L);
 	}
-	stack_dump(L);
 
 	luaL_pushresult(&b);
-	stack_dump(L);
 
+	return 1;
+}
+
+int my_concat(lua_State *L) {
+	int num_of_argument = lua_gettop(L);
+	int i = 0;
+    lua_concat(L, num_of_argument);
 	return 1;
 }
 
@@ -223,7 +213,7 @@ int my_getn(lua_State *L) {
 	int n = 0;
 
 	luaL_checktype(L, 1, LUA_TTABLE);
-	n = lua_rawlen(L, -1);
+	n = (int)lua_rawlen(L, -1);
 	lua_pushinteger(L, n);
 
 	return 1;

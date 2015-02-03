@@ -36,7 +36,6 @@ void stack_dump(lua_State *L) {
 
 void test_stack() {
 	lua_State *L = luaL_newstate();
-	int r = 0;
 
 	lua_pushstring(L, "World");
 	lua_pushstring(L, "Hello");
@@ -71,39 +70,42 @@ void test_stack() {
 	lua_copy(L, -1, -2);
 	stack_dump(L);
 
-	// -----------------------------------------------------
-
 	lua_pop(L, 1);
 	stack_dump(L);
-
-	r = luaL_ref(L, LUA_REGISTRYINDEX);
-	stack_dump(L);
-
-	lua_rawgeti(L, LUA_REGISTRYINDEX, r);
-	stack_dump(L);
-
-	luaL_unref(L, LUA_REGISTRYINDEX, r);
-	stack_dump(L);
-
-	luaL_unref(L, LUA_REGISTRYINDEX, LUA_REFNIL);
-	stack_dump(L);
-
-	lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_REFNIL);
-	stack_dump(L);
-	assert(luaL_ref(L, LUA_REGISTRYINDEX) == LUA_REFNIL);
-
+    
 	lua_settop(L, 1);
 	stack_dump(L);
 }
 
 void test_reg() {
 	lua_State *L = luaL_newstate();
-
+    
 	// variable with a unique address
 	static char key = 'k';
 	const char* my_str = "hello\n";
 	static char key_2 = 'l';
 	const char* my_str_2 = "world\n";
+	int r = 0;
+
+	lua_pushstring(L, "Hello world");
+
+    // pop the top value, create new reference
+	r = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    // get value by reference
+	lua_rawgeti(L, LUA_REGISTRYINDEX, r);
+
+    // release reference
+	luaL_unref(L, LUA_REGISTRYINDEX, r);
+
+    // release nil reference is not effect
+	luaL_unref(L, LUA_REGISTRYINDEX, LUA_REFNIL);
+
+    // get nil value by LUA_REFNIL
+	lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_REFNIL);
+	stack_dump(L);
+
+	assert(luaL_ref(L, LUA_REGISTRYINDEX) == LUA_REFNIL);
 
 	// store a string
 	lua_pushlightuserdata(L, (void*) &key);	// push address
