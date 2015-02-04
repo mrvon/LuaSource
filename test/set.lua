@@ -88,6 +88,13 @@ end
 mt.__eq = function(a, b)
     return a <= b and b <= a
 end
+mt.__len = function(a)
+    local count = 0
+    for _, _ in pairs(a) do
+        count = count + 1
+    end
+    return count
+end
 
 
 
@@ -98,9 +105,11 @@ print(getmetatable(s2))
 
 print("-------------- S1 ---------------")
 Set.print(s1)
+print("SIZE:", #s1)
 
 print("-------------- S2 ---------------")
 Set.print(s2)
+print("SIZE:", #s2)
 
 s3 = s1 + s2
 print("-------------- S1 + s2 ---------------")

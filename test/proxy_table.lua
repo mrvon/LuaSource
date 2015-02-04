@@ -24,16 +24,35 @@ local mt = {
         return function(t, k)
             return next(_t, k)
         end
+    end,
+
+    __ipairs = function()
+        print("Invoking __ipairs")
+        local i = 0
+        return function(t, k)
+            i = i + 1
+            return _t[i]
+        end
     end
 }
 setmetatable(t, mt)
 
+t[1] = "output"
 t[2] = "hello"
+t[3] = "world"
+t[4] = "foo"
+t[5] = "goo"
+t["name"] = "UNNAME"
+t["id"]   = 1
+
 print(t[2])
 
--- It seems can't work!
 for k, v in pairs(t) do
     print(k, v)
+end
+
+for v in ipairs(t) do
+    print(v)
 end
 
 function ReadOnly(t)
@@ -58,4 +77,4 @@ days = ReadOnly({
     "Saturday"
 })
 print(days[1])
-days[2] = "Noday"
+-- days[2] = "Noday"
