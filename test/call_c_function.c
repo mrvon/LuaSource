@@ -29,15 +29,12 @@ int my_pack(lua_State* L) {
 	int i = 0;
 	int num_of_element = lua_gettop(L);
 	lua_newtable(L);
-	stack_dump(L);
 	for (i = 1; i <= num_of_element; ++i) {
 		lua_pushnumber(L, i);					// key
 		lua_pushvalue(L, 1);					// push value
 		lua_remove(L, 1);						// remove value
-		stack_dump(L);
 
 		lua_settable(L, -3);
-		stack_dump(L);
 	}
 
 	return 1;

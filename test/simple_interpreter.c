@@ -28,6 +28,17 @@ int luaopen_mylib(lua_State *L) {
 	return 1;
 }
 
+int __luaopen_mylib(lua_State *L) {
+    // create library table ('mylib' is its list of functions)
+    luaL_newlibtable(L, mylib);
+    // create shared upvalue
+    lua_newtable(L);
+    // add functions in list 'mylib' to the new library,
+    // sharing previous table as upvalue
+    luaL_setfuncs(L, mylib, 1);
+    return 1;
+}
+
 void simple_reg(lua_State *L) {
     int i = 0;
     for(; mylib[i].func != NULL; ++i) {
