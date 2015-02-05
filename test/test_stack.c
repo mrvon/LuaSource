@@ -85,6 +85,9 @@ void test_reg() {
 	const char* my_str = "hello\n";
 	static char key_2 = 'l';
 	const char* my_str_2 = "world\n";
+    static char key_3 = 'm';
+    const char* my_str_3 = "foo\n";
+
 	int r = 0;
 
 	lua_pushstring(L, "Hello world");
@@ -108,7 +111,7 @@ void test_reg() {
 	assert(luaL_ref(L, LUA_REGISTRYINDEX) == LUA_REFNIL);
 
 	// store a string
-	lua_pushlightuserdata(L, (void*) &key);	// push address
+	lua_pushlightuserdata(L, (void*)&key);	// push address
 	lua_pushstring(L, my_str);				// push value
 	lua_settable(L, LUA_REGISTRYINDEX);		// registry[&key] = my_str
 
@@ -124,6 +127,16 @@ void test_reg() {
 	// retrieve a string
 	lua_rawgetp(L, LUA_REGISTRYINDEX, &key_2);
 	fprintf(stdout, lua_tostring(L, -1));
+
+    // store a string
+    lua_pushlightuserdata(L, (void*)&key_3); // push address
+    lua_pushstring(L, my_str_3);             // push value
+    lua_rawset(L, LUA_REGISTRYINDEX);        // registry[&key] = my_str_3
+
+    // retrieve a string
+    lua_pushlightuserdata(L, (void*)&key_3); // push address
+    lua_rawget(L, LUA_REGISTRYINDEX);        // retrieve value
+    fprintf(stdout, lua_tostring(L, -1));    // convert to string
 }
 
 static int counter(lua_State *L) {
