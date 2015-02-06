@@ -271,7 +271,7 @@ static int numusehash (const Table *t, int *nums, int *pnasize) {
 static void setarrayvector (lua_State *L, Table *t, int size) {
     int i;
     luaM_reallocvector(L, t->array, t->sizearray, size, TValue);
-    for (i=t->sizearray; i<size; i++)
+    for (i = t->sizearray; i < size; i++)
         setnilvalue(&t->array[i]);
     t->sizearray = size;
 }
@@ -314,7 +314,7 @@ void luaH_resize (lua_State *L, Table *t, int nasize, int nhsize) {
     if (nasize < oldasize) {  /* array part must shrink? */
         t->sizearray = nasize;
         /* re-insert elements from vanishing slice */
-        for (i=nasize; i<oldasize; i++) {
+        for (i = nasize; i < oldasize; i++) {
             if (!ttisnil(&t->array[i]))
                 luaH_setint(L, t, i + 1, &t->array[i]);
         }
@@ -323,7 +323,7 @@ void luaH_resize (lua_State *L, Table *t, int nasize, int nhsize) {
     }
     /* re-insert elements from hash part */
     for (i = twoto(oldhsize) - 1; i >= 0; i--) {
-        Node *old = nold+i;
+        Node *old = nold + i;
         if (!ttisnil(gval(old))) {
             /* doesn't need barrier/invalidate cache, as entry was
             already present in the table */

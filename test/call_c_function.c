@@ -52,17 +52,16 @@ int my_reverse(lua_State* L) {
 }
 
 int my_foreach(lua_State* L) {
-	luaL_checktype(L, -1, LUA_TFUNCTION);
-	luaL_checktype(L, -2, LUA_TTABLE);
+	luaL_checktype(L, 1, LUA_TTABLE);
+	luaL_checktype(L, 2, LUA_TFUNCTION);
 
 	lua_pushnil(L);	// first key
-	while(lua_next(L, -3) != 0) {
-		// uses 'key' (at index -2) and 'value' (at index - 1)
-		lua_pushvalue(L, -3);
-		lua_pushvalue(L, -3);
-
+	while(lua_next(L, 1) != 0) {
+		// 'key' (at index -2) and 'value' (at index - 1)
+		lua_pushvalue(L, -2);   // copy key
+        lua_pushvalue(L, 2);	// copy f
 		lua_insert(L, -3);
-		lua_insert(L, -3);
+        lua_insert(L, -2);
 
 		// do the call (2 arguments, 0 result)
 		if (lua_pcall(L, 2, 0, 0) != LUA_OK) {
