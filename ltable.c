@@ -549,8 +549,10 @@ static int unbound_search (Table *t, unsigned int j) {
     /* now do a binary search between them */
     while (j - i > 1) {
         unsigned int m = (i+j)/2;
-        if (ttisnil(luaH_getint(t, m))) j = m;
-        else i = m;
+        if (ttisnil(luaH_getint(t, m)))
+            j = m;
+        else
+            i = m;
     }
     return i;
 }
@@ -567,8 +569,10 @@ int luaH_getn (Table *t) {
         unsigned int i = 0;
         while (j - i > 1) {
             unsigned int m = (i + j) / 2;
-            if (ttisnil(&t->array[m - 1])) j = m;
-            else i = m;
+            if (ttisnil(&t->array[m - 1]))
+                j = m;
+            else
+                i = m;
         }
         return i;
     }
