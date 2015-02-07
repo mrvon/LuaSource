@@ -140,7 +140,7 @@ void test_reg() {
 }
 
 static int counter(lua_State *L) {
-	int val = lua_tointeger(L, lua_upvalueindex(1)); // old value
+	int val = (int)lua_tointeger(L, lua_upvalueindex(1)); // old value
 	lua_pushinteger(L, ++val);                       // new value
 	lua_pushvalue(L, -1);                            // duplicate it
 	lua_replace(L, lua_upvalueindex(1));             // update upvalue
