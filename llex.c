@@ -64,7 +64,7 @@ static void save (LexState *ls, int c) {
 
 void luaX_init (lua_State *L) {
 	int i;
-	for (i=0; i<NUM_RESERVED; i++) {
+	for (i = 0; i < NUM_RESERVED; i++) {
 		TString *ts = luaS_new(L, luaX_tokens[i]);
 		luaS_fix(ts);  /* reserved words are never collected */
 		ts->tsv.extra = cast_byte(i+1);  /* reserved word */
