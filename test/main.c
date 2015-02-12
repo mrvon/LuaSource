@@ -8,10 +8,10 @@ typedef struct Foo {
 } Foo;
 
 int main(void) {
-	//test_conf();
+	test_conf();
 	//simple_interpreter();
 	//test_reg();
-	test_stack();
+	//test_stack();
 
 	//fprintf(stdout, "INT: %d\n", offsetof(Foo, n));
 	//fprintf(stdout, "CHAR: %d\n", offsetof(Foo, c));
