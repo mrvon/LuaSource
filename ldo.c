@@ -291,7 +291,8 @@ static StkId tryfuncTM (lua_State *L, StkId func) {
 
 
 /*
-** returns true if function has been executed (C function)
+** returns true if function has been executed.
+** and it must be a C function.
 */
 int luaD_precall (lua_State *L, StkId func, int nresults) {
 	lua_CFunction f;
