@@ -89,7 +89,7 @@ void test_reg() {
 	// retrieve a string
 	lua_pushlightuserdata(L, (void*)&key);	// push address
 	lua_gettable(L, LUA_REGISTRYINDEX);		// retrieve value
-	fprintf(stdout, lua_tostring(L, -1));	// convert to string
+	fprintf(stdout, "%s", lua_tostring(L, -1));	// convert to string
 
 	// store a string 
 	lua_pushstring(L, my_str_2);
@@ -97,7 +97,7 @@ void test_reg() {
 
 	// retrieve a string
 	lua_rawgetp(L, LUA_REGISTRYINDEX, &key_2);
-	fprintf(stdout, lua_tostring(L, -1));
+	fprintf(stdout, "%s", lua_tostring(L, -1));
 
     // store a string
     lua_pushlightuserdata(L, (void*)&key_3); // push address
@@ -107,7 +107,7 @@ void test_reg() {
     // retrieve a string
     lua_pushlightuserdata(L, (void*)&key_3); // push address
     lua_rawget(L, LUA_REGISTRYINDEX);        // retrieve value
-    fprintf(stdout, lua_tostring(L, -1));    // convert to string
+    fprintf(stdout, "%s", lua_tostring(L, -1));    // convert to string
 }
 
 static int counter(lua_State *L) {
