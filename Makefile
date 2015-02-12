@@ -42,8 +42,12 @@ LUA_O=	lua.o
 LUAC_T=	luac
 LUAC_O=	luac.o
 
-ALL_O= $(BASE_O) $(LUA_O) $(LUAC_O)
-ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T)
+TEST_T= t
+TEST_O= test.o test_conf.o test_error.o test_function.o test_interpreter.o test_push.o test_stack.o 
+
+
+ALL_O= $(BASE_O) $(LUA_O) $(LUAC_O) $(TEST_O)
+ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T) $(TEST_T)
 ALL_A= $(LUA_A)
 
 # Targets start here.
@@ -64,6 +68,9 @@ $(LUA_T): $(LUA_O) $(LUA_A)
 
 $(LUAC_T): $(LUAC_O) $(LUA_A)
 	$(CC) -o $@ $(LDFLAGS) $(LUAC_O) $(LUA_A) $(LIBS)
+
+$(TEST_T): $(TEST_O) $(LUA_A)
+	$(CC) -o $@ $(LDFLAGS) $(TEST_O) $(LUA_A) $(LIBS)
 
 clean:
 	$(RM) $(ALL_T) $(ALL_O)
@@ -184,4 +191,10 @@ lvm.o: lvm.c lua.h luaconf.h ldebug.h lstate.h lobject.h llimits.h ltm.h \
 	lzio.h lmem.h ldo.h lfunc.h lgc.h lopcodes.h lstring.h ltable.h lvm.h
 lzio.o: lzio.c lua.h luaconf.h llimits.h lmem.h lstate.h lobject.h ltm.h \
 	lzio.h
-
+test.o: test.c
+test_conf.o: test_conf.c
+test_error.o: test_error.c
+test_function.o: test_function.c
+test_interpreter.o: test_interpreter.c
+test_push.o: test_push.c
+test_stack.o: test_stack.c

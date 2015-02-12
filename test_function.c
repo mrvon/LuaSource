@@ -200,7 +200,6 @@ int t_concat(lua_State *L) {
 
 int my_concat(lua_State *L) {
 	int num_of_argument = lua_gettop(L);
-	int i = 0;
     lua_concat(L, num_of_argument);
 	return 1;
 }
