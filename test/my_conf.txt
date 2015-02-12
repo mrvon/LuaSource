@@ -1,5 +1,7 @@
 -- local mylib = require "mylib"
 
+max = math.max
+min = math.min
 -- My Conf
 width = 1024
 height = 2048

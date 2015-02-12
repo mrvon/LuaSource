@@ -5,35 +5,6 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
-void stack_dump(lua_State *L) {
-	int i;
-	int top = lua_gettop(L);
-	fprintf(stdout, "-------------------STACK DUMP-------------------\n");
-	fprintf(stdout, "StkIdx\t\tType\t\tValue\n");
-	fprintf(stdout, "												 \n");
-	for (i = top; i >= 1; --i) {
-		int t = lua_type(L, i);
-		fprintf(stdout, "%d\t\t%s\t\t", i, lua_typename(L, t));
-
-		switch(t) {
-		case LUA_TSTRING:
-			fprintf(stdout, "'%s'", lua_tostring(L, i));
-			break;
-		case LUA_TBOOLEAN:
-			fprintf(stdout, lua_toboolean(L, i) ? "true" : "false");
-			break;
-		case LUA_TNUMBER:
-			fprintf(stdout, "%g", lua_tonumber(L, i));
-			break;
-		default:
-			printf("%s", lua_typename(L, t));
-			break;
-		}
-		fprintf(stdout, "\n");		// put a separator
-	}
-	fprintf(stdout, "------------------------------------------------\n");
-}
-
 void test_stack() {
 	lua_State *L = luaL_newstate();
 
