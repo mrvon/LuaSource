@@ -18,6 +18,18 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\test.c" />
+    <ClCompile Include="..\test_conf.c" />
+    <ClCompile Include="..\test_error.c" />
+    <ClCompile Include="..\test_function.c" />
+    <ClCompile Include="..\test_interpreter.c" />
+    <ClCompile Include="..\test_push.c" />
+    <ClCompile Include="..\test_stack.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\test.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{ECC74B7A-4C7F-49ED-AA47-CFFA96EE0737}</ProjectGuid>
     <RootNamespace>test</RootNamespace>
@@ -113,18 +125,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="test_function.c" />
-    <ClCompile Include="test_error.c" />
-    <ClCompile Include="test.c" />
-    <ClCompile Include="test_interpreter.c" />
-    <ClCompile Include="test_conf.c" />
-    <ClCompile Include="test_push.c" />
-    <ClCompile Include="test_stack.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="test.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
