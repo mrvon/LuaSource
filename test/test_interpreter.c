@@ -4,7 +4,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
-#include "test_func.h"
+#include "test.h"
 
 static const struct luaL_Reg mylib[] = {
 	{"summation", summation},

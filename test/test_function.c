@@ -6,7 +6,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
-#include "test_func.h"
+#include "test.h"
 
 int l_sin(lua_State* L) {
 	double d = luaL_checknumber(L, 1);	// get argument

@@ -5,7 +5,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
-#include "test_func.h"
+#include "test.h"
 
 #define MAX_COLOR	255
 

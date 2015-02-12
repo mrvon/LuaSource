@@ -114,19 +114,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="call_c_function.c" />
-    <ClCompile Include="error.c" />
-    <ClCompile Include="main.c" />
-    <ClCompile Include="simple_interpreter.c" />
+    <ClCompile Include="test_function.c" />
+    <ClCompile Include="test_error.c" />
+    <ClCompile Include="test.c" />
+    <ClCompile Include="test_interpreter.c" />
     <ClCompile Include="test_conf.c" />
     <ClCompile Include="test_push.c" />
     <ClCompile Include="test_stack.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="main.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="test_func.h" />
+    <ClInclude Include="test.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

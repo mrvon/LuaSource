@@ -11,36 +11,31 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="simple_interpreter.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="test_push.c">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="test_stack.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="error.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="test_conf.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="call_c_function.c">
+    <ClCompile Include="test.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test_interpreter.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test_function.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test_error.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="main.h">
+    <ClInclude Include="test.h">
       <Filter>头文件</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="test_func.h">
-      <Filter>头文件</Filter>
-    </None>
   </ItemGroup>
 </Project>
