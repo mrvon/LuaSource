@@ -381,7 +381,7 @@ int luaD_poscall (lua_State *L, StkId firstResult) {
 	while (i-- > 0)
 		setnilvalue(res++);
 	L->top = res;
-	return (wanted - LUA_MULTRET);  /* 0 iff wanted == LUA_MULTRET */
+	return (wanted - LUA_MULTRET);  /* 0 if wanted == LUA_MULTRET */
 }
 
 
