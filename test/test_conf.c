@@ -316,5 +316,5 @@ void test_conf() {
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
 
-	load_conf(L, "my_conf.txt");
+	load_conf(L, "test_conf.txt");
 }
