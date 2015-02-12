@@ -19,7 +19,7 @@ SYSCFLAGS=
 SYSLDFLAGS=
 SYSLIBS=
 
-MYCFLAGS=
+MYCFLAGS=-g
 MYLDFLAGS=
 MYLIBS=
 MYOBJS=
@@ -64,13 +64,13 @@ $(LUA_A): $(BASE_O)
 	$(RANLIB) $@
 
 $(LUA_T): $(LUA_O) $(LUA_A)
-	$(CC) -o $@ $(LDFLAGS) $(LUA_O) $(LUA_A) $(LIBS)
+	$(CC) -o $@ $(LDFLAGS)  $(LUA_O) $(LUA_A) $(LIBS) $(MYCFLAGS) 
 
 $(LUAC_T): $(LUAC_O) $(LUA_A)
-	$(CC) -o $@ $(LDFLAGS) $(LUAC_O) $(LUA_A) $(LIBS)
+	$(CC) -o $@ $(LDFLAGS) $(LUAC_O) $(LUA_A) $(LIBS) $(MYCFLAGS) 
 
 $(TEST_T): $(TEST_O) $(LUA_A)
-	$(CC) -o $@ $(LDFLAGS) $(TEST_O) $(LUA_A) $(LIBS)
+	$(CC) -o $@ $(LDFLAGS) $(TEST_O) $(LUA_A) $(LIBS) $(MYCFLAGS) 
 
 clean:
 	$(RM) $(ALL_T) $(ALL_O)
