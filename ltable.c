@@ -410,7 +410,7 @@ TValue *luaH_newkey (lua_State *L, Table *t, const TValue *key) {
     else if (ttisnumber(key) && luai_numisnan(L, nvalue(key)))
         luaG_runerror(L, "table index is NaN");
     mp = mainposition(t, key);
-    if (!ttisnil(gval(mp)) || isdummy(mp)) {  /* main position is taken? or this table is a dummy table? */
+    if (!ttisnil(gval(mp)) || isdummy(mp)) {  /* main position is taken? or hash part is dummy? */
         Node *othern;
         Node *n = getfreepos(t);  /* get a free place */
         if (n == NULL) {  /* cannot find a free place? */
