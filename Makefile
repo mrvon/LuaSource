@@ -24,6 +24,7 @@ MYCFLAGS=-g
 MYLDFLAGS=
 MYLIBS=
 MYOBJS=
+SHARED=
 
 # == END OF USER SETTINGS -- NO NEED TO CHANGE ANYTHING BELOW THIS LINE =======
 
@@ -44,7 +45,10 @@ LUAC_T=	luac
 LUAC_O=	luac.o
 
 TEST_T= t
-TEST_O= test.o test_conf.o test_error.o test_function.o test_interpreter.o test_push.o test_stack.o 
+TEST_O= test.o test_conf.o test_error.o test_lib.o test_interpreter.o test_push.o test_stack.o 
+
+TESTLIB_T= testlib.so
+TESTLIB_O= testlib.o
 
 
 ALL_O= $(BASE_O) $(LUA_O) $(LUAC_O) $(TEST_O)
@@ -72,6 +76,9 @@ $(LUAC_T): $(LUAC_O) $(LUA_A)
 
 $(TEST_T): $(TEST_O) $(LUA_A)
 	$(CC) -o $@ $(LDFLAGS) $(TEST_O) $(LUA_A) $(LIBS) $(MYCFLAGS) 
+
+$(TESTLIB_T): $(TESTLIB_O) $(LUA_A)
+	$(CC) -o $@ $(LDFLAGS) $(TESTLIB_O) $(LUA_A) $(LIBS) $(MYCFLAGS) $(SHARED)
 
 clean:
 	$(RM) $(ALL_T) $(ALL_O)
@@ -195,7 +202,8 @@ lzio.o: lzio.c lua.h luaconf.h llimits.h lmem.h lstate.h lobject.h ltm.h \
 test.o: test.c
 test_conf.o: test_conf.c
 test_error.o: test_error.c
-test_function.o: test_function.c
+test_lib.o: test_lib.c
 test_interpreter.o: test_interpreter.c
 test_push.o: test_push.c
 test_stack.o: test_stack.c
+testlib.o : test_lib.c
