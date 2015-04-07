@@ -8,13 +8,13 @@
 #include "lualib.h"
 #include "test.h"
 
-int l_sin(lua_State* L) {
+static int l_sin(lua_State* L) {
 	double d = luaL_checknumber(L, 1);	// get argument
 	lua_pushnumber(L, sin(d));			// push result
 	return 1;							// number of results
 }
 
-int summation(lua_State* L) {
+static int summation(lua_State* L) {
 	int num_of_argument = lua_gettop(L);
 	int i = 0;
 	double sum = 0;
@@ -25,7 +25,7 @@ int summation(lua_State* L) {
 	return 1;
 }
 
-int my_pack(lua_State* L) {
+static int my_pack(lua_State* L) {
 	int i = 0;
 	int num_of_element = lua_gettop(L);
 	lua_newtable(L);
@@ -40,7 +40,7 @@ int my_pack(lua_State* L) {
 	return 1;
 }
 
-int my_reverse(lua_State* L) {
+static int my_reverse(lua_State* L) {
 	int num_of_element = lua_gettop(L);
 	int i = 0;
 
@@ -51,7 +51,7 @@ int my_reverse(lua_State* L) {
 	return num_of_element;
 }
 
-int my_foreach(lua_State* L) {
+static int my_foreach(lua_State* L) {
 	luaL_checktype(L, 1, LUA_TTABLE);
 	luaL_checktype(L, 2, LUA_TFUNCTION);
 
@@ -74,7 +74,7 @@ int my_foreach(lua_State* L) {
 	return 0;
 }
 
-int l_map(lua_State* L) {
+static int l_map(lua_State* L) {
 	int i = 0;
 	int n = 0;
 
@@ -96,7 +96,7 @@ int l_map(lua_State* L) {
 	return 0;	// no results
 }
 
-int l_filter(lua_State *L) {
+static int l_filter(lua_State *L) {
 	int n = 0;
 	int r = 0;
 	int b = 0;
@@ -130,7 +130,7 @@ int l_filter(lua_State *L) {
 }
 
 
-int l_split(lua_State* L) {
+static int l_split(lua_State* L) {
 	const char* s	= luaL_checkstring(L, 1);	// subject
 	const char* sep = luaL_checkstring(L, 2);	// separator
 	const char* e	= NULL;
@@ -153,7 +153,7 @@ int l_split(lua_State* L) {
 }
 
 // support string contain \0
-int l_split_ex(lua_State *L) {	
+static int l_split_ex(lua_State *L) {	
 	size_t slen = 0;
 	size_t seplen = 0;
 	const char* s = luaL_checklstring(L, 1, &slen);
@@ -178,7 +178,7 @@ int l_split_ex(lua_State *L) {
 	return 1;	// return the table
 }
 
-int t_concat(lua_State *L) {
+static int t_concat(lua_State *L) {
 	luaL_Buffer b;
 	int i = 0;
 	int n = 0;
@@ -198,13 +198,13 @@ int t_concat(lua_State *L) {
 	return 1;
 }
 
-int my_concat(lua_State *L) {
+static int my_concat(lua_State *L) {
 	int num_of_argument = lua_gettop(L);
     lua_concat(L, num_of_argument);
 	return 1;
 }
 
-int my_getn(lua_State *L) {
+static int my_getn(lua_State *L) {
 	int n = 0;
 
 	luaL_checktype(L, 1, LUA_TTABLE);
@@ -222,7 +222,7 @@ static int counter(lua_State *L) {
 	return 1;                                        // return new value
 }
 
-int create_counter(lua_State *L) {
+static int create_counter(lua_State *L) {
     // initial value for upvalue
 	lua_pushinteger(L, 0);
 
@@ -248,13 +248,14 @@ static int tuple(lua_State *L) {
 	}
 }
 
-int t_tuple(lua_State *L) {
+static int t_tuple(lua_State *L) {
 	int count_of_element = lua_gettop(L);
 	lua_pushcclosure(L, &tuple, count_of_element);
 	return 1;
 }
 
 static const struct luaL_Reg test_lib[] = {
+    {"l_sin", l_sin},
 	{"summation", summation},
 	{"my_pack", my_pack},
 	{"my_reverse", my_reverse},
