@@ -213,3 +213,66 @@ int my_getn(lua_State *L) {
 
 	return 1;
 }
+
+static int counter(lua_State *L) {
+	int val = (int)lua_tointeger(L, lua_upvalueindex(1)); // old value
+	lua_pushinteger(L, ++val);                       // new value
+	lua_pushvalue(L, -1);                            // duplicate it
+	lua_replace(L, lua_upvalueindex(1));             // update upvalue
+	return 1;                                        // return new value
+}
+
+int create_counter(lua_State *L) {
+    // initial value for upvalue
+	lua_pushinteger(L, 0);
+
+	lua_pushcclosure(L, &counter, 1);
+	return 1;
+}
+
+static int tuple(lua_State *L) {
+	int count_of_argument = luaL_optint(L, 1, 0);
+	if (count_of_argument == 0) {	// no argument
+		int i = 0;
+		// push each valid upvalue onto the stack
+		for (i = 1; ! lua_isnone(L, lua_upvalueindex(i)); ++i)
+			lua_pushvalue(L, lua_upvalueindex(i));
+		return i - 1;	// number of values in the stack
+	}
+	else {	// get field 'op'
+		luaL_argcheck(L, 0 < count_of_argument, 1, "index out of range");
+		if (lua_isnone(L, lua_upvalueindex(count_of_argument)))
+			return 0;	// no such field
+		lua_pushvalue(L, lua_upvalueindex(count_of_argument));
+		return 1;
+	}
+}
+
+int t_tuple(lua_State *L) {
+	int count_of_element = lua_gettop(L);
+	lua_pushcclosure(L, &tuple, count_of_element);
+	return 1;
+}
+
+static const struct luaL_Reg test_lib[] = {
+	{"summation", summation},
+	{"my_pack", my_pack},
+	{"my_reverse", my_reverse},
+	{"my_foreach", my_foreach},
+	{"l_map", l_map},
+	{"l_split", l_split},
+	{"l_split_ex", l_split_ex},
+	{"t_concat", t_concat},
+	{"l_filter", l_filter},
+	{"my_concat", my_concat},
+	{"my_getn", my_getn},
+	{"create_counter", create_counter},
+	{"t_tuple", t_tuple},
+	{NULL, NULL},
+};
+
+int luaopen_testlib(lua_State *L) {
+	luaL_newlib(L, test_lib);
+	return 1;
+}
+
