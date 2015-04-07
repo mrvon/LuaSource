@@ -271,8 +271,17 @@ static const struct luaL_Reg test_lib[] = {
 	{NULL, NULL},
 };
 
-int luaopen_testlib(lua_State *L) {
+int luaopen_test_lib(lua_State *L) {
 	luaL_newlib(L, test_lib);
 	return 1;
 }
 
+
+void error(lua_State* L, const char* fmt, ...) {
+	va_list argp;
+	va_start(argp, fmt);
+	vfprintf(stderr, fmt, argp);
+	va_end(argp);
+	lua_close(L);
+	exit(EXIT_FAILURE);
+}

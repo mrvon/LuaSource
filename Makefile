@@ -24,7 +24,7 @@ MYCFLAGS=-g
 MYLDFLAGS=
 MYLIBS=
 MYOBJS=
-SHARED=
+SHARED= -fPIC --shared -dynamiclib -Wl,-undefined,dynamic_lookup
 
 # == END OF USER SETTINGS -- NO NEED TO CHANGE ANYTHING BELOW THIS LINE =======
 
@@ -45,14 +45,14 @@ LUAC_T=	luac
 LUAC_O=	luac.o
 
 TEST_T= t
-TEST_O= test.o test_conf.o test_error.o test_lib.o test_interpreter.o test_push.o test_stack.o 
+TEST_O= test.o test_conf.o test_interpreter.o test_push.o test_stack.o $(TESTLIB_T)
 
-TESTLIB_T= testlib.so
-TESTLIB_O= testlib.o
+TESTLIB_T= test_lib.so
+TESTLIB_O= test_lib.o
 
 
 ALL_O= $(BASE_O) $(LUA_O) $(LUAC_O) $(TEST_O)
-ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T) $(TEST_T)
+ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T) $(TEST_T) $(TESTLIB_T)
 ALL_A= $(LUA_A)
 
 # Targets start here.
@@ -78,7 +78,7 @@ $(TEST_T): $(TEST_O) $(LUA_A)
 	$(CC) -o $@ $(LDFLAGS) $(TEST_O) $(LUA_A) $(LIBS) $(MYCFLAGS) 
 
 $(TESTLIB_T): $(TESTLIB_O) $(LUA_A)
-	$(CC) -o $@ $(LDFLAGS) $(TESTLIB_O) $(LUA_A) $(LIBS) $(MYCFLAGS) $(SHARED)
+	$(CC) -o $@ $(LDFLAGS) $(SHARED) $(TESTLIB_O) $(LUA_A)
 
 clean:
 	$(RM) $(ALL_T) $(ALL_O)
@@ -201,9 +201,7 @@ lzio.o: lzio.c lua.h luaconf.h llimits.h lmem.h lstate.h lobject.h ltm.h \
 	lzio.h
 test.o: test.c
 test_conf.o: test_conf.c
-test_error.o: test_error.c
-test_lib.o: test_lib.c
 test_interpreter.o: test_interpreter.c
 test_push.o: test_push.c
 test_stack.o: test_stack.c
-testlib.o : test_lib.c
+test_lib.o: test_lib.c
