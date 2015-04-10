@@ -1,21 +1,25 @@
 #include <stdio.h>
 #include <setjmp.h>
 
-void do_something(jmp_buf tmp) 
+#define LUAI_THROW(c)		longjmp(c, 1)
+#define LUAI_TRY(c, a)		if (setjmp(c) == 0) { a }
+#define luai_jmpbuf		    jmp_buf
+
+void do_something(luai_jmpbuf lj)
 {
     fprintf(stdout, "Start working\n");
-    longjmp(tmp, 1);    // try to comment this line
+    LUAI_THROW(lj);    // try to comment this line
     fprintf(stdout, "OK\n");
 }
 
 void pcall() 
 {
-    jmp_buf tmp;
+    luai_jmpbuf lj;
 
-    if(setjmp(tmp) == 0)
-    {
-        do_something(tmp);
-    }
+	LUAI_TRY(lj,
+        do_something(lj);
+	);
+
     fprintf(stdout, "End working\n");
 }
 
