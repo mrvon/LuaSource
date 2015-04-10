@@ -5,22 +5,24 @@
 #define LUAI_TRY(c, a)		if (setjmp(c) == 0) { a }
 #define luai_jmpbuf		    jmp_buf
 
-void do_something(luai_jmpbuf lj)
+void real_call(luai_jmpbuf lj)
 {
-    fprintf(stdout, "Start working\n");
     LUAI_THROW(lj);    // try to comment this line
+
     fprintf(stdout, "OK\n");
 }
 
-void pcall() 
+void pcall()
 {
     luai_jmpbuf lj;
 
+    fprintf(stdout, "Start protected call\n");
+
 	LUAI_TRY(lj,
-        do_something(lj);
+        real_call(lj);
 	);
 
-    fprintf(stdout, "End working\n");
+    fprintf(stdout, "End protected call\n");
 }
 
 int main()
