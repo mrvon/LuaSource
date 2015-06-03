@@ -33,7 +33,7 @@ static int newarray(lua_State *L) {
     return 1; /* new userdatum is already on the stack */
 }
 static int setarray(lua_State *L) {
-    NumArray *a = (NumArray*) lua_touserdata(L, 1);
+    NumArray *a = checkarray(L);
     int index = luaL_checkint(L, 2) - 1;
 
     luaL_argcheck(L, a != NULL, 1, "'array' expected");
@@ -49,7 +49,7 @@ static int setarray(lua_State *L) {
 }
 
 static int getarray(lua_State *L) {
-    NumArray *a = (NumArray*) lua_touserdata(L, 1);
+    NumArray *a = checkarray(L);
     int index = luaL_checkint(L, 2) - 1;
 
     luaL_argcheck(L, a != NULL, 1, "'array' expected");
@@ -60,24 +60,40 @@ static int getarray(lua_State *L) {
 }
 
 static int getsize(lua_State *L) {
-    /* NumArray *a = checkarray(L); */
-    NumArray *a = (NumArray*) lua_touserdata(L, 1);
-    luaL_argcheck(L, a != NULL, 1, "'array' expected");
+    NumArray *a = checkarray(L);
     lua_pushinterger(L, a->size);
 
     return 1;
 }
 
-static const struct luaL_Reg arraylib[] = {
+static int array2string(lua_State *L) {
+    NumArray *a = checkarray(L);
+    lua_pushfstring(L, "array(%d)", a->size);
+    return 1;
+}
+
+static const struct luaL_Reg arraylib_f[] = {
     {"new", newarray},
+    {NULL, NULL},
+};
+
+static const struct luaL_Reg arraylib_m[] = {
     {"set", setarray},
     {"get", getarray},
     {"size", getsize},
+    {"__tostring", array2string},
     {NULL, NULL},
 };
 
 int luaopen_array(lua_State *L) {
     luaL_newmetatable(L, "LuaBook.array");
-    luaL_newlib(L, arraylib)
+
+    /* metatable.__index = metatable */
+    lua_pushvalue(L, -1); /* duplicates the metatable */
+    lua_setfield(L, -2, "__index");
+
+    luaL_setfuncs(L, arraylib_m, 0);
+    luaL_newlib(L, arraylib_f)
+
     return 1;
 }
