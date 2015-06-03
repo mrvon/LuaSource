@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #define BITS_PER_WORD   (CHAR_BIT * sizeof(unsigned int))
+#define WORD_COUNT      ((unsigned int)(i - 1) / BITS_PER_WORD)
 #define I_WORD(i)       ((unsigned int)(i) / BITS_PER_WORD)
 #define I_BIT(i)        (1 << ((unsigned int)(i) % BITS_PER_WORD))
 
@@ -17,11 +18,11 @@ static int newarray(lua_State *L) {
 
     int n = luaL_checkint(L, 1);
     luaL_argcheck(L, n >= 1, 1, "invalid size");
-    nbytes = sizeof(NumArray) + I_WORD(n - 1) * sizeof(unsigned int);
+    nbytes = sizeof(NumArray) + WORD_COUNT(n) * sizeof(unsigned int);
     a = (NumArray *) lua_newuserdata(L, nbytes);
 
     a->size = n;
-    for (i = 0; i <= I_WORD(n - 1); ++i) {
+    for (i = 0; i <= WORD_COUNT(n); ++i) {
         a->values[i] = 0;
     }
 
