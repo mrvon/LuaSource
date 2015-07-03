@@ -1,0 +1,4 @@
+Table t->sizearray 是在什么时候赋值的
+
+t = {}, t[2] = 1000, print(#t)  -- 结果是0
+t = {}, t[1] = 1000, print(#t)  -- 结果是1
