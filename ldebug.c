@@ -596,7 +596,7 @@ void stack_dump(lua_State *L) {
 	int top = lua_gettop(L);
 	printf("-------------------STACK DUMP-------------------\n");
 	printf("StkIdx\t\tType\t\tValue\n");
-	printf("												 \n");
+	printf("												\n");
 	for (i = top; i >= 1; --i) {
 		int t = lua_type(L, i);
 		printf("%d\t\t%s\t\t", i, lua_typename(L, t));
