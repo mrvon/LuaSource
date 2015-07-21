@@ -227,6 +227,7 @@ static int countint (const TValue *key, int *nums) {
 }
 
 
+/* count keys in array part */
 static int numusearray (const Table *t, int *nums) {
     int lg;
     int ttlg;  /* 2^lg */
@@ -252,6 +253,7 @@ static int numusearray (const Table *t, int *nums) {
 }
 
 
+/* count keys in hash part */
 static int numusehash (const Table *t, int *nums, int *pnasize) {
     int totaluse = 0;  /* total number of elements */
     int ause = 0;  /* summation of `nums' */
@@ -342,7 +344,8 @@ void luaH_resizearray (lua_State *L, Table *t, int nasize) {
 
 
 static void rehash (lua_State *L, Table *t, const TValue *ek) {
-    int nasize, na;
+    int nasize;
+    int na; /* number of elements to go to array part */
     int nums[MAXBITS + 1];  /* nums[i] = number of keys with 2^(i-1) < k <= 2^i */
     int i;
     int totaluse;
