@@ -359,7 +359,10 @@ static void rehash (lua_State *L, Table *t, const TValue *ek) {
     /* compute new size for array part */
     na = computesizes(nums, &nasize);
     /* resize the table to new computed sizes */
-    luaH_resize(L, t, nasize, totaluse - na);
+    luaH_resize(L, t,
+            nasize,         /* optimal size for array part (great or equal than na) */
+            totaluse - na   /* precise size for hash part */
+            );
 }
 
 
