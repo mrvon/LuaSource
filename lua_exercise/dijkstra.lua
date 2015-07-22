@@ -87,6 +87,7 @@ local function breadth_first_find_path(Graph, source, target)
     while #OpenSet > 0 do
         local u = OpenSet[1]
         table.remove(OpenSet, 1)
+        CloseSet[u] = true
 
         for v, d in pairs(u.adj) do
             if Dist[v] > Dist[u] + d then
