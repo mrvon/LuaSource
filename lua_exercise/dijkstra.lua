@@ -58,6 +58,7 @@ local function dijkstra(Graph, source, target)
     while #OpenSet > 0 do
         local u = extract_min(OpenSet, Dist)
         CloseSet[u] = true
+
         for v, d in pairs(u.adj) do
             if Dist[v] > Dist[u] + d then
                 Dist[v] = Dist[u] + d
@@ -137,6 +138,7 @@ local function extract_min_fscore(OpenSet, Fscore)
 end
 
 local function heuristic(source, target)
+    -- TODO
     return 1
 end
 
