@@ -57,7 +57,7 @@ local function dijkstra(Graph, source, target)
 
     while #OpenSet > 0 do
         local u = extract_min(OpenSet, Dist)
-        table.insert(CloseSet, u)
+        CloseSet[u] = true
         for v, d in pairs(u.adj) do
             if Dist[v] > Dist[u] + d then
                 Dist[v] = Dist[u] + d
@@ -115,9 +115,89 @@ function printpath(Prev, target, Dist)
     print(target.name)
 end
 
+--------------------------------------------------------------------------------
+
+local function extract_min_fscore(OpenSet, Fscore)
+    local min_fscore = nil
+    local min_node = nil
+    for node, _ in pairs(OpenSet) do
+        local fscore = Fscore[node]
+        if fscore then
+            if min_fscore == nil or fscore < min_fscore then
+                min_fscore = fscore
+                min_node = node
+            end
+        end
+    end
+
+    OpenSet[min_node] = nil
+
+    return min_node
+end
+
+local function heuristic(source, target)
+    return 1
+end
+
+local function is_empty(OpenSet)
+    for _, _ in pairs(OpenSet) do
+        return false
+    end
+    return true
+end
+
+local function astar(Graph, source, target)
+    local CloseSet = {}
+    local OpenSet = {}
+    local Gscore = {}
+    local Fscore = {}
+    local Prev = {}
+
+    OpenSet[source] = true
+
+    local i = 1
+    for _, node in pairs(Graph) do
+        Gscore[node] = math.huge
+        Fscore[node] = math.huge
+        i = i + 1
+    end
+
+    Gscore[source] = 0
+    Fscore[source] = Gscore[source] + heuristic(source, target)
+
+    while not is_empty(OpenSet) do
+        local u = extract_min_fscore(OpenSet, Fscore)
+        if u == target then
+            printpath(Prev, target, Gscore)
+            return
+        end
+
+        CloseSet[u] = true
+
+        for v, d in pairs(u.adj) do
+            if not CloseSet[v] then
+                local tentative_g_score = Gscore[u] + d
+
+                if not OpenSet[v] or tentative_g_score < Gscore[v] then
+                    Gscore[v] = tentative_g_score
+                    Fscore[v] = Gscore[v] + heuristic(v, target)
+                    Prev[v] = u
+
+                    if not OpenSet[v] then
+                        OpenSet[v] = true
+                    end
+                end
+            end
+        end
+    end
+end
+--------------------------------------------------------------------------------
+
+
 Graph = readgraph()
 source = name2node(Graph, "a")
 target = name2node(Graph, "b")
 
 dijkstra(Graph, source, target)
 breadth_first_find_path(Graph, source, target)
+astar(Graph, source, target)
