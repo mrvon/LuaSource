@@ -42,9 +42,9 @@ local function extract_min(OpenSet, Dist)
 end
 
 local function dijkstra(Graph, source, target)
-    local Dist     = {} -- Distance from node to source
     local CloseSet = {}
     local OpenSet  = {}
+    local Dist     = {} -- Distance from source to node
     local Prev     = {} -- Previous node in optimal path
 
     local i = 1
