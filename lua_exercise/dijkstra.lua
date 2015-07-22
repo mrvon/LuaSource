@@ -146,6 +146,7 @@ local function is_empty(OpenSet)
     return true
 end
 
+-- f(x) = g(x) + h(x)
 local function astar(Graph, source, target)
     local CloseSet = {}
     local OpenSet = {}
