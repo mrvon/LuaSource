@@ -77,7 +77,7 @@ local function breadth_first_find_path(Graph, source, target)
     local Prev     = {}
 
     table.insert(OpenSet, source)
-    CloseSet[source] = true -- FIXME
+    CloseSet[source] = true
 
     local i = 1
     for _, node in pairs(Graph) do
