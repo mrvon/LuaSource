@@ -416,7 +416,7 @@ TValue *luaH_newkey (lua_State *L, Table *t, const TValue *key) {
     else if (ttisnumber(key) && luai_numisnan(L, nvalue(key)))
         luaG_runerror(L, "table index is NaN");
     mp = mainposition(t, key);
-    if (!ttisnil(gval(mp)) || isdummy(mp)) {  /* main position is taken? or hash part is dummy? */
+    if (!ttisnil(gval(mp)) || isdummy(mp)) {  /* main position is taken? or hash part is dummy? *VON* */
         Node *othern;
         Node *n = getfreepos(t);  /* get a free place */
         if (n == NULL) {  /* cannot find a free place? */
@@ -424,7 +424,8 @@ TValue *luaH_newkey (lua_State *L, Table *t, const TValue *key) {
             /* whatever called 'newkey' take care of TM cache and GC barrier */
             return luaH_set(L, t, key);  /* insert key into grown table */
         }
-        lua_assert(!isdummy(n));
+        lua_assert(!isdummy(n));  /* *VON* */
+
         othern = mainposition(t, gkey(mp));
         if (othern != mp) {  /* is colliding node out of its main position? */
             /* yes; move colliding node into free position */
