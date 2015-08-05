@@ -250,6 +250,14 @@ OP_EXTRAARG/*	Ax	extra (larger) argument for previous opcode	*/
 
   (*) All `skips' (pc++) assume that next instruction is a jump.
 
+
+  Mrvon Note:
+
+  (*) In OP_TEST and OP_TESTSET, '<=>' is mean equality operator.
+
+  (*) In OP_FORLOOP, The sense of the comparison depends on
+  whether the stepping is negative or positive, hence the '<?=' operator.
+
 ===========================================================================*/
 
 
