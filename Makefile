@@ -45,7 +45,7 @@ LUAC_T=	luac
 LUAC_O=	luac.o
 
 TEST_T= t
-TEST_O= test.o test_conf.o test_interpreter.o test_push.o test_stack.o $(TESTLIB_O) $(TESTLIB_T)
+TEST_O= test.o test_conf.o test_newconf.o test_interpreter.o test_push.o test_stack.o $(TESTLIB_O) $(TESTLIB_T)
 
 TESTLIB_T= test_lib.so
 TESTLIB_O= test_lib.o
@@ -201,6 +201,7 @@ lzio.o: lzio.c lua.h luaconf.h llimits.h lmem.h lstate.h lobject.h ltm.h \
 	lzio.h
 test.o: test.c
 test_conf.o: test_conf.c
+test_newconf.o: test_newconf.c
 test_interpreter.o: test_interpreter.c
 test_push.o: test_push.c
 test_stack.o: test_stack.c
