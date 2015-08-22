@@ -5,5 +5,5 @@ Game = {
 }
 
 function test_func(x, y)
-    return x + y
+    return x + y, "hell o"
 end

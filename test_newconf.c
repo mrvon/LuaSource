@@ -77,7 +77,6 @@ static void after_call(lua_State* L, int top)
 
 static void new_call_va(lua_State* L, const char* func, const char* sig, ...) {
 	va_list vl;
-    int top = before_call(L);
 	int narg = 0;
 	int nres = 0;	// number of arguments and results
 
@@ -105,7 +104,6 @@ static void new_call_va(lua_State* L, const char* func, const char* sig, ...) {
 			goto endargs;
 		default:
 			error_dump(L, "invalid option (%c)\n", *(sig - 1));
-            after_call(L, top);
             return;
 		}
 	}
@@ -115,7 +113,6 @@ static void new_call_va(lua_State* L, const char* func, const char* sig, ...) {
 
 	if (lua_pcall(L, narg, nres, 0) != 0) {
 		error_dump(L, "error calling '%s': %s\n", func, lua_tostring(L, -1));
-        after_call(L, top);
         return;
 	}
 
@@ -127,7 +124,6 @@ static void new_call_va(lua_State* L, const char* func, const char* sig, ...) {
 				int b = 0;
 				if (! lua_isboolean(L, nres)) {
 					error_dump(L, "wrong result type\n");
-                    after_call(L, top);
                     return;
 				}
 				b = lua_toboolean(L, nres);
@@ -140,7 +136,6 @@ static void new_call_va(lua_State* L, const char* func, const char* sig, ...) {
 				double n = lua_tonumberx(L, nres, &is_num);
 				if (! is_num) {
 					error_dump(L, "wrong result type\n");
-                    after_call(L, top);
                     return;
 				}
 				*va_arg(vl, double*) = n;
@@ -152,7 +147,6 @@ static void new_call_va(lua_State* L, const char* func, const char* sig, ...) {
 				int n = (int)lua_tointegerx(L, nres, &is_num);
 				if (! is_num) {
 					error_dump(L, "wrong result type\n");
-                    after_call(L, top);
                     return;
 				}
 				*va_arg(vl, int*) = n;
@@ -163,7 +157,6 @@ static void new_call_va(lua_State* L, const char* func, const char* sig, ...) {
 				const char* s = lua_tostring(L, nres);
 				if (s == NULL) {
 					error_dump(L, "wrong result type\n");
-                    after_call(L, top);
                     return;
 				}
 				*va_arg(vl, const char**) = s;
@@ -172,7 +165,6 @@ static void new_call_va(lua_State* L, const char* func, const char* sig, ...) {
 		default:
 			{
 				error_dump(L, "invalid option (%c)\n", *(sig - 1));
-                after_call(L, top);
                 return;
 			}
 		}
@@ -180,7 +172,6 @@ static void new_call_va(lua_State* L, const char* func, const char* sig, ...) {
 	}
 
 	va_end(vl);
-    after_call(L, top);
 }
 
 
@@ -200,7 +191,9 @@ void test_newconf()
     int z = 0;
     const char* str = NULL;
     stack_dump(L);
+    int top = before_call(L);
     new_call_va(L, "test_func", "ii>is", x, y, &z, &str);
+    after_call(L, top);
     printf("X = %d Y = %d Z = %d N = %s\n", x, y, z, str);
     stack_dump(L);
 
