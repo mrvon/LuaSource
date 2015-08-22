@@ -193,8 +193,9 @@ void test_newconf()
     stack_dump(L);
     int top = before_call(L);
     new_call_va(L, "test_func", "ii>is", x, y, &z, &str);
-    after_call(L, top);
+    // str must be copy to the buffer, before you pop it from stack
     printf("X = %d Y = %d Z = %d N = %s\n", x, y, z, str);
+    after_call(L, top);
     stack_dump(L);
 
     if(open_global_table(L, "Game") == 0) {
