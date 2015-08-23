@@ -45,7 +45,7 @@ LUAC_T=	luac
 LUAC_O=	luac.o
 
 TEST_T= t
-TEST_O= test.o test_conf.o test_newconf.o test_interpreter.o test_push.o test_stack.o $(TESTLIB_O) $(TESTLIB_T) $(ARRAYLIB_T)
+TEST_O= test.o test_conf.o test_newconf.o test_interpreter.o test_push.o test_stack.o $(TESTLIB_O) $(TESTLIB_T) $(ARRAYLIB_O) $(ARRAYLIB_T)
 
 TESTLIB_T= test_lib.so
 TESTLIB_O= test_lib.o
