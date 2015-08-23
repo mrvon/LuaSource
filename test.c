@@ -9,11 +9,11 @@ typedef struct Foo {
 
 int main(void) {
 	//test_conf();
-	//simple_interpreter();
+    //test_newconf();
+    simple_interpreter();
 	//test_reg();
 	//test_stack();
     //test_push();
-    test_newconf();
 
 	//fprintf(stdout, "INT: %d\n", offsetof(Foo, n));
 	//fprintf(stdout, "CHAR: %d\n", offsetof(Foo, c));

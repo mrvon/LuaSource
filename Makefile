@@ -45,14 +45,16 @@ LUAC_T=	luac
 LUAC_O=	luac.o
 
 TEST_T= t
-TEST_O= test.o test_conf.o test_newconf.o test_interpreter.o test_push.o test_stack.o $(TESTLIB_O) $(TESTLIB_T)
+TEST_O= test.o test_conf.o test_newconf.o test_interpreter.o test_push.o test_stack.o $(TESTLIB_O) $(TESTLIB_T) $(ARRAYLIB_T)
 
 TESTLIB_T= test_lib.so
 TESTLIB_O= test_lib.o
 
+ARRAYLIB_T = array_lib.so
+ARRAYLIB_O = array_lib.o
 
 ALL_O= $(BASE_O) $(LUA_O) $(LUAC_O) $(TEST_O)
-ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T) $(TEST_T) $(TESTLIB_T)
+ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T) $(TEST_T) $(TESTLIB_T) $(ARRAYLIB_T)
 ALL_A= $(LUA_A)
 
 # Targets start here.
@@ -77,8 +79,11 @@ $(LUAC_T): $(LUAC_O) $(LUA_A)
 $(TEST_T): $(TEST_O) $(LUA_A)
 	$(CC) -o $@ $(LDFLAGS) $(TEST_O) $(LUA_A) $(LIBS) $(MYCFLAGS) 
 
-$(TESTLIB_T): $(TESTLIB_O) $(LUA_A)
-	$(CC) -o $@ $(LDFLAGS) $(SHARED) $(TESTLIB_O) $(LUA_A)
+$(TESTLIB_T): $(TESTLIB_O)
+	$(CC) -o $@ $(LDFLAGS) $(SHARED) $(TESTLIB_O)
+
+$(ARRAYLIB_T): $(ARRAYLIB_O)
+	$(CC) -o $@ $(LDFLAGS) $(SHARED) $(ARRAYLIB_O)
 
 clean:
 	$(RM) $(ALL_T) $(ALL_O)
@@ -206,3 +211,4 @@ test_interpreter.o: test_interpreter.c
 test_push.o: test_push.c
 test_stack.o: test_stack.c
 test_lib.o: test_lib.c
+array_lib.o: array_lib.c

@@ -64,10 +64,7 @@ static int my_foreach(lua_State* L) {
         lua_insert(L, -2);
 
 		// do the call (2 arguments, 0 result)
-		if (lua_pcall(L, 2, 0, 0) != LUA_OK) {
-			error(L, "error running function 'f': %s\n", lua_tostring(L, -1));
-			return 0;
-		}
+		lua_call(L, 2, 0);
 	}
 	lua_pop(L, 0);
 
@@ -254,6 +251,59 @@ static int t_tuple(lua_State *L) {
 	return 1;
 }
 
+#include <dirent.h>
+#include <errno.h>
+#include <string.h>
+
+static int l_dir(lua_State *L)
+{
+    DIR* dir;
+    struct dirent *entry;
+    int i;
+    const char* path = luaL_checkstring(L, 1);
+
+    dir = opendir(path);
+    if (dir == NULL) {
+        lua_pushnil(L);
+        lua_pushstring(L, strerror(errno));
+        return 2;
+    }
+
+    lua_newtable(L);
+    i = 1;
+    while ((entry = readdir(dir)) != NULL) {
+        lua_pushnumber(L, i++);
+        lua_pushstring(L, entry->d_name);
+        lua_settable(L, -3);
+    }
+
+    closedir(dir);
+    return 1;
+}
+
+static int l_test(lua_State *L)
+{
+    static char Key = 'k';
+    static char K2  = 'k';
+    lua_pushstring(L, "Hello world");
+    lua_rawsetp(L, LUA_REGISTRYINDEX, &Key);
+
+    lua_rawgetp(L, LUA_REGISTRYINDEX, &Key);
+    printf("%s\n", lua_tostring(L, -1));
+    lua_pop(L, 1);
+
+    lua_pushlightuserdata(L, &K2);
+    lua_pushstring(L, "Hello Girl");
+    lua_rawset(L, LUA_REGISTRYINDEX);
+
+    lua_pushlightuserdata(L, &K2);
+    lua_rawget(L, LUA_REGISTRYINDEX);
+    printf("%s\n", lua_tostring(L, -1));
+    lua_pop(L, 1);
+
+    return 0;
+}
+
 static const struct luaL_Reg test_lib[] = {
     {"l_sin", l_sin},
 	{"summation", summation},
@@ -269,6 +319,8 @@ static const struct luaL_Reg test_lib[] = {
 	{"my_getn", my_getn},
 	{"create_counter", create_counter},
 	{"t_tuple", t_tuple},
+    {"l_dir", l_dir},
+    {"test", l_test},
 	{NULL, NULL},
 };
 
