@@ -69,6 +69,41 @@ static int unionarray(lua_State *L)
         }
     }
 
+    luaL_getmetatable(L, METATABLE_NAME);
+    lua_setmetatable(L, -2);
+
+    return 1;
+}
+
+static int intersectionarray(lua_State *L)
+{
+    int i;
+    int j;
+    int nbytes;
+
+    BitArray* a = (BitArray*) CHECK_ARRAY(L, 1);
+    BitArray* b = (BitArray*) CHECK_ARRAY(L, 2);
+
+    if (a->size < b->size) {
+        BitArray* tmp = a;
+        a = b;
+        b = tmp;
+    }
+
+    nbytes = sizeof(BitArray) + INDEX_WORD(a->size - 1) * sizeof(unsigned int);
+
+    BitArray* c = (BitArray*) lua_newuserdata(L, nbytes);
+    c->size = a->size;
+
+    j = INDEX_WORD(b->size - 1);
+    for (i = 0; i <= INDEX_WORD(a->size - 1); ++i) {
+        if (i > j) {
+            c->values[i] = a->values[i];
+        }
+        else {
+            c->values[i] = a->values[i] & b->values[i];
+        }
+    }
 
     luaL_getmetatable(L, METATABLE_NAME);
     lua_setmetatable(L, -2);
@@ -156,6 +191,7 @@ static int array2string(lua_State *L)
 static const struct luaL_Reg array_lib_f[] = {
     {"new", newarray},
     {"union", unionarray},
+    {"intersection", intersectionarray},
 	{NULL, NULL},
 };
 
