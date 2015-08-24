@@ -33,8 +33,7 @@ static int newarray(lua_State *L)
         a->values[i] = 0;
     }
 
-    luaL_getmetatable(L, METATABLE_NAME);
-    lua_setmetatable(L, -2);
+    luaL_setmetatable(L, METATABLE_NAME);
 
     return 1;
 }
@@ -69,8 +68,7 @@ static int unionarray(lua_State *L)
         }
     }
 
-    luaL_getmetatable(L, METATABLE_NAME);
-    lua_setmetatable(L, -2);
+    luaL_setmetatable(L, METATABLE_NAME);
 
     return 1;
 }
@@ -105,8 +103,7 @@ static int intersectionarray(lua_State *L)
         }
     }
 
-    luaL_getmetatable(L, METATABLE_NAME);
-    lua_setmetatable(L, -2);
+    luaL_setmetatable(L, METATABLE_NAME);
 
     return 1;
 }
