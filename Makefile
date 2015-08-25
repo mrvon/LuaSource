@@ -50,8 +50,8 @@ TEST_O= test.o test_conf.o test_newconf.o test_interpreter.o test_push.o test_st
 TESTLIB_T= test_lib.so
 TESTLIB_O= test_lib.o
 
-ARRAYLIB_T = array_lib.so
-ARRAYLIB_O = array_lib.o
+ARRAYLIB_T = array.so
+ARRAYLIB_O = array.o
 
 ALL_O= $(BASE_O) $(LUA_O) $(LUAC_O) $(TEST_O)
 ALL_T= $(LUA_A) $(LUA_T) $(LUAC_T) $(TEST_T) $(TESTLIB_T) $(ARRAYLIB_T)
@@ -211,4 +211,4 @@ test_interpreter.o: test_interpreter.c
 test_push.o: test_push.c
 test_stack.o: test_stack.c
 test_lib.o: test_lib.c
-array_lib.o: array_lib.c
+array.o: array.c
