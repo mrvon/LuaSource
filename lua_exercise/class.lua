@@ -1,12 +1,12 @@
 function my_print(str, deep)
-    -- print(string.rep(" ", deep * 9) .. str)
+    print(string.rep(" ", deep * 9) .. str)
 end
 
 function clone(object)
     local lookup_table = {}
     local function __copy(object, deep)
         if type(object) ~= "table" then
-            my_print("Case 1: " .. object, deep)
+            my_print("Case 1: " .. tostring(object), deep)
             return object
         elseif lookup_table[object] then
             my_print("Case 2", deep)
@@ -114,3 +114,43 @@ function class(class_name, super)
 
     return sub_class
 end
+
+
+local Animal = class("Animal", nil)
+
+function Animal:ctor(name)
+    self.name = name
+
+    print(string.format("Animal:ctor(Name=%s)", self.name))
+end
+
+function Animal:say()
+    print("I am a Animal")
+end
+
+local s = Animal.new("animal_1")
+assert(s.class == Animal)
+assert(s.ctor == Animal.ctor)
+assert(s.__cname == Animal.__cname)
+assert(s.__ctype == Animal.__ctype)
+
+local Tiger = class("Tiger", Animal)
+local t = Tiger.new("tiger_1")
+
+function Tiger:ctor(name, power)
+    Tiger.super.ctor(self, name)
+    self.power = power
+
+    print(string.format("Tiger:ctor(Name=%s, Power=%d)", self.name, self.power))
+end
+
+
+local t2 = Tiger.new("tiger_2", 100)
+t2.say()
+
+-- Override Animal:say()
+function Tiger:say()
+    print("I am a Tiger")
+end
+
+t2.say()
