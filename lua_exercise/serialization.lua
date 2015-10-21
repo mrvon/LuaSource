@@ -108,10 +108,10 @@ function aux_save(out_arr, name, value, saved)
         mywrite(out_arr, basic_serialize(value), "\n")
     elseif type(value) == "table" then
         if saved[value] then                                   -- value already saved?
-            mywrite(out_arr, saved[value], "\n")                       -- use its previous name
+            mywrite(out_arr, saved[value], "\n")               -- use its previous name
         else
             saved[value] = name                                -- save name for next time
-            mywrite(out_arr, "{}\n")                                   -- create a new table
+            mywrite(out_arr, "{}\n")                           -- create a new table
             for k, v in pairs(value) do                        -- save its fields
                 k = basic_serialize(k)
                 local fname = string.format("%s[%s]", name, k)
