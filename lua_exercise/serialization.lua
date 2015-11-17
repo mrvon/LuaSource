@@ -45,21 +45,24 @@ function aux_serialize(out_arr, o, indent_level)
         mywrite(out_arr, string.format("%q", o))
     elseif type(o) == "table" then
         mywrite(out_arr, "{\n")
-        indent(out_arr, indent_level)
         for k, v in pairs(o) do
+            indent(out_arr, indent_level + 1)
             if not isvalidindentfier(k) then
-                mywrite(out_arr, "  [")
+                mywrite(out_arr, "[")
                 aux_serialize(out_arr, k, indent_level + 1)
                 mywrite(out_arr, "] = ")
             else
-                mywrite(out_arr, "  " .. k .. " = ")
+                mywrite(out_arr, k .. " = ")
             end
+
             aux_serialize(out_arr, v, indent_level + 1)
-            mywrite(out_arr, ",\n")
-            indent(out_arr, indent_level)
+
+            if type(v) ~= "table" then
+                mywrite(out_arr, ",\n")
+            end
         end
-        mywrite(out_arr, "}\n")
         indent(out_arr, indent_level)
+        mywrite(out_arr, "},\n")
     else
         error("cannot serialize a " .. type(o))
     end
@@ -69,7 +72,7 @@ end
 print(serialize({a = 12, b = 'lua', key = 'another "one"', "hello world"}))
 print(serialize({[1] = 12, [2] = 'lua', [3] = 'another "one"'}))
 print(serialize({["1a"] = 12, ["1b"] = 'lua', ["1c"] = 'another "one"'}))
-print(serialize({["1a"] = {nest_str = "Hello world", {nest_str = "Hi!"}}, ["1b"] = 'lua', ["1c"] = 'another "one"'}))
+print(serialize({["1a"] = {nest_str = "Hello world", {nest_str = "Hi!", nest_str_2 = "World"}}, ["1b"] = 'lua', ["1c"] = 'another "one"'}))
 
 --------------------------------------------------------------------------------
 -- serialize support loop and share
