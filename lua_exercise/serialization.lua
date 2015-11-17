@@ -71,7 +71,10 @@ print(serialize({[1] = 12, [2] = 'lua', [3] = 'another "one"'}))
 print(serialize({["1a"] = 12, ["1b"] = 'lua', ["1c"] = 'another "one"'}))
 print(serialize({["1a"] = {nest_str = "Hello world", {nest_str = "Hi!"}}, ["1b"] = 'lua', ["1c"] = 'another "one"'}))
 
-function basic_serialize(o)
+--------------------------------------------------------------------------------
+-- serialize support loop and share
+
+function base_seri(o)
     if type(o) == "number" then
         return tostring(o)
     elseif type(o) == "string" then
@@ -81,17 +84,17 @@ function basic_serialize(o)
     end
 end
 
-function save(name, value, saved)
+function loop_seri(name, value, saved)
     local out_arr = {}
-    aux_save(out_arr, name, value, saved)
+    aux_loop_seri(out_arr, name, value, saved)
     return table.concat(out_arr)
 end
 
-function aux_save(out_arr, name, value, saved)
+function aux_loop_seri(out_arr, name, value, saved)
     saved = saved or {}                                        -- initial value
     mywrite(out_arr, name, " = ")
     if type(value) == "number" or type(value) == "string" then
-        mywrite(out_arr, basic_serialize(value), "\n")
+        mywrite(out_arr, base_seri(value), "\n")
     elseif type(value) == "table" then
         if saved[value] then                                   -- value already saved?
             mywrite(out_arr, saved[value], "\n")               -- use its previous name
@@ -99,9 +102,9 @@ function aux_save(out_arr, name, value, saved)
             saved[value] = name                                -- save name for next time
             mywrite(out_arr, "{}\n")                           -- create a new table
             for k, v in pairs(value) do                        -- save its fields
-                k = basic_serialize(k)
+                k = base_seri(k)
                 local fname = string.format("%s[%s]", name, k)
-                aux_save(out_arr, fname, v, saved)
+                aux_loop_seri(out_arr, fname, v, saved)
             end
         end
     else
@@ -109,9 +112,38 @@ function aux_save(out_arr, name, value, saved)
     end
 end
 
--- local t = {}
--- a = {{"one", "two"}, 3}
--- b = {k = a[1]}
--- print(save("a", a, t))
--- print(save("b", b, t))
 
+-- table with loop
+local loop_t = {
+    Name = "Dennis",
+    Age = 18,
+    Phone = {
+        type = 1,
+        number = "123",
+    }
+}
+loop_t.self = loop_t
+
+print(loop_seri("loop_t", loop_t))
+
+
+-- share
+local share_t = {}
+
+local share_1 = {
+    name = "share_1",
+    type = 1,
+}
+share_1.self = share_1
+
+local share_2 = {
+    name = "share_2",
+    type = 2,
+}
+share_2.self = share_2
+
+share_1.ref = share_2
+share_2.ref = share_1
+
+print(loop_seri(share_1.name, share_1, share_t))
+print(loop_seri(share_2.name, share_2, share_t))
