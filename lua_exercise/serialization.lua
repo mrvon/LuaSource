@@ -1,10 +1,3 @@
-function mywrite(out_arr, ...)
-    local t = {...}
-    for i = 1, #t do
-        table.insert(out_arr, t[i])
-    end
-end
-
 function isvalidindentfier(k)
     local pattern = "[_%a][_%a%d]*"
     local str = string.match(k, pattern)
@@ -42,6 +35,13 @@ end
 function indent(out_arr, indent_level)
     for i = 1, indent_level do
         mywrite(out_arr, "\t")
+    end
+end
+
+function mywrite(out_arr, ...)
+    local t = {...}
+    for i = 1, #t do
+        table.insert(out_arr, t[i])
     end
 end
 
