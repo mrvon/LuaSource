@@ -8,7 +8,7 @@ function generic_for(_f, _s, _var, block_callback)
             break
         end
 
-        block_callback(table.unpack(t))
+        block_callback(table.unpack(t, 1, t.n))
     end
 end
 --------------------------------------------------------------------------------
