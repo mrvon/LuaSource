@@ -79,7 +79,7 @@ function copy_file(source_filename, target_filename)
     local s_content = s_file:read("*a")
     s_file:close()
 
-    local t_file = assert(io.open(target_filename, "a"))
+    local t_file = assert(io.open(target_filename, "w+"))
     t_file:write(s_content)
     t_file:flush()
     t_file:close()
@@ -94,19 +94,23 @@ function diff(absolute_filename)
     local a_content = a_file:read("*a")
     io.close(a_file)
 
-    local d_file = assert(io.open(diff_filename, "r"))
-    local d_content = d_file:read("*a")
-    io.close(d_file)
+    local d_file = io.open(diff_filename, "r")
+    if d_file then
+        local d_content = d_file:read("*a")
+        io.close(d_file)
 
-    if a_content == d_content then
-        local compressed_library_filename = change_root_path(absolute_filename, NEW_IMAGE_LIBRARY, COMPRESSED_LIBRARY)
-        local compressed_export_filename = change_root_path(absolute_filename, NEW_IMAGE_LIBRARY, EXPORT_COMPRESSED_PATH)
-        if copy_file(compressed_library_filename, compressed_export_filename) then
-            return
+        if a_content == d_content then
+            local compressed_library_filename = change_root_path(absolute_filename, NEW_IMAGE_LIBRARY, COMPRESSED_LIBRARY)
+            local compressed_export_filename = change_root_path(absolute_filename, NEW_IMAGE_LIBRARY, EXPORT_COMPRESSED_PATH)
+            if copy_file(compressed_library_filename, compressed_export_filename) then
+                return
+            else
+                print(string.format("FILE: %s CANNOT FOUND IN %s", absolute_filename, compressed_library_filename))
+            end
+        else
+            print(string.format("FILE: %s CHANGE", absolute_filename))
         end
     end
-
-    print(string.format("FILE: %s CHANGE", absolute_filename))
 
     local uncompress_export_filename = change_root_path(absolute_filename, NEW_IMAGE_LIBRARY, EXPORT_UNCOMPRESS_PATH)
     copy_file(absolute_filename, uncompress_export_filename)
