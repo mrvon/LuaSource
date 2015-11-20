@@ -1,8 +1,8 @@
 local lfs = require "lfs"
 local md5 = require "md5"
 
-local NEW_IMAGE_LIBRARY = "./new_image_library/"
-local OLD_IMAGE_LIBRARY = "./old_image_library/"
+local NEW_IMAGE_LIBRARY = "./new_image_library"
+local OLD_IMAGE_LIBRARY = "./old_image_library"
 
 local COMPRESSED_LIBRARY = "./compressed_library"
 
@@ -68,13 +68,14 @@ function mkdir(dir)
     recursive_mkdir(dir)
 end
 
--- mkdir("./Hello/World")
--- mkdir("E:/Foo/Goo/Too/")
-
 function copy_file(source_filename, target_filename)
     mkdir(target_filename)
 
-    local s_file = assert(io.open(source_filename, "r"))
+    local s_file = io.open(source_filename, "r")
+    if s_file == nil then
+        return false
+    end
+
     local s_content = s_file:read("*a")
     s_file:close()
 
@@ -82,6 +83,8 @@ function copy_file(source_filename, target_filename)
     t_file:write(s_content)
     t_file:flush()
     t_file:close()
+
+    return true
 end
 
 function diff(absolute_filename)
@@ -96,12 +99,17 @@ function diff(absolute_filename)
     io.close(d_file)
 
     if a_content == d_content then
-        local compressed_filename = change_root_path(absolute_filename, NEW_IMAGE_LIBRARY, EXPORT_COMPRESSED_PATH)
-        copy_file(absolute_filename, compressed_filename)
-    else
-        local uncompress_filename = change_root_path(absolute_filename, NEW_IMAGE_LIBRARY, EXPORT_UNCOMPRESS_PATH)
-        copy_file(absolute_filename, uncompress_filename)
+        local compressed_library_filename = change_root_path(absolute_filename, NEW_IMAGE_LIBRARY, COMPRESSED_LIBRARY)
+        local compressed_export_filename = change_root_path(absolute_filename, NEW_IMAGE_LIBRARY, EXPORT_COMPRESSED_PATH)
+        if copy_file(compressed_library_filename, compressed_export_filename) then
+            return
+        end
     end
+
+    print(string.format("FILE: %s CHANGE", absolute_filename))
+
+    local uncompress_export_filename = change_root_path(absolute_filename, NEW_IMAGE_LIBRARY, EXPORT_UNCOMPRESS_PATH)
+    copy_file(absolute_filename, uncompress_export_filename)
 end
 
 traverse(NEW_IMAGE_LIBRARY)
