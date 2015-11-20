@@ -1,5 +1,4 @@
 local lfs = require "lfs"
-local md5 = require "md5"
 
 local NEW_IMAGE_LIBRARY = "./new_image_library"
 local OLD_IMAGE_LIBRARY = "./old_image_library"
@@ -71,7 +70,7 @@ end
 function copy_file(source_filename, target_filename)
     mkdir(target_filename)
 
-    local s_file = io.open(source_filename, "r")
+    local s_file = io.open(source_filename, "rb")
     if s_file == nil then
         return false
     end
@@ -79,7 +78,7 @@ function copy_file(source_filename, target_filename)
     local s_content = s_file:read("*a")
     s_file:close()
 
-    local t_file = assert(io.open(target_filename, "w+"))
+    local t_file = assert(io.open(target_filename, "w+b"))
     t_file:write(s_content)
     t_file:flush()
     t_file:close()
@@ -90,11 +89,11 @@ end
 function diff(absolute_filename)
     local diff_filename = change_root_path(absolute_filename, NEW_IMAGE_LIBRARY, OLD_IMAGE_LIBRARY)
 
-    local a_file = assert(io.open(absolute_filename, "r"))
+    local a_file = assert(io.open(absolute_filename, "rb"))
     local a_content = a_file:read("*a")
     io.close(a_file)
 
-    local d_file = io.open(diff_filename, "r")
+    local d_file = io.open(diff_filename, "rb")
     if d_file then
         local d_content = d_file:read("*a")
         io.close(d_file)
