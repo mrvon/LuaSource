@@ -11,7 +11,8 @@ local EXPORT_UNCOMPRESS_PATH = "./export_uncompress"
 local DIR_SEPARATOR = "/"
 
 function filename_filter(filename)
-    if filename == "." or filename == ".." then
+    if filename == "." or filename == ".." or
+        filename == ".git" or filename == ".svn" then
         return false
     end
 
