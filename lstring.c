@@ -42,8 +42,8 @@ int luaS_eqlngstr (TString *a, TString *b) {
 /*
 ** equality for strings
 */
-// for long string just compare it. 
-// for short string is store in string table, so always the same instance, it's very easy.
+/* for long string just compare it. */
+/* for short string is store in string table, so always the same instance, it's very easy. */
 int luaS_eqstr (TString *a, TString *b) {
     return (a->tsv.tt == b->tsv.tt) &&
         (a->tsv.tt == LUA_TSHRSTR ? eqshrstr(a, b) : luaS_eqlngstr(a, b));

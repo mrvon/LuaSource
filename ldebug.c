@@ -615,7 +615,7 @@ void stack_dump(lua_State *L) {
 			printf("%s", lua_typename(L, t));
 			break;
 		}
-		printf("\n");		// put a separator
+		printf("\n");		/* put a separator */
 	}
 	printf("------------------------------------------------\n");
 }

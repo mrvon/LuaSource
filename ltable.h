@@ -4,7 +4,7 @@
 ** See Copyright Notice in lua.h
 */
 
-// H means Hash
+/* H means Hash */
 
 #ifndef ltable_h
 #define ltable_h

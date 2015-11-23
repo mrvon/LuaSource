@@ -53,7 +53,9 @@
 
 typedef struct lua_State lua_State;
 
-// Any function registered with Lua must have this prototype
+/*
+** Any function registered with Lua must have this prototype
+*/
 typedef int (*lua_CFunction) (lua_State *L);
 
 /*

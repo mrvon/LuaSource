@@ -574,8 +574,8 @@ typedef struct Table {
 /*
 ** `module' operation for hashing (size is always a power of 2)
 */
-// (size & (size - 1)) == 0 is mean size is a power of 2
-// s & ((size)-1) is the module result
+/* (size & (size - 1)) == 0 is mean size is a power of 2 */
+/* s & ((size)-1) is the module result */
 #define lmod(s,size) \
 	(check_exp((size&(size-1))==0, (cast(int, (s) & ((size)-1)))))
 

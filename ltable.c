@@ -376,9 +376,9 @@ Table *luaH_new (lua_State *L) {
     Table *t = &luaC_newobj(L, LUA_TTABLE, sizeof(Table), NULL, 0)->h;
     t->metatable = NULL;
     t->flags = cast_byte(~0);
-    t->array = NULL;            // array part pointer
-    t->sizearray = 0;           // array part size
-    setnodevector(L, t, 0);     // hash part
+    t->array = NULL;            /* array part pointer */
+    t->sizearray = 0;           /* array part size */
+    setnodevector(L, t, 0);     /* hash part */
     return t;
 }
 
