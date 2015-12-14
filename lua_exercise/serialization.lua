@@ -127,8 +127,31 @@ local loop_t = {
 }
 loop_t.self = loop_t
 
-print(loop_seri("loop_t", loop_t))
+-- print(loop_seri("loop_t", loop_t))
 
+function seri(seri_table)
+    return "do local " .. loop_seri("ret", seri_table) .. "return ret end"
+end
+
+function unseri(seri_str)
+    local f = load(seri_str)
+    if f then
+        return f()
+    end
+end
+
+local s = seri(loop_t)
+local t = unseri(s)
+
+for k, v in pairs(loop_t) do
+    print(k, v)
+end
+
+for k, v in pairs(t) do
+    print(k, v)
+end
+
+--------------------------------------------------------------------------------
 
 -- share
 local share_t = {}
