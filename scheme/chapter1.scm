@@ -138,7 +138,7 @@
   (cond ((and (<= a b) (<= a c) (+ b c)))
         ((and (<= b a) (<= b c) (+ a c)))
         (else (+ a b))
-   )
+        )
   )
 
 (max-sum 1 2 3)
@@ -164,6 +164,9 @@
   (p)
   )
 
+; endless loop
+; (p)
+
 (define (test x y)
   (if (= x 0)
     0
@@ -175,10 +178,10 @@
 
 ; -----------------------------------------------------------------------------
 (define (sqrt-iter guess x)
-  (if (good-enough? guess x)
+  (if (good-enough-func guess x)
     guess
     (sqrt-iter (improve guess x)
-      x)
+               x)
     )
   )
 
@@ -190,10 +193,33 @@
   (/ (+ x y) 2)
   )
 
-(define (good-enough? guess x)
+(define (good-enough-func guess x)
+  (good-enough_2 guess x)
+  )
+
+(define (good-enough_1 guess x)
   (< 
     (abs (- (square guess) x))
     0.001
+    )
+  )
+
+(define (good-enough_2 guess x)
+  (good-enough-templete guess x improve)
+  )
+
+(define (good-enough-templete guess x improve-func)
+  (<
+    (/
+      (abs
+        (-
+          (improve-func guess x)
+          guess
+          )
+        )
+      guess
+      )
+    0.00000001
     )
   )
 
@@ -211,14 +237,14 @@
 (define (new-if predicate then-clause else-clause)
   (cond (predicate then-clause)
         (else else-clause))
- )
+  )
 
 (define (new-sqrt-iter guess x)
-  (new-if (good-enough? guess x)
-    guess
-    (new-sqrt-iter (improve guess x)
-      x)
-    )
+  (new-if (good-enough-func guess x)
+          guess
+          (new-sqrt-iter (improve guess x)
+                         x)
+          )
   )
 
 (define (new-sqrt x)
@@ -228,3 +254,38 @@
 ; endless loop
 ; (new-sqrt 3)
 
+; -----------------------------------------------------------------------------
+; Exercise 1.7
+; grep good-enough_2
+
+; -----------------------------------------------------------------------------
+; Exercise 1.8
+(define (cube-root-iter guess x)
+  (if (good-enough-cube guess x)
+    guess
+    (cube-root-iter (improve-cube-root guess x)
+                    x
+     )
+    )
+  )
+
+(define (good-enough-cube guess x)
+  (good-enough-templete guess x improve-cube-root)
+  )
+
+(define (improve-cube-root guess x)
+  (/
+    (+ 
+      (/ x (square guess))
+      (* guess 2)
+      )
+    3)
+  )
+
+(define (cube-root x)
+  (cube-root-iter 1.0 x)
+  )
+
+(cube-root 3)
+(cube-root 4)
+(cube-root 5)
