@@ -205,10 +205,10 @@
   )
 
 (define (good-enough_2 guess x)
-  (good-enough-templete guess x improve)
+  (good-enough-templete improve guess x)
   )
 
-(define (good-enough-templete guess x improve-func)
+(define (good-enough-templete improve-func guess x )
   (<
     (/
       (abs
@@ -260,32 +260,42 @@
 
 ; -----------------------------------------------------------------------------
 ; Exercise 1.8
-(define (cube-root-iter guess x)
-  (if (good-enough-cube guess x)
-    guess
-    (cube-root-iter (improve-cube-root guess x)
-                    x
-     )
-    )
-  )
-
-(define (good-enough-cube guess x)
-  (good-enough-templete guess x improve-cube-root)
-  )
-
+; Lexcial scoping
 (define (improve-cube-root guess x)
-  (/
+(/
     (+ 
-      (/ x (square guess))
-      (* guess 2)
-      )
+    (/ x (square guess))
+    (* guess 2)
+    )
     3)
-  )
+)
 
 (define (cube-root x)
-  (cube-root-iter 1.0 x)
+
+  (define (cube-root-iter guess)
+    (if (good-enough-cube guess)
+      guess
+      (cube-root-iter (improve-cube-root guess x))
+      )
+    )
+
+  (define (good-enough-cube guess)
+    (good-enough-templete improve-cube-root guess x)
+    )
+
+  (cube-root-iter 1.0)
   )
 
 (cube-root 3)
 (cube-root 4)
 (cube-root 5)
+
+; -----------------------------------------------------------------------------
+(define (factorial n)
+  (if (= n 1)
+    1
+    (* n (factorial (- n 1))))
+  )
+
+(factorial 5)
+(factorial 6)
