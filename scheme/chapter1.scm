@@ -262,13 +262,13 @@
 ; Exercise 1.8
 ; Lexcial scoping
 (define (improve-cube-root guess x)
-(/
+  (/
     (+ 
-    (/ x (square guess))
-    (* guess 2)
-    )
+      (/ x (square guess))
+      (* guess 2)
+      )
     3)
-)
+  )
 
 (define (cube-root x)
 
