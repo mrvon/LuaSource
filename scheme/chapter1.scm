@@ -1,6 +1,6 @@
 #lang scheme
 ; -----------------------------------------------------------------------------
-; (+ 
+; (+
 
 ;   (* 3
 ;      (+ (* 2 4)
@@ -106,8 +106,8 @@
      b
      a)
    )
-(* 
-  (cond 
+(*
+  (cond
     ((> a b) a)
     ((< a b) b)
     (else -1)
@@ -118,7 +118,7 @@
 ; -----------------------------------------------------------------------------
 ; Exercise 1.2
 (/
-  (+ 5 
+  (+ 5
      4 (- 2
           (- 3
              (+ 6
@@ -149,7 +149,7 @@
 ; Exercise 1.4
 (define (a-plus-abs-b a b)
   (
-   (if (> b 0) + -) 
+   (if (> b 0) + -)
    a
    b
    )
@@ -198,7 +198,7 @@
   )
 
 (define (good-enough_1 guess x)
-  (< 
+  (<
     (abs (- (square guess) x))
     0.001
     )
@@ -263,7 +263,7 @@
 ; Lexcial scoping
 (define (improve-cube-root guess x)
   (/
-    (+ 
+    (+
       (/ x (square guess))
       (* guess 2)
       )
@@ -291,11 +291,215 @@
 (cube-root 5)
 
 ; -----------------------------------------------------------------------------
-(define (factorial n)
+(define (factorial_1 n)
   (if (= n 1)
     1
-    (* n (factorial (- n 1))))
+    (* n (factorial_1 (- n 1))))
   )
 
-(factorial 5)
-(factorial 6)
+(factorial_1 5)
+(factorial_1 6)
+
+(define (factorial_2 max-count)
+  (define (fact-iter product counter)
+    (if (> counter max-count)
+      product
+      (fact-iter (* counter product)
+                 (+ counter 1))
+      )
+    )
+
+  (fact-iter 1 1)
+  )
+
+(factorial_2 5)
+(factorial_2 6)
+
+; -----------------------------------------------------------------------------
+; Exercise 1.9
+
+(define (inc x)
+  (+ x 1)
+  )
+
+(define (dec x)
+  (- x 1)
+  )
+
+(inc 0)
+(dec 0)
+
+(define (plus-1 a b)
+  (if (= a 0)
+    b
+    (inc (plus-1 (dec a) b))
+    )
+  )
+
+(plus-1 4 5)
+(inc (plus-1 3 5))
+(inc (inc (plus-1 2 5)))
+(inc (inc (inc (plus-1 1 5))))
+(inc (inc (inc (inc (plus-1 0 5)))))
+
+
+(define (plus-2 a b)
+  (if (= a 0)
+    b
+    (plus-2 (dec a) (inc b))
+    )
+  )
+
+(plus-2 4 5)
+(plus-2 3 6)
+(plus-2 2 7)
+(plus-2 1 8)
+(plus-2 0 9)
+
+
+; -----------------------------------------------------------------------------
+; Exercise 1.10
+(define (Ack x y)
+  (cond ((= y 0) 0)
+        ((= x 0) (* 2 y))
+        ((= y 1) 2)
+        (else (Ack
+                (- x 1)
+                (Ack x (- y 1))
+                )
+              )
+        )
+  )
+
+; process
+(Ack 1 10)
+; -->
+(Ack 0 (Ack 1 9))
+(Ack 0 (Ack 0 (Ack 1 8)))
+(Ack 0 (Ack 0 (Ack 0 (Ack 1 7))))
+(Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 1 6)))))
+(Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 1 5))))))
+(Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 1 4)))))))
+(Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 1 3))))))))
+(Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 1 2)))))))))
+(Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 1 1))))))))))
+(Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 2)))))))))
+(Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 4))))))))
+(Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 8)))))))
+(Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 16))))))
+(Ack 0 (Ack 0 (Ack 0 (Ack 0 (Ack 0 32)))))
+(Ack 0 (Ack 0 (Ack 0 (Ack 0 64))))
+(Ack 0 (Ack 0 (Ack 0 128)))
+(Ack 0 (Ack 0 256))
+(Ack 0 512)
+; result
+1024
+
+; process
+(Ack 2 4)
+; -->
+(Ack 1 (Ack 2 3))
+(Ack 1 (Ack 1 (Ack 2 2)))
+(Ack 1 (Ack 1 (Ack 1 (Ack 2 1))))
+(Ack 1 (Ack 1 (Ack 1 2)))
+(Ack 1 (Ack 1 (Ack 0 (Ack 1 1))))
+(Ack 1 (Ack 1 (Ack 0 2)))
+(Ack 1 (Ack 1 4))
+(Ack 1 (Ack 0 (Ack 1 3)))
+(Ack 1 (Ack 0 (Ack 0 (Ack 1 2))))
+(Ack 1 (Ack 0 (Ack 0 (Ack 0 (Ack 1 1)))))
+(Ack 1 (Ack 0 (Ack 0 (Ack 0 2))))
+(Ack 1 (Ack 0 (Ack 0 4)))
+(Ack 1 (Ack 0 8))
+(Ack 1 16)
+(Ack 0 (Ack 1 15))
+(Ack 0 (Ack 0 (Ack 1 14)))
+(Ack 0 (Ack 0 (Ack 0 (Ack 1 13))))
+; ...
+
+(Ack 3 3)
+
+
+; -----------------------------------------------------------------------------
+; Ack-f(n) = (Ack 0 n)
+(define (Ack-f n)
+  (Ack 0 n)
+  )
+
+; Ack-F(n) = 2*n
+(define (Ack-F n)
+  (* 2 n)
+  )
+
+(Ack-f 10)
+(Ack-F 10)
+
+; -----------------------------------------------------------------------------
+; Ack-g(n) = (Ack 1 n)
+(define (Ack-g n)
+  (Ack 1 n)
+  ; (Ack 0 (Ack 1 (- n 1)))     -- step 1
+  ; (* 2 (Ack 1 (- n 1)))       -- step 2
+  ; (* 2 (* 2 (Ack 1 (- n 2)))) -- step 3
+  ; ...
+  ; 2^n-1 (A 1 1)               -- step n-1
+  ; 2^n                         -- step n
+  )
+
+(Ack-g 10)
+
+; Ack-G(n) = 2^n
+(define (Ack-G n)
+  (cond ((= n 0) 1)
+        ((= n 1) 2)
+        (else (* 2
+                 (Ack-G (- n 1)))
+              )
+        )
+  )
+
+(Ack-G 10)
+
+; -----------------------------------------------------------------------------
+; Ack-h(n) = (Ack 2 n)
+; Ack-h(n) = 2^(Ack 2 n-1)
+; Ack-h(n) = 2^2^(Ack 2 n-2)
+; Ack-h(n) = 2^2^...2^(Ack 2 1)
+; Ack-h(n) = 2^2^...2^2 (count of 2 is n)
+
+(define (Ack-h n)
+  (Ack 2 n)
+  )
+
+(Ack-h 4)
+
+(define (Ack-H n)
+  (if (> n 0)
+    (Ack-G (Ack-H (- n 1)))
+    1
+    )
+  )
+
+(Ack-H 4)
+
+; -----------------------------------------------------------------------------
+(define (fib n)
+  (cond ((= n 0) 0)
+        ((= n 1) 1)
+        (else (+ (fib (- n 1))
+                 (fib (- n 2))
+               )
+          )
+        )
+  )
+
+
+(fib 0)
+(fib 1)
+(fib 2)
+(fib 3)
+(fib 4)
+(fib 5)
+(fib 6)
+(fib 7)
+(fib 8)
