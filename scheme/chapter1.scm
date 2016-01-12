@@ -500,3 +500,105 @@ circumference
 (fib 6)
 (fib 7)
 (fib 8)
+
+(define (fib-iter-version n)
+  (fib-iter 1 0 n)
+  )
+
+(define (fib-iter a b count)
+  (if (= count 0)
+    b
+    (fib-iter (+ a b) a (- count 1))
+    )
+  )
+
+(fib-iter-version 0)
+(fib-iter-version 1)
+(fib-iter-version 2)
+(fib-iter-version 3)
+(fib-iter-version 4)
+(fib-iter-version 5)
+(fib-iter-version 6)
+(fib-iter-version 7)
+(fib-iter-version 8)
+
+; -----------------------------------------------------------------------------
+(define (count-change amount)
+
+  (define (cc amount kind-of-coins)
+    (cond ((= amount 0) 1)
+          ((or (< amount 0) (= kind-of-coins 0)) 0)
+          (else (+ (cc amount (- kind-of-coins 1))
+                   (cc (- amount (first-denomination kind-of-coins)) kind-of-coins)
+                   )
+                )
+          )
+    )
+
+  (define (first-denomination kind-of-coins)
+    (cond ((= kind-of-coins 1) 1)
+          ((= kind-of-coins 2) 5)
+          ((= kind-of-coins 3) 10)
+          ((= kind-of-coins 4) 25)
+          ((= kind-of-coins 5) 50)
+          )
+    )
+
+  (cc amount 5)
+  )
+
+(count-change 100)
+
+; -----------------------------------------------------------------------------
+; Exercise 1.11
+
+(define (func_11 n)
+  (if (< n 3)
+    n
+    (+
+      (func_11 (- n 1))
+      (* 2 (func_11 (- n 2)))
+      (* 3 (func_11 (- n 3)))
+      )
+    )
+  )
+
+(func_11 0)
+(func_11 1)
+(func_11 2)
+(func_11 3)
+(func_11 4)
+(func_11 5)
+(func_11 6)
+(func_11 7)
+(func_11 8)
+(func_11 9)
+
+
+(define (func_11-inter-version n)
+  (define (func_11-inter x1 x2 x3 n)
+    (if (>= n 0)
+      (func_11-inter x2 x3 (+ x3 (* 2 x2) (* 3 x1)) (- n 1))
+      x3
+      )
+    )
+
+  (cond ((<= n 0) 0)
+        ((= n 1) 1)
+        ((= n 2) 2)
+        (else
+          (func_11-inter 0 1 2 (- n 3))
+          )
+        )
+  )
+
+(func_11-inter-version 0)
+(func_11-inter-version 1)
+(func_11-inter-version 2)
+(func_11-inter-version 3)
+(func_11-inter-version 4)
+(func_11-inter-version 5)
+(func_11-inter-version 6)
+(func_11-inter-version 7)
+(func_11-inter-version 8)
+(func_11-inter-version 9)
