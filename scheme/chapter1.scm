@@ -602,3 +602,157 @@ circumference
 (func_11-inter-version 7)
 (func_11-inter-version 8)
 (func_11-inter-version 9)
+
+; -----------------------------------------------------------------------------
+; Exercise 1.12
+; FIXME
+(define (pascal-triangle n)
+  (cond ((= n 1) 1)
+        ((= n 2) 1)
+    )
+  )
+
+(pascal-triangle 2)
+
+
+; -----------------------------------------------------------------------------
+; Exercise 1.13
+(fib-iter-version 0)
+(fib-iter-version 1)
+(fib-iter-version 2)
+(fib-iter-version 3)
+
+; -----------------------------------------------------------------------------
+; Exercise 1.14
+;log(x)
+(count-change 11)
+
+; -----------------------------------------------------------------------------
+; Exercise 1.15
+
+(define (sine angle)
+
+  (define (cube x)
+    (* x x x)
+    )
+
+  (define (p x)
+    (- (* 3 x)
+       (* 4 (cube x))
+       )
+    )
+
+  (if (not (> (abs angle) 0.1))
+    angle
+    (p (sine (/ angle 3.0)))
+    )
+  )
+
+(sine 12.15)
+
+; -----------------------------------------------------------------------------
+(define (expt b n)
+  (if (= n 0)
+    1
+    (* b (expt b (- n 1)))
+    )
+  )
+
+(expt 2 0)
+(expt 2 1)
+(expt 2 2)
+(expt 2 3)
+(expt 2 4)
+(expt 2 5)
+(expt 2 6)
+(expt 2 7)
+(expt 2 8)
+
+
+(define (expt-iter-version b n)
+
+  (define (expt-iter b counter product)
+    (if (= counter 0)
+      product
+      (expt-iter b (- counter 1) (* product b))
+      )
+    )
+
+  (expt-iter b n 1)
+  )
+
+(expt-iter-version 2 0)
+(expt-iter-version 2 1)
+(expt-iter-version 2 2)
+(expt-iter-version 2 3)
+(expt-iter-version 2 4)
+(expt-iter-version 2 5)
+(expt-iter-version 2 6)
+(expt-iter-version 2 7)
+(expt-iter-version 2 8)
+
+; -----------------------------------------------------------------------------
+; Exercise 1.16
+(define (fast-expt b n)
+
+  (define (is-even counter)
+    (= (remainder counter 2) 0)
+    )
+
+  (define (expt-iter b counter product)
+    (cond ((= counter 0) product)
+          ((is-even counter) (expt-iter b (- counter 2) (* product b b)))
+          (else (expt-iter b (- counter 1) (* product b)))
+      )
+    )
+
+  (expt-iter b n 1)
+  )
+
+(fast-expt 2 0)
+(fast-expt 2 1)
+(fast-expt 2 2)
+(fast-expt 2 3)
+(fast-expt 2 4)
+(fast-expt 2 5)
+(fast-expt 2 6)
+(fast-expt 2 7)
+(fast-expt 2 8)
+
+
+; -----------------------------------------------------------------------------
+; Exercise 1.17
+(define (multi-1 a b)
+  (if (= b 0)
+    0
+    (+ a (multi-1 a (- b 1)))
+   )
+  )
+
+
+(multi-1 32 32)
+
+
+(define (multi-2 a b)
+
+  (define (double n)
+    (+ n n)
+    )
+
+  (define (halve n)
+    (/ n 2)
+    )
+
+  (define (is-even n)
+    (= (remainder n 2) 0)
+    )
+
+  (cond ((= b 0) 0)
+        ((is-even b) (+ (double a) (multi-2 a (- b 2))))
+        (else (+ a (multi-2 a (- b 1)))
+          )
+        )
+  )
+
+
+(multi-2 32 32)
