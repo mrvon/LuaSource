@@ -11,6 +11,7 @@ local S = lpeg.S         -- match anything in a set
 local R = lpeg.R         -- match anything in a range
 local C = lpeg.C         -- captures a match
 local Ct = lpeg.Ct       -- a table with all captures from the pattern
+local Cs = lpeg.Cs       -- substitution capture
 
 -------------------------------------------------------------------------------
 
@@ -189,3 +190,33 @@ function subst(openp, repl, endp)
 end
 
 print(subst('`', '{{%1}}'):match '`code`')
+print(subst('_', "''%1''"):match '_italics_')
+print(string.gsub('_italics_', '^_([^_]+)_', "''%1''"))
+
+function gsub(s, patt, repl)
+    patt = P(patt)
+    local p = Cs(((patt / repl) + 1) ^ 0)
+    return p:match(s)
+end
+
+print(gsub("hello dog, dog!", "dog", "cat"))
+
+local p = C(((P"dog" / "cat") + 1) ^ 0)
+local c1, c2, c3 = p:match "hello dog, dog!"
+print(c1)
+print(c2)
+print(c3)
+
+local lf = P"\n"
+local rest_of_line_nl = C((P(1) - lf) ^ 0 * lf)  -- capture chars upto \n
+local quoted_line = P">" * rest_of_line_nl       -- block quote lines start with '>'
+
+function empty(p)
+    return C(p) / ''
+end
+local quoted_line = empty('> ') * rest_of_line_nl
+
+-- collect the quoted lines and put inside [[[..]]]
+local quote = Cs(quoted_line ^ 1) / "[[[\n%1]]]\n"
+
+print(quote:match "> hello\n> dolly\n")
