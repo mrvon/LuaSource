@@ -158,3 +158,34 @@ for i = 1, #csv_list do
 end
 
 -- String Substituion
+local Q = P'"'
+local str_patt = Q * (P(1) - Q) ^ 0 * Q
+
+print(Match(C(str_patt), [[
+"Hello world" is a string.
+]]))
+
+local str_patt_2 = Q * C((P(1) - Q) ^ 0) * Q
+print(Match(str_patt_2, [[
+"Hello world" is a string.
+]]))
+
+function extract_quote(openp, endp)
+    openp = P(openp)
+    endp = endp and P(endp) or openp
+    
+    local upto_endp = (P(1) - endp) ^ 1
+    return openp * C(upto_endp) * endp
+end
+
+print(extract_quote("(", ")"):match "(and more)")
+print(extract_quote("[[", "]]"):match "[[long string]]")
+
+function subst(openp, repl, endp)
+    openp = P(openp)
+    endp = endp and P(endp) or openp
+    local upto_endp = (P(1) - endp) ^ 1
+    return openp * C(upto_endp)/repl * endp
+end
+
+print(subst('`', '{{%1}}'):match '`code`')
