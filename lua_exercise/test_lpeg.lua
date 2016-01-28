@@ -133,14 +133,18 @@ end
 
 local idenchar = R("AZ", "az") + P"_"
 local iden = idenchar * (idenchar + R"09") ^ 0
-print(list(C(iden)):match "hello, dolly, _x, s23")
+local ciden = C(iden)
+print(list(ciden):match "hello, dolly, _x, s23")
 
 local locale_list = {}
 lpeg.locale(locale_list)
 
 local iden_2 = (locale_list.alpha + P"_") * (locale_list.alnum + P"_") ^ 0
-print(list(C(iden_2)):match "hello, dolly, _x, s23")
+local ciden_2 = C(iden_2)
+print(list(ciden_2):match "hello, dolly, _x, s23")
 
+
+-- rlistf is a litter tricky
 local rlistf = list(float / tonumber)
 local csv = Ct( (Ct(rlistf) + "\n") ^ 1)
 local csv_list = csv:match "1,2.3,3\n10,20, 30\n"
