@@ -13,6 +13,7 @@ local S = lpeg.S         -- match anything in a set
 local R = lpeg.R         -- match anything in a range
 local C = lpeg.C         -- captures a match
 local Cb = lpeg.Cb
+local Cc = lpeg.Cc
 local Cf = lpeg.Cf
 local Cg = lpeg.Cg
 local Cmt = lpeg.Cmt
@@ -142,3 +143,8 @@ local long_string = open * C((P(1) - closeeq) ^ 0) * close / 1
 print(Match(long_string, [==[
 [[ Hello world ]]
 ]==]))
+
+print("------------------ Group and back captures")
+print(serialize(Match(Ct(Cc"foo" * Cg(Cc"bar" * Cc"baz", "TAG") * Cc"qux"), "")))
+
+print(serialize(Match(Ct(C(Cg(1, "foo"))), "a")))

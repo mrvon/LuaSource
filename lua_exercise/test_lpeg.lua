@@ -178,7 +178,11 @@ print(c3)
 
 local lf = P"\n"
 local rest_of_line_nl = C((P(1) - lf) ^ 0 * lf)  -- capture chars upto \n
-local quoted_line = P">" * rest_of_line_nl       -- block quote lines start with '>'
+local quoted_line = P"> " * rest_of_line_nl      -- block quote lines start with '>'
+
+-- collect the quoted lines and put inside [[[..]]]
+local quote = Cs(quoted_line ^ 1) / "[[[\n%1]]]\n"
+print(quote:match "> hello\n> dolly\n")
 
 function empty(p)
     return C(p) / ''
@@ -187,5 +191,4 @@ local quoted_line = empty('> ') * rest_of_line_nl
 
 -- collect the quoted lines and put inside [[[..]]]
 local quote = Cs(quoted_line ^ 1) / "[[[\n%1]]]\n"
-
 print(quote:match "> hello\n> dolly\n")

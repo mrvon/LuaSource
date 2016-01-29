@@ -10,8 +10,14 @@ local P = lpeg.P         -- match a string literally
 local S = lpeg.S         -- match anything in a set
 local R = lpeg.R         -- match anything in a range
 local C = lpeg.C         -- captures a match
-local Ct = lpeg.Ct       -- a table with all captures from the pattern
+local Cb = lpeg.Cb
+local Cf = lpeg.Cf
+local Cg = lpeg.Cg
+local Cmt = lpeg.Cmt
+local Cp = lpeg.Cp
 local Cs = lpeg.Cs       -- substitution capture
+local Ct = lpeg.Ct       -- a table with all captures from the pattern
+local V = lpeg.V
 
 -------------------------------------------------------------------------------
 
