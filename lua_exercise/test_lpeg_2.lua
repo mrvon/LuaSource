@@ -1,7 +1,9 @@
 package.cpath = "luaclib/?.so"
-package.path = "lualib/?.lua"
+package.path = "./?.lua;lualib/?.lua"
 
 local lpeg = require "lpeg"
+local seri = require "seri"
+
 
 print(string.format("Welcome use Lpeg %s", lpeg.version()))
 
@@ -13,6 +15,7 @@ local C = lpeg.C         -- captures a match
 local Ct = lpeg.Ct       -- a table with all captures from the pattern
 local Cs = lpeg.Cs       -- substitution capture
 local Cg = lpeg.Cg
+local Cf = lpeg.Cf
 
 -------------------------------------------------------------------------------
 
@@ -62,3 +65,4 @@ local sep = S(",;") * space
 local pair = Cg(name * "=" * space * name) * sep ^ -1
 local list = Cf(Ct("") * pair^0, rawset)
 
+print(serialize(list:match("a=b, c = hi; next = pi")))
