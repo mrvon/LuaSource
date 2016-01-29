@@ -155,7 +155,7 @@ function subst(openp, repl, endp)
     openp = P(openp)
     endp = endp and P(endp) or openp
     local upto_endp = (P(1) - endp) ^ 1
-    return openp * C(upto_endp)/repl * endp
+    return openp * C(upto_endp) / repl * endp
 end
 
 print(subst('`', '{{%1}}'):match '`code`')
@@ -164,7 +164,7 @@ print(string.gsub('_italics_', '^_([^_]+)_', "''%1''"))
 
 function gsub(s, patt, repl)
     patt = P(patt)
-    local p = Cs(((patt / repl) + 1) ^ 0)
+    local p = Cs(((patt / repl) + P(1)) ^ 0)
     return p:match(s)
 end
 
