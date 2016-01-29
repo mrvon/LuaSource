@@ -12,11 +12,13 @@ local P = lpeg.P         -- match a string literally
 local S = lpeg.S         -- match anything in a set
 local R = lpeg.R         -- match anything in a range
 local C = lpeg.C         -- captures a match
-local Ct = lpeg.Ct       -- a table with all captures from the pattern
-local Cs = lpeg.Cs       -- substitution capture
-local Cg = lpeg.Cg
+local Cb = lpeg.Cb
 local Cf = lpeg.Cf
+local Cg = lpeg.Cg
+local Cmt = lpeg.Cmt
 local Cp = lpeg.Cp
+local Cs = lpeg.Cs       -- substitution capture
+local Ct = lpeg.Ct       -- a table with all captures from the pattern
 local V = lpeg.V
 
 -------------------------------------------------------------------------------
@@ -127,3 +129,16 @@ local balanced_parentheses = P {
 }
 
 print(Match(anywhere(C(balanced_parentheses)), "can you (talk) with (me)"))
+
+print("------------------ lua long string")
+local equals = P"=" ^ 0
+local open = "[" * Cg(equals, "init") * "[" * P"\n" ^ -1
+local close = "]" * C(equals) * "]"
+local closeeq = Cmt(close * Cb("init"), function(s, i, a, b)
+    return a == b
+end)
+local long_string = open * C((P(1) - closeeq) ^ 0) * close / 1
+
+print(Match(long_string, [==[
+[[ Hello world ]]
+]==]))
