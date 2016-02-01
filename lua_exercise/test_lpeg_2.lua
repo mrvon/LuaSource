@@ -213,3 +213,21 @@ print("------------------ Name groups")
 print((P(1) * Cg(C"bc", "FOOO") * C"d" * P(1) * Cb"FOOO" * Cb"FOOO"):match"abcde")
 
 serialize((P(1) * Cg(C"b" * C"c" * C"d", "FOOO") * C"e" * Ct(Cb"FOOO")):match"abcde")
+
+print("------------------ Equal Count Grammar")
+local equal_count = P {
+    "S", -- initial rule name
+    S = "a" * V"B" + "b" * V"A" + "",
+    A = "a" * V"S" + "b" * V"A" * V"A",
+    B = "b" * V"S" + "a" * V"B" * V"B",
+} * -1
+
+print(C(equal_count):match"aaaabbbb")
+
+
+print("------------------ Simple Name-value lists")
+local name = C(L.alpha ^ 1)                         -- capture name is alpha serial
+local sep = P","                                    -- separator
+local pair = Cg(name * "=" * name) * sep ^ -1       -- Cg make make key-value pair as a single capture(this is importance)
+local list = Cf(Ct("") * pair ^ 0, rawset)          -- Cf call rawset(rawset({}, key_1, value_1), key_2, value_2) ...
+print(serialize(list:match("a=b,c=hi,next=pi")))
