@@ -108,6 +108,13 @@ function anywhere(p)
     return P {p + 1 * V(1)}
 end
 
+function anywhere(patt)
+    return P {
+        "InitRule",
+        InitRule = p + P(1) * V("InitRule")
+    }
+end
+
 print(Match(anywhere(C("world")), "Hello world"))
 
 local I = Cp()
