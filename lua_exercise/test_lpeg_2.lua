@@ -24,6 +24,16 @@ local V = lpeg.V
 
 -------------------------------------------------------------------------------
 
+local __seri = serialize
+function serialize(...)
+    local args = table.pack(...)
+    for i = 1, args.n do
+        if args[i] then
+            print(__seri(args[i]))
+        end
+    end
+end
+
 local subject = "hello world"
 
 local pattern = P("hello")  -- matches the string literally
@@ -72,7 +82,7 @@ local sep = S(",;") * space
 local pair = Cg(name * "=" * space * name) * sep ^ -1
 local list = Cf(Ct("") * pair^0, rawset)
 
-print(serialize(list:match("a=b, c = hi; next = pi")))
+serialize(list:match("a=b, c = hi; next = pi"))
 
 print("------------------ Splitting a string")
 function split(str, sep)
@@ -91,7 +101,7 @@ function split_into_table(str, sep)
     return Match(p, str)
 end
 
-print(serialize(split_into_table("Hello--world--2016", "--")))
+serialize(split_into_table("Hello--world--2016", "--"))
 
 print("------------------ Searching for a pattern")
 function anywhere(p)
@@ -145,6 +155,61 @@ print(Match(long_string, [==[
 ]==]))
 
 print("------------------ Group and back captures")
-print(serialize(Match(Ct(Cc"foo" * Cg(Cc"bar" * Cc"baz", "TAG") * Cc"qux"), "")))
+serialize(Match(Ct(Cc"foo" * Cg(Cc"bar" * Cc"baz", "TAG") * Cc"qux"), ""))
+serialize(
+    Match(
+    Ct(Cc"foo" * Cc"qux"), ""
+    )
+)
 
-print(serialize(Match(Ct(C(Cg(1, "foo"))), "a")))
+print("------------------ Of captures and values")
+print((P(1) * C(C"b" * C"c") * P(1)):match"abcd")
+serialize(Ct(P(1) * C(C"b" * C"c") * P(1)):match"abcd")
+serialize(Ct(P(1) * C(C(P("b")) * C(P("c"))) * P(1)):match"abcd")
+
+print(Cs(P(1) * C(C"b" * C"c") * P(1)):match("abcd"))
+
+function the_func(bcd)
+    assert(bcd == "bcd")
+    return "B", "C", "D"
+end
+
+print((P(1) * (C"bcd" / the_func) * P(1)):match"abcde")
+print(Cs(P(1) * (C"bcd" / the_func) * P(1)):match"abcde")
+
+print("------------------ Anonymous groups")
+print((P(1) * C"b" * C"c" * C"d" * P(1)):match"abcde")
+print((P(1) * C(C"b" * C"c" * C"d") * P(1)):match"abcde")
+print((P(1) * Cg(C"b" * C"c" * C"d") * P(1)):match"abcde")
+
+serialize(Ct(P(1) * Cg(C"b" * C"c" * C"d") * P(1)):match"abcde")
+
+-- TODO
+print(Cs(P(1) * Cg(C"b" * C"c" * C"d") * P(1)):match"abcde")
+
+print("------------------ Calc")
+function calc(a, op, b)
+    -- print(a, op, b)
+    a = tonumber(a)
+    b = tonumber(b)
+    if op == "+" then
+        return a + b
+    else
+        return a - b
+    end
+end
+
+local digit = R"09"
+
+calculate = Cf(
+    C(digit) * Cg(C(S"+-") * C(digit)) ^ 0,
+    calc
+)
+
+print(calculate:match"1")
+print(calculate:match"1+2-3+4")
+
+print("------------------ Name groups")
+print((P(1) * Cg(C"bc", "FOOO") * C"d" * P(1) * Cb"FOOO" * Cb"FOOO"):match"abcde")
+
+serialize((P(1) * Cg(C"b" * C"c" * C"d", "FOOO") * C"e" * Ct(Cb"FOOO")):match"abcde")
