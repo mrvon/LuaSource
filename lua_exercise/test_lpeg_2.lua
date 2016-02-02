@@ -233,7 +233,7 @@ serialize(Match(decode_pattern, "\194\129"))
 
 do return end
 
-print("------------------ lua long string")
+print("------------------ Lua's long string")
 local equals = P"=" ^ 0
 local open = "[" * Cg(equals, "init") * "[" * P"\n" ^ -1
 local close = "]" * C(equals) * "]"
