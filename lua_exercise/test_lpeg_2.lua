@@ -219,12 +219,17 @@ local function f4(s)
     return ((c1 * 64 + c2) * 64 + c3) * 64 + c4 - 63447168
 end
 
-local utf8 = R("\0\127") + R("\194\195") * R("\128\191") / f2
+local cont = R("\128\191")  -- continuation byte
 
-local decode_pattern = Cs(utf8 ^ 0) * -1
+local utf8 = R("\0\127") / string.byte
+           + R("\194\223") * cont / f2
+           + R("\224\239") * cont / f3
+           + R("\240\244") * cont / f4
 
-print(Match(decode_pattern, "\97\98\194\129"))
-print(Match(decode_pattern, "\194\129"))
+local decode_pattern = Ct(utf8 ^ 0) * -1
+
+serialize(Match(decode_pattern, "\97\98\194\129"))
+serialize(Match(decode_pattern, "\194\129"))
 
 do return end
 
