@@ -219,12 +219,10 @@ local function f4(s)
     return ((c1 * 64 + c2) * 64 + c3) * 64 + c4 - 63447168
 end
 
-local cont = R("\128\191")  -- continuation byte
-
 local utf8 = R("\0\127") / string.byte
-           + R("\194\223") * cont / f2
-           + R("\224\239") * cont / f3
-           + R("\240\244") * cont / f4
+           + R("\194\223") * R("\128\191") / f2
+           + R("\224\239") * R("\128\191") / f3
+           + R("\240\244") * R("\128\191") / f4
 
 local decode_pattern = Ct(utf8 ^ 0) * -1
 
