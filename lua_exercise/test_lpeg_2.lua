@@ -195,12 +195,28 @@ serialize(csv([[
 1997,2015,Dennis,mrvon.github.com,"","string with <,> comma"
 ]]))
 
--- convert a two-byte UTF-8 sequence to a Latin 1 character
+-- decode a two-byte UTF-8 sequence
 local function f2(s)
     local beg_index = 1
     local end_index = 2
     local c1, c2 = string.byte(s, beg_index, end_index)
     return string.char(c1 * 64 + c2 - 12416)
+end
+
+-- decode a three-byte UTF-8 sequence
+local function f3(s)
+    local beg_index = 1
+    local end_index = 3
+    local c1, c2, c3 = string.byte(s, beg_index, end_index)
+    return (c1 * 64 + c2) * 64 + c3 - 925824
+end
+
+-- decode a four-byte UTF-8 sequence
+local function f4(s)
+    local beg_index = 1
+    local end_index = 4
+    local c1, c2, c3, c4 = string.byte(s, beg_index, end_index)
+    return ((c1 * 64 + c2) * 64 + c3) * 64 + c4 - 63447168
 end
 
 local utf8 = R("\0\127") + R("\194\195") * R("\128\191") / f2
