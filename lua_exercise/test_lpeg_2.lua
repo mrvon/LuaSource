@@ -21,6 +21,7 @@ local Cp = lpeg.Cp
 local Cs = lpeg.Cs       -- substitution capture
 local Ct = lpeg.Ct       -- a table with all captures from the pattern
 local V = lpeg.V
+local L = {} lpeg.locale(L)
 
 -------------------------------------------------------------------------------
 
@@ -73,8 +74,6 @@ print(p:match "1 hello")
 print(p:match "hello ")
 
 print("------------------ Name-value lists")
-local L = {}
-lpeg.locale(L)
 
 local space = L.space ^ 0
 local name = C(L.alpha ^ 1) * space
@@ -108,10 +107,11 @@ function anywhere(p)
     return P {p + 1 * V(1)}
 end
 
-function anywhere(patt)
+-- Another style
+function anywhere(p)
     return P {
-        "InitRule",
-        InitRule = p + P(1) * V("InitRule")
+        "init_rule",
+        init_rule = p + P(1) * V("init_rule")
     }
 end
 
@@ -133,12 +133,23 @@ end
 -- find match position in the string
 print(Match(anywhere_position_2("world"), "hello world!"))
 
--- TODO grammars
+-- if match first word, ok
+-- else skip first word, match next word. and so on.
 function at_word_boundary(p)
     return P {
-        [1] = p + L.alpha ^ 0 * (1 - L.alpha) ^ 1 * V(1)
+        -- index 1 is init rule
+        [1] = C(P(p)) + L.alpha ^ 0 * (1 - L.alpha) ^ 1 * V(1)
     }
 end
+
+print(Match(at_word_boundary("hello"), "hello world!"))     -- hello
+print(Match(at_word_boundary("world"), "hello world!"))     -- world
+print(Match(at_word_boundary("world!"), "hello world!"))    -- world!
+print(Match(at_word_boundary("worl"), "hello world!"))      -- worl
+print(Match(at_word_boundary("orld"), "hello world!"))      -- nil
+print(Match(at_word_boundary("hell"), "hello world!"))      -- hello
+print(Match(at_word_boundary("ello"), "hello world!"))      -- nil
+
 
 print("------------------ Balanced parentheses")
 
@@ -146,7 +157,60 @@ local balanced_parentheses = P {
     "(" * ((1 - S"()") + V(1)) ^ 0 * ")"
 }
 
-print(Match(anywhere(C(balanced_parentheses)), "can you (talk) with (me)"))
+print(Match(anywhere(C(balanced_parentheses)), "can you (talk) with (me) ..."))
+print(Match(anywhere(C(balanced_parentheses)), "(can you (talk) with (me)) ..."))
+
+print("------------------ Global substitution")
+
+function gsub(str, pattern, replace)
+    pattern = P(pattern)
+    pattern = Cs((pattern / replace + 1) ^ 0)
+    return Match(pattern, str)
+end
+
+-- another style, easy to understand.
+function gsub(str, pattern, replace)
+    pattern = P(pattern)
+    pattern = Cs(
+        -- if pattern match, so replace it
+        -- else match single character and replace by #
+        (pattern / replace + P(1) / "#")
+        ^ 0
+    )
+    return Match(pattern, str)
+end
+
+print("I love you more and more.")
+print(gsub("I love you more and more.", "more", "less"))
+
+print("------------------ Comma Separated Values (CSV)")
+
+function csv(s)
+    local field = '"' * Cs(((P(1) - '"') + P'""' / '"') ^ 0) * '"' + C((1 - S',\n"') ^ 0)
+    local record = field * (',' * field) ^ 0 * (P'\n' + -1)
+    return Match(Ct(record), s)
+end
+
+serialize(csv([[
+1997,2015,Dennis,mrvon.github.com,"","string with <,> comma"
+]]))
+
+-- convert a two-byte UTF-8 sequence to a Latin 1 character
+local function f2(s)
+    local beg_index = 1
+    local end_index = 2
+    local c1, c2 = string.byte(s, beg_index, end_index)
+    return string.char(c1 * 64 + c2 - 12416)
+end
+
+local utf8 = R("\0\127") + R("\194\195") * R("\128\191") / f2
+
+local decode_pattern = Cs(utf8 ^ 0) * -1
+
+print(Match(decode_pattern, "\97\98\194\129"))
+print(Match(decode_pattern, "\194\129"))
+
+do return end
 
 print("------------------ lua long string")
 local equals = P"=" ^ 0
