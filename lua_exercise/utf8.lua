@@ -14,3 +14,9 @@ for p, c in utf8.codes(utf8_char_list) do
 end
 
 print("Len of char list", utf8.len(utf8_char_list))
+
+io.write("Utf8 Encoding Byte List:", "\t")
+for i = 1, string.len(utf8_char) do
+    io.write(string.byte(utf8_char, i), "\t")
+end
+io.write("\n")
