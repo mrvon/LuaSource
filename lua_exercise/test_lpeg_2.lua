@@ -240,7 +240,6 @@ UTF8 encoding table
 31     U+4000000 U+7FFFFFFF     6       1111110x	10xxxxxx	10xxxxxx	10xxxxxx	10xxxxxx	10xxxxxx
 ]]
 
-do return end
 
 print("------------------ Lua's long string")
 local equals = P"=" ^ 0
