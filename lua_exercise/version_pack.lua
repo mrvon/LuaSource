@@ -30,9 +30,10 @@ function main()
 
     -- zip_compress
     rmdir(zip_pack_file_name)
-    local zip_cmd = string.format("7za.exe a -tzip %s %s/*", zip_pack_file_name, target_temp_directory)
-    print(zip_cmd)
+    local zip_cmd = string.format("7za.exe a -mx%s -tzip %s %s/* ", zip_compress_level, zip_pack_file_name, target_temp_directory)
+    local zip_test = string.format("7za.exe t %s", zip_pack_file_name)
     os.execute(zip_cmd)
+    os.execute(zip_test)
 
     -- clean
     rmdir(target_temp_directory)
