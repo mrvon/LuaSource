@@ -59,7 +59,7 @@ function day_index(time_y)
     date_y.sec = 0
 
     local diff_time = os.time(date_y) - os.time(date_x)
-    return diff_time / (3600 * 24)
+    return math.floor(diff_time / (3600 * 24))
 end
 
 print(day_index(
