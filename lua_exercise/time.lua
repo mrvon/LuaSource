@@ -42,3 +42,45 @@ function day_diff(time_x, time_y)
     local diff_time = os.time(date_x) - os.time(date_y)
     return diff_time / (3600 * 24)
 end
+
+function day_index(time_y)
+    local date_x = {
+        year  = 1970,
+        month = 1,
+        day   = 1,
+        hour  = 0,
+        min   = 0,
+        sec   = 0,
+    }
+
+    local date_y = os.date("*t", time_y)
+    date_y.hour = 0
+    date_y.min = 0
+    date_y.sec = 0
+
+    local diff_time = os.time(date_y) - os.time(date_x)
+    return diff_time / (3600 * 24)
+end
+
+print(day_index(
+os.time({
+        year  = 1970,
+        month = 1,
+        day   = 1,
+        hour  = 0,
+        min   = 0,
+        sec   = 0,
+})
+))
+
+print(day_index(
+os.time({
+        year  = 1970,
+        month = 1,
+        day   = 2,
+        hour  = 0,
+        min   = 0,
+        sec   = 0,
+})
+))
+print(day_index(os.time()))
