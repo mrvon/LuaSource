@@ -1,3 +1,8 @@
+local function unlock(co, ...)
+    print("unlock", co)
+    return ...
+end
+
 local function yielding(co, from, ...)
     print("-- 7 --")
 
@@ -5,7 +10,7 @@ local function yielding(co, from, ...)
 
     -- print(coroutine.yield(from, ...))
 
-    coroutine.resume(co, from, coroutine.yield(from, ...))
+    return unlock(co, coroutine.resume(co, from, coroutine.yield(from, ...)))
 end
 
 local function resume(co, from, ok, ...)
@@ -17,7 +22,7 @@ local function resume(co, from, ok, ...)
         return true, select(2, ...)
     else 
         print("-- 6 --")
-        resume(co, from, yielding(co, from, ...))
+        return resume(co, from, yielding(co, from, ...))
     end
 end
 
@@ -34,15 +39,16 @@ local co = coroutine.create(function()
         local self = coroutine.running()
         print("co_2", self)
 
-        -- coroutine.yield("USER", "Let it go")
         print("-- 5 --")
 
+        -- coroutine.yield("USER", "Let it go")
         print(coroutine.yield("CALL", "Let it go"))
 
         print("-- 9 --")
     end)
 
     print("-- 3 --")
+
     print(resume(co_2, caller, coroutine.resume(co_2)))
 
     print("-- A --")
@@ -57,8 +63,10 @@ local function suspend(ok, co, cmd, ...)
     else
         assert(false)
     end
+
+    print("-- B --")
 end
 
 print("-- 1 --")
 suspend(coroutine.resume(co))
-print("-- B --")
+print("-- C --")
