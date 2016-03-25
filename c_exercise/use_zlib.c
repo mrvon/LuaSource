@@ -43,5 +43,18 @@ int main(int argc, char const* argv[]) {
 
     buff_print(dest, dest_len);
 
+    unsigned long ori_len = source_len;
+    char* ori = (char*)malloc(source_len);
+    assert(ori);
+
+    status = uncompress(ori, &ori_len, dest, dest_len);
+
+    if (status != Z_OK) {
+        printf("uncompress error (%d)!\n", status);
+        return 0;
+    }
+
+    buff_print(ori, ori_len);
+
     return 0;
 }
