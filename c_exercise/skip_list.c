@@ -108,15 +108,15 @@ random_init() {
 
 static double
 random_range() {
-    // [0, 1]
-    return (double)rand() / (double)RAND_MAX ;
+    // [0, 1)
+    return (double)rand() / ((double)RAND_MAX + 1) ;
 }
 
 static int
 random_level() {
     int level = 1;
 
-    while ((random_range() <= PROBABILITY) && (level < MAX_LEVEL)) {
+    while ((random_range() < PROBABILITY) && (level < MAX_LEVEL)) {
         level++;
     }
 
@@ -222,7 +222,7 @@ delete(struct skip_list* list, int delete_key) {
     assert(update);
 
     for (i = list->level - 1; i >= 0; --i) {
-        while (x->forward && x->forward[i]->key < delete_key) {
+        while (x->forward[i] && x->forward[i]->key < delete_key) {
             x = x->forward[i];
         }
         update[i] = x;
@@ -255,17 +255,27 @@ int main() {
 
     struct skip_list* list = new_list();
 
-    insert(list, 1023, 20481);
-    insert(list, 1024, 20482);
-    insert(list, 1025, 20483);
-    insert(list, 1026, 20484);
+    int m = 10000;
+    int i = 1;
+    for (i = 1; i < m; ++i) {
+        insert(list, i, i * 3);
+    }
 
-    printf("key = %d val = %d\n", 1023, search(list, 1023));
-    printf("key = %d val = %d\n", 1024, search(list, 1024));
-    printf("key = %d val = %d\n", 1025, search(list, 1025));
-    printf("key = %d val = %d\n", 1026, search(list, 1026));
+    for (i = 1; i < m; ++i) {
+        assert(search(list, i) == (i * 3));
+    }
+
+    for (i = 1; i < m; ++i) {
+        delete(list, i);
+    }
+
+    for (i = 1; i < m; ++i) {
+        assert(search(list, i) == 0);
+    }
 
     del_list(list);
+
+    printf("OK\n");
 
     return 0;
 }
