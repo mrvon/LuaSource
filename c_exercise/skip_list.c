@@ -84,6 +84,7 @@ randomLevel()
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include <time.h>
 
@@ -126,10 +127,13 @@ random_level() {
 static struct list_node*
 new_node(int level) {
     assert(level >= 1);
-    struct list_node* node = (struct list_node*)malloc(
-            sizeof(*node) + sizeof(struct list_node*) * (level - 1)
-            );
+
+    size_t size = sizeof(struct list_node) + sizeof(struct list_node*) * (level - 1);
+    struct list_node* node = (struct list_node*)malloc(size);
+
     assert(node);
+    memset(node, 0, size);
+
     return node;
 }
 
