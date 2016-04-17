@@ -257,6 +257,22 @@ delete(struct skip_list* list, int delete_key) {
     free(update);
 }
 
+static void
+print_val(int key, int val) {
+    printf("%d %d\n", key, val);
+}
+
+static void
+traverse(struct skip_list* list, void (*func)(int, int)) {
+    struct list_node* x = list->header;
+
+    x = x->forward[0];
+
+    while (x) {
+        func(x->key, x->val);
+        x = x->forward[0];
+    }
+}
 
 int main() {
     random_init();
@@ -272,6 +288,8 @@ int main() {
     for (i = 1; i < m; ++i) {
         assert(search(list, i) == (i * 3));
     }
+
+    /* traverse(list, print_val); */
 
     for (i = 1; i < m; ++i) {
         delete(list, i);
