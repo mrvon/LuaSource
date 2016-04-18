@@ -274,7 +274,8 @@ traverse(struct skip_list* list, void (*func)(int, int)) {
     }
 }
 
-int main() {
+int 
+main() {
     random_init();
 
     struct skip_list* list = new_list();
