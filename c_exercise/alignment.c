@@ -119,6 +119,21 @@ struct L {
     float   e; // [14, 19]
 } __attribute__((packed, aligned(1)));
 
+union max_align {
+    double  a;
+    long    b;
+    void*   c;
+};
+
+struct R {
+    char a;
+    char b;
+};
+
+union K {
+    union max_align dummy;
+    struct R r;
+};
 
 int main(int argc, char const* argv[])
 {
@@ -168,6 +183,13 @@ int main(int argc, char const* argv[])
     // |4|2|1|8|4|
     assert(__alignof__(struct L) == 1);
     assert(sizeof(struct L) == 19);
+
+    assert(sizeof(union max_align) == 8);
+
+    assert(__alignof__(struct R) == CHAR_LEN);
+    assert(sizeof(struct R) == 2);
+    assert(sizeof(union K) == 8);
+
 
     return 0;
 }
