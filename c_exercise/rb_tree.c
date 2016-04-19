@@ -40,6 +40,12 @@ new_node() {
     return node;
 }
 
+static void
+del_node(struct rb_node* node) {
+    assert(node);
+    free((void*)node);
+}
+
 static struct rb_tree* 
 new_rb_tree() {
     struct rb_tree* tree = (struct rb_tree*)malloc(sizeof(*tree));
@@ -208,12 +214,145 @@ insert(struct rb_tree* tree, int insert_key, int insert_val) {
     }
 }
 
-static void
-delete(struct rb_tree* tree, int delete_key) {
+static struct rb_node*
+minimum(struct rb_node* x) {
+    while (x->left_child != NIL_NODE) {
+        x = x->left_child;
+    }
+    return x;
+}
+
+static struct rb_node*
+maximum(struct rb_node* x) {
+    while (x->right_child != NIL_NODE) {
+        x = x->right_child;
+    }
+    return x;
 }
 
 static void
-__delete() {
+transplant(struct rb_tree* tree, struct rb_node* u, struct rb_node* v) {
+    if (u->parent == NIL_NODE) {
+        tree->root_node = v;
+    } else if (u == u->parent->left_child) {
+        u->parent->left_child = v;
+    } else {
+        u->parent->right_child = v;
+    }
+    v->parent = u->parent;
+}
+
+static void
+delete_fixup(struct rb_tree* tree, struct rb_node* x) {
+    while (x != tree->root_node && x->color == BLACK) {
+        if (x == x->parent->left_child) {
+            struct rb_node* w = x->parent->right_child;
+
+            if (w->color == RED) {
+                w->color = BLACK;                                                  // CASE 1
+                x->parent->color = RED;                                            // CASE 1
+                left_rotate(tree, x->parent);                                      // CASE 1
+                w = x->parent->right_child;                                        // CASE 1
+            }
+
+            if (w->left_child->color == BLACK && w->right_child->color == BLACK) {
+                w->color = RED;                                                    // CASE 2
+                x = x->parent;                                                     // CASE 2
+            } else {
+                if (w->right_child->color == BLACK) {
+                    w->left_child->color = BLACK;                                  // CASE 3
+                    w->color = RED;                                                // CASE 3
+                    right_rotate(tree, w);                                         // CASE 3
+                    w = x->parent->right_child;                                    // CASE 3
+                }
+
+                w->color = x->parent->color;                                       // CASE 4
+                x->parent->color = BLACK;                                          // CASE 4
+                w->right_child->color = BLACK;                                     // CASE 4
+                left_rotate(tree, x->parent);                                      // CASE 4
+                x = tree->root_node;                                               // CASE 4
+            }
+        } else {
+            struct rb_node* w = x->parent->left_child;
+
+            if (w->color == RED) {
+                w->color = BLACK;                                                  // CASE 1
+                x->parent->color = RED;                                            // CASE 1
+                right_rotate(tree, x->parent);                                     // CASE 1
+                w = x->parent->left_child;                                         // CASE 1
+            }
+
+            if (w->right_child->color == BLACK && w->left_child->color == BLACK) {
+                w->color = RED;                                                    // CASE 2
+                x = x->parent;                                                     // CASE 2
+            } else {
+                if (w->left_child->color == BLACK) {
+                    w->right_child->color = BLACK;                                 // CASE 3
+                    w->color = RED;                                                // CASE 3
+                    left_rotate(tree, w);                                          // CASE 3
+                    w = x->parent->left_child;                                     // CASE 3
+                }
+
+                w->color = x->parent->color;                                       // CASE 4
+                x->parent->color = BLACK;                                          // CASE 4
+                w->left_child->color = BLACK;                                      // CASE 4
+                right_rotate(tree, x->parent);                                     // CASE 4
+                x = tree->root_node;                                               // CASE 4
+            }
+        }
+    }
+}
+
+static void
+__delete(struct rb_tree* tree, struct rb_node* z) {
+    struct rb_node* x = NIL_NODE;
+    struct rb_node* y = z;
+    int y_original_color = y->color;
+
+    tree->size--;
+
+    if (z->left_child == NIL_NODE) {
+        x = z->right_child;
+        transplant(tree, z, z->right_child);
+    } else if (z->right_child == NIL_NODE) {
+        x = z->left_child;
+        transplant(tree, z, z->left_child);
+    } else {
+        y = minimum(z->right_child);
+        y_original_color = y->color;
+        x = y->right_child;
+
+        if (y->parent == z) {
+            if (x == NIL_NODE) {
+                x->parent = y; // This line is very important
+            } else {
+                assert(x->parent == y);
+            }
+        } else {
+            transplant(tree, y, y->right_child);
+            y->right_child = z->right_child;
+            y->right_child->parent = y;
+        }
+
+        transplant(tree, z, y);
+        y->left_child = z->left_child;
+        y->left_child->parent = y;
+        y->color = z->color;
+    }
+
+    del_node(z);
+
+    if (y_original_color == BLACK) {
+        delete_fixup(tree, x);
+    }
+}
+
+static void
+delete(struct rb_tree* tree, int delete_key) {
+    struct rb_node* node = __search(tree, tree->root_node, delete_key);
+    if (node != NIL_NODE) {
+        __delete(tree, node);
+    }
 }
 
 int main() {
@@ -227,6 +366,14 @@ int main() {
 
     for (i = 1; i < m; ++i) {
         assert(search(tree, i) == (i * 3));
+    }
+
+    for (i = 1; i < m; ++i) {
+        delete(tree, i);
+    }
+
+    for (i = 1; i < m; ++i) {
+        assert(search(tree, i) == 0);
     }
 
     del_rb_tree(tree);
