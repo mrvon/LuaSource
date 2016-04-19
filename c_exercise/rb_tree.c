@@ -22,10 +22,18 @@ struct rb_tree {
 };
 
 static struct rb_node nil_node = {
-    0, 0, BLACK, NULL, NULL, NULL
+    0
 };
 
 #define NIL_NODE (&nil_node)
+
+static void
+global_init() {
+    nil_node.color          = BLACK;
+    nil_node.parent         = NIL_NODE;
+    nil_node.left_child     = NIL_NODE;
+    nil_node.right_child    = NIL_NODE;
+}
 
 static struct rb_node*
 new_node() {
@@ -57,8 +65,28 @@ new_rb_tree() {
     return tree;
 }
 
+static void
+__make_empty(struct rb_node* node) {
+    if (node != NIL_NODE) {
+        __make_empty(node->left_child);
+        __make_empty(node->right_child);
+        del_node(node);
+    }
+}
+
+static void
+make_empty(struct rb_tree* tree) {
+    __make_empty(tree->root_node);
+
+    tree->root_node = NIL_NODE;
+    tree->size = 0;
+}
+
 static void 
 del_rb_tree(struct rb_tree* tree) {
+    assert(tree);
+    make_empty(tree);
+    free((void*)tree);
 }
 
 static struct rb_node*
@@ -387,6 +415,8 @@ delete(struct rb_tree* tree, int delete_key) {
 }
 
 int main() {
+    global_init();
+
     struct rb_tree* tree = new_rb_tree();
 
     int m = 10000;
