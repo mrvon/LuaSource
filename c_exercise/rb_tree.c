@@ -55,10 +55,10 @@ static void
 del_rb_tree(struct rb_tree* tree) {
 }
 
-static int
+static struct rb_node*
 __search(struct rb_tree* tree, struct rb_node* node, int search_key) {
     if (node == NIL_NODE || node->key == search_key) {
-        return node->val;
+        return node;
     }
 
     if (search_key < node->key) {
@@ -70,7 +70,12 @@ __search(struct rb_tree* tree, struct rb_node* node, int search_key) {
 
 static int
 search(struct rb_tree* tree, int search_key) {
-    return __search(tree, tree->root_node, search_key);
+    struct rb_node* node = __search(tree, tree->root_node, search_key);
+    if (node == NIL_NODE) {
+        return 0;
+    } else {
+        return node->val;
+    }
 }
 
 static void
@@ -162,7 +167,7 @@ insert_fixup(struct rb_tree* tree, struct rb_node* z) {
 }
 
 static void
-insert(struct rb_tree* tree, int insert_key, int insert_val) {
+__insert(struct rb_tree* tree, int insert_key, int insert_val) {
     struct rb_node* x = tree->root_node;
     struct rb_node* y = NIL_NODE;            // trailing pointer of x
     struct rb_node* z = new_node();
@@ -196,7 +201,19 @@ insert(struct rb_tree* tree, int insert_key, int insert_val) {
 }
 
 static void
+insert(struct rb_tree* tree, int insert_key, int insert_val) {
+    struct rb_node* node = __search(tree, tree->root_node, insert_key);
+    if (node == NIL_NODE) {
+        __insert(tree, insert_key, insert_val);
+    }
+}
+
+static void
 delete(struct rb_tree* tree, int delete_key) {
+}
+
+static void
+__delete() {
 }
 
 int main() {
