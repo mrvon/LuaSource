@@ -125,14 +125,14 @@ union max_align {
     void*   c;
 };
 
-struct R {
+struct Y {
     char a;
     char b;
 };
 
-union K {
+union Z {
     union max_align dummy;
-    struct R r;
+    struct Y y;
 };
 
 int main(int argc, char const* argv[])
@@ -186,9 +186,9 @@ int main(int argc, char const* argv[])
 
     assert(sizeof(union max_align) == 8);
 
-    assert(__alignof__(struct R) == CHAR_LEN);
-    assert(sizeof(struct R) == 2);
-    assert(sizeof(union K) == 8);
+    assert(__alignof__(struct Y) == CHAR_LEN);
+    assert(sizeof(struct Y) == 2);
+    assert(sizeof(union Z) == 8);
 
 
     return 0;
