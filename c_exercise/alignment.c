@@ -40,6 +40,7 @@ Conclusion
 
 */
 #include <stdio.h>
+#include <stddef.h>
 #include <assert.h>
 
 /* x64 gcc */
@@ -124,19 +125,36 @@ struct K {
     short   b; // [4, 5]
     double  c; // [6, 13]
     char    d; // [14]
-    // 1 bytes padding [15]
-    float   e; // [16, 19]
+    float   e; // [15, 18]
+    // 1 bytes padding [19]
 } __attribute__((packed, aligned(2)));
 
 struct L {
     int     a; // [0. 3]
     short   b; // [4, 5]
-    // 2 bytes padding [6, 7]
-    double  c; // [8, 15]
-    char    d; // [16]
-    // 3 bytes padding [17, 19]
-    float   e; // [20, 23]
+    double  c; // [6, 13]
+    char    d; // [14]
+    float   e; // [15, 18]
+    // 1 bytes padding [19]
 } __attribute__((packed, aligned(4)));
+
+struct M {
+    int     a; // [0. 3]
+    short   b; // [4, 5]
+    double  c; // [6, 13]
+    char    d; // [14]
+    float   e; // [15, 18]
+    // 1 bytes padding [24]
+} __attribute__((packed, aligned(8)));
+
+struct N {
+    int     a; // [0. 3]
+    short   b; // [4, 5]
+    double  c; // [6, 13]
+    char    d; // [14]
+    float   e; // [15, 18]
+    // 1 bytes padding [32]
+} __attribute__((packed, aligned(16)));
 
 union max_align {
     double  a;
@@ -164,50 +182,106 @@ int main(int argc, char const* argv[])
     assert(sizeof(char)   == CHAR_LEN);
 
     // |4|
+    assert(offsetof(struct A, a) == 0);
     assert(__alignof__(struct A) == INT_LEN);
     assert(sizeof(struct A) == 4);
 
     // |4|1xxx|
+    assert(offsetof(struct B, a) == 0);
+    assert(offsetof(struct B, b) == 4);
     assert(__alignof__(struct B) == INT_LEN);
     assert(sizeof(struct B) == 8);
 
     // |1xxx|4|
+    assert(offsetof(struct C, a) == 0);
+    assert(offsetof(struct C, b) == 4);
     assert(__alignof__(struct C) == INT_LEN);
     assert(sizeof(struct C) == 8);
 
     // |1|
+    assert(offsetof(struct D, a) == 0);
     assert(__alignof__(struct D) == CHAR_LEN);
     assert(sizeof(struct D) == 1);
 
     // |1|1|
+    assert(offsetof(struct E, a) == 0);
+    assert(offsetof(struct E, b) == 1);
     assert(__alignof__(struct E) == CHAR_LEN);
     assert(sizeof(struct E) == 2);
 
     // |1|1xx|
+    assert(offsetof(struct F, a) == 0);
+    assert(offsetof(struct F, b) == 1);
     assert(__alignof__(struct F) == 4);
     assert(sizeof(struct F) == 4);
 
     // |4|2|1x|8|4xxxx|
+    assert(offsetof(struct G, a) == 0);
+    assert(offsetof(struct G, b) == 4);
+    assert(offsetof(struct G, c) == 6);
+    assert(offsetof(struct G, d) == 8);
+    assert(offsetof(struct G, e) == 16);
     assert(__alignof__(struct G) == DOUBLE_LEN);
     assert(sizeof(struct G) == 24);
 
     // |8|4|2|1x|4xxxx|
+    assert(offsetof(struct H, a) == 0);
+    assert(offsetof(struct H, b) == 8);
+    assert(offsetof(struct H, c) == 12);
+    assert(offsetof(struct H, d) == 14);
+    assert(offsetof(struct H, e) == 16);
     assert(__alignof__(struct H) == DOUBLE_LEN);
     assert(sizeof(struct H) == 24);
 
     // |1x|2|4|4xxxx|8|
+    assert(offsetof(struct I, a) == 0);
+    assert(offsetof(struct I, b) == 2);
+    assert(offsetof(struct I, c) == 4);
+    assert(offsetof(struct I, d) == 8);
+    assert(offsetof(struct I, e) == 16);
     assert(__alignof__(struct I) == DOUBLE_LEN);
     assert(sizeof(struct I) == 24);
 
     // |4|2|1|8|4|
+    assert(offsetof(struct J, a) == 0);
+    assert(offsetof(struct J, b) == 4);
+    assert(offsetof(struct J, c) == 6);
+    assert(offsetof(struct J, d) == 14);
+    assert(offsetof(struct J, e) == 15);
     assert(__alignof__(struct J) == 1);
     assert(sizeof(struct J) == 19);
 
+    assert(offsetof(struct K, a) == 0);
+    assert(offsetof(struct K, b) == 4);
+    assert(offsetof(struct K, c) == 6);
+    assert(offsetof(struct K, d) == 14);
+    assert(offsetof(struct K, e) == 15);
     assert(__alignof__(struct K) == 2);
     assert(sizeof(struct K) == 20);
 
+    assert(offsetof(struct L, a) == 0);
+    assert(offsetof(struct L, b) == 4);
+    assert(offsetof(struct L, c) == 6);
+    assert(offsetof(struct L, d) == 14);
+    assert(offsetof(struct L, e) == 15);
     assert(__alignof__(struct L) == 4);
-    printf("%ld\n", sizeof(struct L));
+    assert(sizeof(struct L) == 20);
+
+    assert(offsetof(struct M, a) == 0);
+    assert(offsetof(struct M, b) == 4);
+    assert(offsetof(struct M, c) == 6);
+    assert(offsetof(struct M, d) == 14);
+    assert(offsetof(struct M, e) == 15);
+    assert(__alignof__(struct M) == 8);
+    assert(sizeof(struct M) == 24);
+
+    assert(offsetof(struct N, a) == 0);
+    assert(offsetof(struct N, b) == 4);
+    assert(offsetof(struct N, c) == 6);
+    assert(offsetof(struct N, d) == 14);
+    assert(offsetof(struct N, e) == 15);
+    assert(__alignof__(struct N) == 16);
+    assert(sizeof(struct N) == 32);
 
     assert(sizeof(union max_align) == 8);
 
