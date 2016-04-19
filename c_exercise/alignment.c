@@ -51,6 +51,7 @@ Conclusion
 #define SHORT_LEN   2
 #define CHAR_LEN    1
 
+
 struct A {
     int a;  // [0, 3]
 };
@@ -59,6 +60,7 @@ struct B {
     int a;  // [0, 3]
     char b; // [4]
     // 3 bytes padding [5, 7]
+    // char c[3];
 };
 
 struct C {
