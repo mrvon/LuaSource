@@ -76,7 +76,7 @@ search(struct rb_tree* tree, int search_key) {
 static void
 left_rotate(struct rb_tree* tree, struct rb_node* x) {
     struct rb_node* y = x->right_child;      // Set y
-    x->right_child = y->right_child;         // Turn y's left subtree into x's right subtree
+    x->right_child = y->left_child;          // Turn y's left subtree into x's right subtree
 
     if (y->left_child != NIL_NODE) {
         y->left_child->parent = x;
