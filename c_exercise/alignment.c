@@ -35,7 +35,7 @@ so that each element in an array of structures will satisfy its alignment requir
 Conclusion
 
 1. K-byte data types must have an address that is a multiple of K.
-2. Bytes of structure must be a multiple of P. P is max element size of structure.
+2. Bytes of structure must be a multiple of P. P is max size of element in structure.
 -------------------------------------------------------------------------------
 
 */
