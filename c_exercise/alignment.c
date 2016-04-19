@@ -111,13 +111,32 @@ struct I {
     double  e; // [16, 23]
 };
 
+struct J {
+    int     a; // [0. 3]
+    short   b; // [4, 5]
+    double  c; // [6, 13]
+    char    d; // [14]
+    float   e; // [15, 18]
+} __attribute__((packed, aligned(1)));
+
+struct K {
+    int     a; // [0. 3]
+    short   b; // [4, 5]
+    double  c; // [6, 13]
+    char    d; // [14]
+    // 1 bytes padding [15]
+    float   e; // [16, 19]
+} __attribute__((packed, aligned(2)));
+
 struct L {
     int     a; // [0. 3]
     short   b; // [4, 5]
-    char    c; // [6]
-    double  d; // [7, 13]
-    float   e; // [14, 19]
-} __attribute__((packed, aligned(1)));
+    // 2 bytes padding [6, 7]
+    double  c; // [8, 15]
+    char    d; // [16]
+    // 3 bytes padding [17, 19]
+    float   e; // [20, 23]
+} __attribute__((packed, aligned(4)));
 
 union max_align {
     double  a;
@@ -181,8 +200,14 @@ int main(int argc, char const* argv[])
     assert(sizeof(struct I) == 24);
 
     // |4|2|1|8|4|
-    assert(__alignof__(struct L) == 1);
-    assert(sizeof(struct L) == 19);
+    assert(__alignof__(struct J) == 1);
+    assert(sizeof(struct J) == 19);
+
+    assert(__alignof__(struct K) == 2);
+    assert(sizeof(struct K) == 20);
+
+    assert(__alignof__(struct L) == 4);
+    printf("%ld\n", sizeof(struct L));
 
     assert(sizeof(union max_align) == 8);
 
