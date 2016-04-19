@@ -230,6 +230,37 @@ maximum(struct rb_node* x) {
     return x;
 }
 
+static struct rb_node*
+predecessor(struct rb_node* x) {
+    if (x->left_child != NIL_NODE) {
+        return maximum(x->left_child);
+    }
+
+    struct rb_node* y = x->parent;
+
+    while (y != NIL_NODE && x == y->left_child) {
+        x = y;
+        y = y->parent;
+    }
+
+    return y;
+}
+
+static struct rb_node*
+successor(struct rb_node* x) {
+    if (x->right_child != NIL_NODE) {
+        return minimum(x->right_child);
+    }
+
+    struct rb_node* y = x->parent;
+
+    while (y != NIL_NODE && x == y->right_child) {
+        x = y;
+        y = y->parent;
+    }
+    return y;
+}
+
 static void
 transplant(struct rb_tree* tree, struct rb_node* u, struct rb_node* v) {
     if (u->parent == NIL_NODE) {
@@ -358,7 +389,7 @@ delete(struct rb_tree* tree, int delete_key) {
 int main() {
     struct rb_tree* tree = new_rb_tree();
 
-    int m = 10;
+    int m = 10000;
     int i = 1;
     for (i = 1; i < m; ++i) {
         insert(tree, i, i * 3);
@@ -366,6 +397,20 @@ int main() {
 
     for (i = 1; i < m; ++i) {
         assert(search(tree, i) == (i * 3));
+    }
+
+    struct rb_node* node = minimum(tree->root_node);
+
+    while (node != NIL_NODE) {
+        printf("%d %d\n", node->key, node->val);
+        node = successor(node);
+    }
+
+    node = maximum(tree->root_node);
+
+    while (node != NIL_NODE) {
+        printf("%d %d\n", node->key, node->val);
+        node = predecessor(node);
     }
 
     for (i = 1; i < m; ++i) {
