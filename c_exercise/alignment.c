@@ -158,6 +158,16 @@ struct N {
     // 13 bytes padding [19, 31]
 } __attribute__((packed, aligned(16)));
 
+struct O {
+    int     a; // [0. 3]
+    short   b; // [4, 5]
+    // 2 bytes padding [6, 7]
+    double  c; // [8, 15]
+    char    d; // [16]
+    // 3 bytes padding [17, 19]
+    float   e; // [20, 23]
+}; // contrast with above
+
 union max_align {
     double  a;
     long    b;
@@ -284,6 +294,14 @@ int main(int argc, char const* argv[])
     assert(offsetof(struct N, e) == 15);
     assert(__alignof__(struct N) == 16);
     assert(sizeof(struct N) == 32);
+
+    assert(offsetof(struct O, a) == 0);
+    assert(offsetof(struct O, b) == 4);
+    assert(offsetof(struct O, c) == 8);
+    assert(offsetof(struct O, d) == 16);
+    assert(offsetof(struct O, e) == 20);
+    assert(__alignof__(struct O) == 8);
+    assert(sizeof(struct O) == 24);
 
     assert(sizeof(union max_align) == 8);
 
