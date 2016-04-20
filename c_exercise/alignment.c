@@ -146,7 +146,7 @@ struct M {
     double  c; // [6, 13]
     char    d; // [14]
     float   e; // [15, 18]
-    // 1 bytes padding [24]
+    // 5 bytes padding [19, 23]
 } __attribute__((packed, aligned(8)));
 
 struct N {
@@ -155,7 +155,7 @@ struct N {
     double  c; // [6, 13]
     char    d; // [14]
     float   e; // [15, 18]
-    // 1 bytes padding [32]
+    // 13 bytes padding [19, 31]
 } __attribute__((packed, aligned(16)));
 
 union max_align {
