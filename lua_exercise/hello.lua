@@ -820,7 +820,51 @@ local function main()
 
         scene:addChild(para_node)
     end
-    test_23()
+    -- test_23()
+
+    local function test_24()
+        local listener_1 = cc.EventListenerTouchOneByOne:create()
+
+        local function on_touch_began(touch, event)
+            print("----------------- on_touch_began event -----------------")
+            local location = touch:getLocation()
+            print(location.x, location.y)
+            return true
+        end
+        local function on_touch_moved(touch, event)
+            print("----------------- on_touch_moved event -----------------")
+        end
+        local function on_touch_ended(touch, event)
+            print("----------------- on_touch_ended event -----------------")
+        end
+
+        listener_1:registerScriptHandler(on_touch_began, cc.Handler.EVENT_TOUCH_BEGAN)
+        listener_1:registerScriptHandler(on_touch_moved, cc.Handler.EVENT_TOUCH_MOVED)
+        listener_1:registerScriptHandler(on_touch_ended, cc.Handler.EVENT_TOUCH_ENDED)
+
+        local event_dispatcher = scene:getEventDispatcher()
+        event_dispatcher:addEventListenerWithSceneGraphPriority(listener_1, scene)
+    end
+    -- test_24()
+
+    local function test_25()
+        local listener_1 = cc.EventListenerKeyboard:create()
+
+        local function on_key_pressed(key_code, event)
+            print("----------------- on_key_pressed event -----------------", key_code)
+        end
+
+        local function on_key_released(key_code, event)
+            print("----------------- on_key_released event -----------------", key_code)
+        end
+
+        listener_1:registerScriptHandler(on_key_pressed, cc.Handler.EVENT_KEYBOARD_PRESSED)
+        listener_1:registerScriptHandler(on_key_released, cc.Handler.EVENT_KEYBOARD_RELEASED)
+
+        local event_dispatcher = scene:getEventDispatcher()
+        event_dispatcher:addEventListenerWithSceneGraphPriority(listener_1, scene)
+    end
+    test_25()
 end
 
 xpcall(main, __G__TRACKBACK__)
