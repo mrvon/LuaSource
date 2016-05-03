@@ -661,7 +661,7 @@ local function main()
         button:setTitleText("Button")
         button:setPosition(visible_size.width / 2, visible_size.height / 6 * 3)
         button:addTouchEventListener(function(sender, type)
-            print("Button Press Type", type)
+            print("Button Event Type", type)
         end)
         scene:addChild(button)
     end
@@ -677,7 +677,7 @@ local function main()
         )
 
         check_box:addTouchEventListener(function(sender, type)
-            print("CheckBox Press Type", type)
+            print("CheckBox Event Type", type)
         end)
         check_box:setPosition(visible_size.width / 2, visible_size.height / 6 * 3)
         scene:addChild(check_box)
@@ -686,7 +686,7 @@ local function main()
 
     local function test_17()
         local loading_bar = ccui.LoadingBar:create("chapter6/LoadingBarFile.png")
-        loading_bar:setPosition(0, 0)
+        loading_bar:setPosition(200, 200)
         loading_bar:setDirection(ccui.LoadingBarDirection.RIGHT)
         loading_bar:setPercent(100)
 
@@ -695,8 +695,132 @@ local function main()
     -- test_17()
 
     local function test_18()
+        local slider = ccui.Slider:create()
+        slider:setPosition(200, 200)
+        slider:loadBarTexture("chapter6/Slider_Back.png")
+        slider:loadSlidBallTextures(
+            "chapter6/SliderNode_Normal.png",
+            "chapter6/SliderNode_Press.png",
+            "chapter6/SliderNode_Disable.png"
+        )
+        slider:loadProgressBarTexture("chapter6/Slider_PressBar.png")
+
+        slider:addTouchEventListener(function(sender, type)
+            print("Slider Event type", type)
+        end)
+
+        scene:addChild(slider)
     end
-    test_18()
+    -- test_18()
+
+    local function test_19()
+        local text_field_1 = ccui.TextField:create("Username", "Monaco", 30)
+        text_field_1:setPosition(visible_size.width / 6 * 3, visible_size.height / 6 * 3)
+
+        text_field_1:addTouchEventListener(function(sender, type)
+            print("TextField(Username) Event type", type)
+        end)
+
+        scene:addChild(text_field_1)
+
+        local text_field_2 = ccui.TextField:create("Password", "Monaco", 30)
+        text_field_2:setPosition(visible_size.width / 6 * 3, visible_size.height / 6 * 2)
+        text_field_2:setPasswordEnabled(true)
+        text_field_2:setMaxLength(10)   -- FIXME
+        text_field_2:addTouchEventListener(function(sender, type)
+            print("TextField(Password) Event type", type)
+        end)
+
+        scene:addChild(text_field_2)
+    end
+    -- test_19()
+
+    local function test_20()
+        local map = cc.TMXTiledMap:create("chapter7/isometric_grass_and_water.tmx")
+        scene:addChild(map, 0, 99)
+
+        local layer = map:getLayer("layer0")
+        local tile = layer:getTileAt(cc.p(0, 0))
+    end
+    -- test_20()
+
+    local function test_21()
+        local emitter = cc.ParticleFireworks:create()
+
+        emitter:setDuration(cc.PARTICLE_DURATION_INFINITY)
+
+        scene:addChild(emitter, 10)
+    end
+    -- test_21()
+
+    local function test_22()
+        local emitter = cc.ParticleFireworks:create()
+
+        emitter:setDuration(cc.PARTICLE_DURATION_INFINITY)
+        emitter:setEmitterMode(cc.PARTICLE_MODE_RADIUS)
+
+        emitter:setStartRadius(100)
+        emitter:setStartRadiusVar(0)
+        emitter:setEndRadius(cc.PARTICLE_START_RADIUS_EQUAL_TO_END_RADIUS)
+        emitter:setEndRadiusVar(0)
+
+        scene:addChild(emitter, 10)
+    end
+    -- test_22()
+
+    local function test_23()
+        local para_node = cc.ParallaxNode:create()
+
+        local verts = 4
+
+        local color_1 = cc.c4f(1, 0.5, 0.3, 1)
+        local color_2 = cc.c4f(1, 0.6, 0.4, 1)
+        local color_3 = cc.c4f(1, 0.7, 0.5, 1)
+
+        local box_1 = {
+            cc.p(0, 0),
+            cc.p(0, 200),
+            cc.p(600, 200),
+            cc.p(600, 0)
+        }
+
+        local box_2 = {
+            cc.p(0, 0),
+            cc.p(0, 300),
+            cc.p(800, 300),
+            cc.p(800, 0)
+        }
+
+        local box_3 = {
+            cc.p(0, 0),
+            cc.p(0, 500),
+            cc.p(1000, 500),
+            cc.p(1000, 0)
+        }
+
+        local layer_1 = cc.DrawNode:create()
+        layer_1:setContentSize(cc.p(600, 200))
+        layer_1:drawPolygon(box_1, verts, color_1, 0, color_1)
+        layer_1:setPosition(cc.p(visible_size.width / 4, visible_size.height / 6 * 5))
+
+        local layer_2 = cc.DrawNode:create()
+        layer_2:setContentSize(cc.p(800, 300))
+        layer_2:drawPolygon(box_2, verts, color_2, 0, color_2)
+        layer_2:setPosition(cc.p(visible_size.width / 4, visible_size.height / 6 * 3))
+
+        local layer_3 = cc.DrawNode:create()
+        layer_3:setContentSize(cc.p(800, 300))
+        layer_3:drawPolygon(box_3, verts, color_3, 0, color_3)
+        layer_3:setPosition(cc.p(visible_size.width / 4, visible_size.height / 6 * 2))
+
+        para_node:addChild(layer_1, -1, cc.p(0.4, 0.5), cc.p(0, 0))
+        para_node:addChild(layer_2, 1, cc.p(2.2, 1.0), cc.p(0, -200))
+        para_node:addChild(layer_3, 2, cc.p(3.0, 2.5), cc.p(200, 800))
+        -- TODO
+
+        scene:addChild(para_node)
+    end
+    test_23()
 end
 
 xpcall(main, __G__TRACKBACK__)
