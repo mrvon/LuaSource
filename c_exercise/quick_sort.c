@@ -17,7 +17,10 @@ swap(int arr[], int x, int y) {
     arr[y] = tmp;
 }
 
-/* Lomuto partition scheme */
+/* Lomuto partition scheme
+ * left part is [left, mid-1]
+ * right part is [mid+1, right]
+ * */
 int
 lomuto_partition(int arr[], int left, int right) {
     int x = arr[right];
@@ -37,12 +40,15 @@ void
 lomuto_qsort(int arr[], int left, int right) {
     if (left < right) {
         int mid = lomuto_partition(arr, left, right);
-        lomuto_qsort(arr, left, mid - 1);
-        lomuto_qsort(arr, mid + 1, right);
+        lomuto_qsort(arr, left, mid-1);
+        lomuto_qsort(arr, mid+1, right);
     }
 }
 
-/* Hoare partition scheme */
+/* Hoare partition scheme
+ * left part is [left, mid]
+ * right part is [mid+1, right]
+ * */
 int
 hoare_partition(int arr[], int left, int right) {
     int x = arr[left];
@@ -72,7 +78,7 @@ hoare_qsort(int arr[], int left, int right) {
     if (left < right) {
         int mid = hoare_partition(arr, left, right);
         hoare_qsort(arr, left, mid);
-        hoare_qsort(arr, mid + 1, right);
+        hoare_qsort(arr, mid+1, right);
     }
 }
 
