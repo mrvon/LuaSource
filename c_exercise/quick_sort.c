@@ -5,14 +5,15 @@
 /*
  * Quick sort with recursion
  */
-void check(int arr[], int left, int right) {
+static void
+check(int arr[], int left, int right) {
     int i;
     for (i = left; i < right; ++i) {
         assert(arr[i] <= arr[i+1]);
     }
 }
 
-void
+static void
 swap(int arr[], int x, int y) {
     int tmp = arr[x];
     arr[x] = arr[y];
@@ -23,7 +24,7 @@ swap(int arr[], int x, int y) {
  * left part is [left, mid-1]
  * right part is [mid+1, right]
  * */
-int
+static int
 lomuto_partition(int arr[], int left, int right) {
     int x = arr[right];
     int i = left - 1;
@@ -38,7 +39,7 @@ lomuto_partition(int arr[], int left, int right) {
     return i + 1;
 }
 
-void
+static void
 lomuto_qsort(int arr[], int left, int right) {
     if (left < right) {
         int mid = lomuto_partition(arr, left, right);
@@ -51,7 +52,7 @@ lomuto_qsort(int arr[], int left, int right) {
  * left part is [left, mid]
  * right part is [mid+1, right]
  * */
-int
+static int
 hoare_partition(int arr[], int left, int right) {
     int x = arr[left];
     int i = left - 1;
@@ -75,7 +76,7 @@ hoare_partition(int arr[], int left, int right) {
     }
 }
 
-void
+static void
 hoare_qsort(int arr[], int left, int right) {
     if (left < right) {
         int mid = hoare_partition(arr, left, right);
@@ -84,7 +85,7 @@ hoare_qsort(int arr[], int left, int right) {
     }
 }
 
-int
+static int
 rand_num(int left, int right) {
     assert(left <= right);
     return left + rand() % (right - left + 1);
@@ -92,14 +93,14 @@ rand_num(int left, int right) {
 
 /* Random partition scheme
  * */
-int
+static int
 randomized_partition(int arr[], int left, int right) {
     int r = rand_num(left, right);
     swap(arr, r, right);
     return lomuto_partition(arr, left, right);
 }
 
-void
+static void
 randomized_sort(int arr[], int left, int right) {
     if (left < right) {
         int mid = randomized_partition(arr, left, right);
@@ -108,9 +109,8 @@ randomized_sort(int arr[], int left, int right) {
     }
 }
 
-/* Quick sort with stack */
-
-int main() {
+int
+main() {
     srand(time(NULL));
 
     int table[] = {
