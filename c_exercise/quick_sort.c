@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
+#include <time.h>
 /*
  * Quick sort with recursion
  */
@@ -82,11 +84,35 @@ hoare_qsort(int arr[], int left, int right) {
     }
 }
 
-/* Random partition scheme */
+int
+rand_num(int left, int right) {
+    assert(left <= right);
+    return left + rand() % (right - left + 1);
+}
+
+/* Random partition scheme
+ * */
+int
+randomized_partition(int arr[], int left, int right) {
+    int r = rand_num(left, right);
+    swap(arr, r, right);
+    return lomuto_partition(arr, left, right);
+}
+
+void
+randomized_sort(int arr[], int left, int right) {
+    if (left < right) {
+        int mid = randomized_partition(arr, left, right);
+        randomized_sort(arr, left, mid-1);
+        randomized_sort(arr, mid+1, right);
+    }
+}
 
 /* Quick sort with stack */
 
 int main() {
+    srand(time(NULL));
+
     int table[] = {
         13, 19, 9, 5, 12, 8, 7, 4, 11, 2, 6, 21,
     };
@@ -96,6 +122,7 @@ int main() {
 
     lomuto_qsort(table, left, right);
     hoare_qsort(table, left, right);
+    randomized_sort(table, left, right);
 
     check(table, left, right);
 
