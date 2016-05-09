@@ -200,6 +200,19 @@ gen_test_arr(int size) {
     return arr;
 }
 
+static int*
+gen_same_arr(int size) {
+    int* arr = (int*)malloc(size * sizeof(int));
+    assert(arr);
+
+    int i;
+    for (i = 0; i < size; ++i) {
+        arr[i] = 1;
+    }
+
+    return arr;
+}
+
 void
 del_test_arr(int* arr) {
     assert(arr);
@@ -217,30 +230,44 @@ main() {
 
     int* arr = gen_test_arr(size);
 
-    /* that's quick when element in array is random shuffle */
+    /* that's quick when elements in array is random shuffle */
     /* lomuto_qsort(arr, left, right); */
     printf("1 lomuto_qsort is done\n");
 
-    /* that's very slow when all element in array is sorted */
+    /* that's very slow when all elements in array is sorted */
     /* lomuto_qsort(arr, left, right); */
     printf("2 lomuto_qsort is done\n");
 
-    /* that's very slow when all element in array is sorted */
+    /* that's very slow when all elements in array is sorted */
     /* hoare_qsort(arr, left, right); */
     printf("3 hoare_qsort is done\n");
 
-    /* performance is always pertty good */
+    /* performance is pertty good when all elements in array is sorted */
     /* randomized_sort(arr, left, right); */
     printf("4 randomized_sort is done\n");
 
-    /* performance is always pertty good */
-    /* median_of_three_qsort(arr, left, right); */
+    /* performance is pertty good when all elements in array is sorted */
+    median_of_three_qsort(arr, left, right);
     printf("5 median_of_three_qsort is done\n");
 
+    /* performance is pertty good when all elements in array is sorted */
     three_way_qsort(arr, left, right);
+    printf("6 three_way_qsort is done\n");
 
     check(arr, left, right);
+    del_test_arr(arr);
 
+    arr = gen_same_arr(size);
+
+    /* that's very slow when all elements in array is same */
+    median_of_three_qsort(arr, left, right);
+    printf("7 median_of_three_qsort is done\n");
+
+    /* performance is pertty good when all elements in array is same */
+    three_way_qsort(arr, left, right);
+    printf("8 three_way_qsort is done\n");
+
+    check(arr, left, right);
     del_test_arr(arr);
 
     return 0;
