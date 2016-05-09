@@ -80,7 +80,7 @@ static void
 hoare_qsort(int arr[], int left, int right) {
     if (left < right) {
         int mid = hoare_partition(arr, left, right);
-        hoare_qsort(arr, left, mid);
+        hoare_qsort(arr, left, mid); /* Hoare partition scheme */
         hoare_qsort(arr, mid+1, right);
     }
 }
@@ -181,7 +181,6 @@ three_way_qsort(int arr[], int left, int right) {
         int right_range;
 
         three_way_partition(arr, left, right, &left_range, &right_range);
-
         three_way_qsort(arr, left, left_range-1);
         three_way_qsort(arr, right_range+1, right);
     }
@@ -263,7 +262,9 @@ main() {
     median_of_three_qsort(arr, left, right);
     printf("7 median_of_three_qsort is done\n");
 
-    /* performance is pertty good when all elements in array is same */
+    /* performance is pertty good when all elements in array is same,
+     * please use this implementation in the practice.
+     * */
     three_way_qsort(arr, left, right);
     printf("8 three_way_qsort is done\n");
 
