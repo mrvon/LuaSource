@@ -134,6 +134,59 @@ randomized_sort(int arr[], int left, int right) {
     }
 }
 
+static void
+raw_three_way_partition(int arr[], int left, int right, int pivot, int* ref_left_range, int* ref_right_range) {
+    int i = left;
+    int j = left;
+    int n = right;
+
+    while (j <= n) {
+        if (arr[j] < pivot) {
+            swap(arr, i, j);
+            ++i;
+            ++j;
+        } else if (arr[j] > pivot) {
+            swap(arr, j, n);
+            --n;
+        } else {
+            ++j;
+        }
+    }
+
+    *ref_left_range = i;
+    *ref_right_range = n;
+}
+
+static int
+three_way_partition(int arr[], int left, int right, int* ref_left_range, int* ref_right_range) {
+    int mid = left + (right - left) / 2;
+    int pivot;
+
+    /* Select median of three as pivot */
+    if (arr[left] >= arr[mid] && arr[left] <= arr[right]) {
+        pivot = arr[left];
+    } else if (arr[mid] >= arr[left] && arr[mid] <= arr[right]) {
+        pivot = arr[mid];
+    } else {
+        pivot = arr[right];
+    }
+
+    raw_three_way_partition(arr, left, right, pivot, ref_left_range, ref_right_range);
+}
+
+static void
+three_way_qsort(int arr[], int left, int right) {
+    if (left < right) {
+        int left_range;
+        int right_range;
+
+        three_way_partition(arr, left, right, &left_range, &right_range);
+
+        three_way_qsort(arr, left, left_range-1);
+        three_way_qsort(arr, right_range+1, right);
+    }
+}
+
 int*
 gen_test_arr(int size) {
     int* arr = (int*)malloc(size * sizeof(int));
@@ -165,24 +218,26 @@ main() {
     int* arr = gen_test_arr(size);
 
     /* that's quick when element in array is random shuffle */
-    lomuto_qsort(arr, left, right);
+    /* lomuto_qsort(arr, left, right); */
     printf("1 lomuto_qsort is done\n");
 
     /* that's very slow when all element in array is sorted */
-    lomuto_qsort(arr, left, right);
+    /* lomuto_qsort(arr, left, right); */
     printf("2 lomuto_qsort is done\n");
 
     /* that's very slow when all element in array is sorted */
-    hoare_qsort(arr, left, right);
+    /* hoare_qsort(arr, left, right); */
     printf("3 hoare_qsort is done\n");
 
     /* performance is always pertty good */
-    randomized_sort(arr, left, right);
+    /* randomized_sort(arr, left, right); */
     printf("4 randomized_sort is done\n");
 
     /* performance is always pertty good */
-    median_of_three_qsort(arr, left, right);
+    /* median_of_three_qsort(arr, left, right); */
     printf("5 median_of_three_qsort is done\n");
+
+    three_way_qsort(arr, left, right);
 
     check(arr, left, right);
 
