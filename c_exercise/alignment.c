@@ -78,12 +78,6 @@ struct E {
     char b; // [1]
 };
 
-struct F {
-    char a; // [0]
-    char b; // [1]
-    // 2 bytes padding [2, 3]
-} __attribute__((packed, aligned(4)));
-
 struct G {
     int     a; // [0, 3]
     short   b; // [4, 5]
@@ -114,49 +108,16 @@ struct I {
     double  e; // [16, 23]
 };
 
+// Do not alignment
+#pragma pack(push, 1)
 struct J {
     int     a; // [0. 3]
     short   b; // [4, 5]
     double  c; // [6, 13]
     char    d; // [14]
     float   e; // [15, 18]
-} __attribute__((packed, aligned(1)));
-
-struct K {
-    int     a; // [0. 3]
-    short   b; // [4, 5]
-    double  c; // [6, 13]
-    char    d; // [14]
-    float   e; // [15, 18]
-    // 1 bytes padding [19]
-} __attribute__((packed, aligned(2)));
-
-struct L {
-    int     a; // [0. 3]
-    short   b; // [4, 5]
-    double  c; // [6, 13]
-    char    d; // [14]
-    float   e; // [15, 18]
-    // 1 bytes padding [19]
-} __attribute__((packed, aligned(4)));
-
-struct M {
-    int     a; // [0. 3]
-    short   b; // [4, 5]
-    double  c; // [6, 13]
-    char    d; // [14]
-    float   e; // [15, 18]
-    // 5 bytes padding [19, 23]
-} __attribute__((packed, aligned(8)));
-
-struct N {
-    int     a; // [0. 3]
-    short   b; // [4, 5]
-    double  c; // [6, 13]
-    char    d; // [14]
-    float   e; // [15, 18]
-    // 13 bytes padding [19, 31]
-} __attribute__((packed, aligned(16)));
+};
+#pragma pack(pop)
 
 struct O {
     int     a; // [0. 3]
@@ -221,12 +182,6 @@ int main(int argc, char const* argv[])
     assert(__alignof__(struct E) == CHAR_LEN);
     assert(sizeof(struct E) == 2);
 
-    // |1|1xx|
-    assert(offsetof(struct F, a) == 0);
-    assert(offsetof(struct F, b) == 1);
-    assert(__alignof__(struct F) == 4);
-    assert(sizeof(struct F) == 4);
-
     // |4|2|1x|8|4xxxx|
     assert(offsetof(struct G, a) == 0);
     assert(offsetof(struct G, b) == 4);
@@ -262,38 +217,6 @@ int main(int argc, char const* argv[])
     assert(offsetof(struct J, e) == 15);
     assert(__alignof__(struct J) == 1);
     assert(sizeof(struct J) == 19);
-
-    assert(offsetof(struct K, a) == 0);
-    assert(offsetof(struct K, b) == 4);
-    assert(offsetof(struct K, c) == 6);
-    assert(offsetof(struct K, d) == 14);
-    assert(offsetof(struct K, e) == 15);
-    assert(__alignof__(struct K) == 2);
-    assert(sizeof(struct K) == 20);
-
-    assert(offsetof(struct L, a) == 0);
-    assert(offsetof(struct L, b) == 4);
-    assert(offsetof(struct L, c) == 6);
-    assert(offsetof(struct L, d) == 14);
-    assert(offsetof(struct L, e) == 15);
-    assert(__alignof__(struct L) == 4);
-    assert(sizeof(struct L) == 20);
-
-    assert(offsetof(struct M, a) == 0);
-    assert(offsetof(struct M, b) == 4);
-    assert(offsetof(struct M, c) == 6);
-    assert(offsetof(struct M, d) == 14);
-    assert(offsetof(struct M, e) == 15);
-    assert(__alignof__(struct M) == 8);
-    assert(sizeof(struct M) == 24);
-
-    assert(offsetof(struct N, a) == 0);
-    assert(offsetof(struct N, b) == 4);
-    assert(offsetof(struct N, c) == 6);
-    assert(offsetof(struct N, d) == 14);
-    assert(offsetof(struct N, e) == 15);
-    assert(__alignof__(struct N) == 16);
-    assert(sizeof(struct N) == 32);
 
     assert(offsetof(struct O, a) == 0);
     assert(offsetof(struct O, b) == 4);

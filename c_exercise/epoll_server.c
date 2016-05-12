@@ -20,6 +20,8 @@
 #include <string.h>
 #include <errno.h>
 
+#define BACKLOG 32
+
 /* ---------------------------------------------------------------------------*/
 /* simple interface */
 
@@ -180,8 +182,10 @@ close_socket_server(struct socket_server* ss) {
     engine_release(ss->epoll_fd);
 }
 
-struct test_command {
-    uint32_t id;
+/* #pragma pack(push, 1) */
+
+struct listen_command {
+    int fd;    /* listen fd */
 };
 
 struct engine_command {
@@ -189,9 +193,11 @@ struct engine_command {
     uint8_t len;
     union {
         char buffer[256];
-        struct test_command test;
+        struct listen_command listen;
     };
 };
+
+/* #pragma pack(pop) */
 
 static void
 send_engine_command(struct socket_server* ss, struct engine_command* cmd, uint8_t type, uint8_t len) {
@@ -212,14 +218,6 @@ send_engine_command(struct socket_server* ss, struct engine_command* cmd, uint8_
 }
 
 static void
-send_test_command(struct socket_server* ss) {
-    struct engine_command command;
-    command.test.id = 1024;
-
-    send_engine_command(ss, &command, 'T', sizeof(command.test));
-}
-
-static void
 block_readpipe(int pipe_fd, void* buffer, int sz) {
     for (;;) {
         int n = read(pipe_fd, buffer, sz);
@@ -233,6 +231,118 @@ block_readpipe(int pipe_fd, void* buffer, int sz) {
         assert(n == sz);
         return;
     }
+}
+
+static void
+exec_listen_command(struct listen_command* command) {
+    fprintf(stdout, "exec listen command\n");
+    fprintf(stdout, "fd = %d\n", command->fd);
+}
+
+static void
+process_engine_command(struct event* e, struct socket* s) {
+    if (e->read) {
+        uint8_t header[2];
+        uint8_t buffer[256];
+
+        block_readpipe(s->fd, header, sizeof(header));
+
+        int type = header[0];
+        int len = header[1];
+
+        block_readpipe(s->fd, buffer, len);
+
+        switch (type) {
+            case 'L':
+                exec_listen_command((struct listen_command*)buffer);
+                return;
+            default:
+                fprintf(stderr, "unknown engine command.\n");
+                return;
+        }
+    }
+}
+
+static int
+raw_bind(const char* host, int port, int protocol, int* family) {
+    int fd;
+    int status;
+    int reuse = 1;
+    struct addrinfo ai_hints;
+    struct addrinfo *ai_list = NULL;
+    char portstr[16];
+
+    if (host == NULL || host[0] == 0) {
+        /* INADDR_ANY */
+        host = "0.0.0.0";
+    }
+    sprintf(portstr, "%d", port);
+    memset(&ai_hints, 0, sizeof(ai_hints));
+    ai_hints.ai_family = AF_UNSPEC;
+    if (protocol == IPPROTO_TCP) {
+        ai_hints.ai_socktype = SOCK_STREAM;
+    } else {
+        ai_hints.ai_socktype = SOCK_DGRAM;
+    }
+    ai_hints.ai_protocol = protocol;
+
+    status = getaddrinfo(host, portstr, &ai_hints, &ai_list);
+    if (status != 0) {
+        return -1;
+    }
+
+    *family = ai_list->ai_family;
+
+    fd = socket(*family, ai_list->ai_socktype, 0);
+    if (fd < 0) {
+        goto _failed_fd;
+    }
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (void*)&reuse, sizeof(int)) == -1) {
+        goto _failed;
+    }
+
+    status = bind(fd, (struct sockaddr *)ai_list->ai_addr, ai_list->ai_addrlen);
+    if (status != 0) {
+        goto _failed;
+    }
+
+    freeaddrinfo(ai_list);
+    return fd;
+_failed:
+    close(fd);
+_failed_fd:
+    freeaddrinfo(ai_list);
+    return -1;
+}
+
+static int
+raw_listen(const char* host, int port, int backlog) {
+    int family = 0;
+    int listen_fd = raw_bind(host, port, IPPROTO_TCP, &family);
+    if (listen_fd < 0) {
+        return -1;
+    }
+    if (listen(listen_fd, backlog) == -1) {
+        close(listen_fd);
+        return -1;
+    }
+    return listen_fd;
+}
+
+/* ---------------------------------------------------------------------------*/
+int
+socket_listen(struct socket_server* ss, const char* host, int port, int backlog) {
+    int listen_fd = raw_listen(host, port, backlog);
+    if (listen_fd < 0) {
+        return -1;
+    }
+
+    struct engine_command cmd;
+    cmd.listen.fd = listen_fd;
+
+    printf("listen_fd: %d\n", listen_fd);
+
+    send_engine_command(ss, &cmd, 'L', sizeof(cmd.listen));
 }
 
 static int
@@ -260,19 +370,7 @@ network_main_loop(struct socket_server* ss) {
 
         switch (s->type) {
             case FD_TYPE_PIPE:
-                if (e->read) {
-                    uint8_t header[2];
-                    uint8_t buffer[256];
-
-                    block_readpipe(s->fd, header, sizeof(header));
-
-                    int type = header[0];
-                    int len = header[1];
-
-                    block_readpipe(s->fd, buffer, len);
-
-                    fprintf(stdout, "Type %u, Len %u\n", type, len);
-                }
+                process_engine_command(e, s);
                 break;
         }
 
@@ -310,11 +408,7 @@ int main() {
     pthread_t network;
     create_thread(&network, thread_network, ss);
 
-    send_test_command(ss);
-    send_test_command(ss);
-    send_test_command(ss);
-    send_test_command(ss);
-    send_test_command(ss);
+    socket_listen(ss, "127.0.0.1", 5000, BACKLOG);
 
     pthread_join(network, NULL);
     close_socket_server(ss);
