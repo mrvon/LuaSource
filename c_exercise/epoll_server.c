@@ -251,7 +251,8 @@ socket_server_release(struct socket_server* ss) {
 #pragma pack(push, 1)
 
 struct listen_command {
-    int fd;    /* listen fd */
+    int id; /* socket id */
+    int fd; /* listen fd */
 };
 
 struct engine_command {
@@ -303,6 +304,7 @@ block_readpipe(int pipe_fd, void* buffer, int sz) {
 static void
 exec_listen_command(struct listen_command* command) {
     fprintf(stdout, "exec listen command\n");
+    fprintf(stdout, "id=%d fd=%d\n", command->id, command->fd);
 }
 
 static void
@@ -396,17 +398,27 @@ raw_listen(const char* host, int port, int backlog) {
 }
 
 /* ---------------------------------------------------------------------------*/
-int
-socket_listen(struct socket_server* ss, const char* host, int port, int backlog) {
+static int
+socket_server_listen(struct socket_server* ss, const char* host, int port, int backlog) {
     int listen_fd = raw_listen(host, port, backlog);
     if (listen_fd < 0) {
         return -1;
     }
 
     struct engine_command cmd;
+
+    int socket_id = generate_id(ss);
+    if (socket_id < 0) {
+        close(listen_fd);
+        return socket_id;
+    }
+
+    cmd.u.listen.id = socket_id;
     cmd.u.listen.fd = listen_fd;
 
     send_engine_command(ss, &cmd, 'L', sizeof(cmd.u.listen));
+
+    return socket_id;
 }
 
 static int
@@ -472,7 +484,7 @@ int main() {
     pthread_t network;
     create_thread(&network, thread_network, ss);
 
-    /* socket_listen(ss, "127.0.0.1", 5000, BACKLOG); */
+    socket_server_listen(ss, "127.0.0.1", 5000, BACKLOG);
 
     pthread_join(network, NULL);
     socket_server_release(ss);
