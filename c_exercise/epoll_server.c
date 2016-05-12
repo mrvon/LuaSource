@@ -20,6 +20,9 @@
 #include <string.h>
 #include <errno.h>
 
+/* atomic function */
+#include "atomic.h"
+
 #define BACKLOG 32
 
 /* ---------------------------------------------------------------------------*/
@@ -101,12 +104,14 @@ engine_noblocking(int socket_fd) {
 
 /* ---------------------------------------------------------------------------*/
 
-#define MAX_EVENT 64
+#define MAX_EVENT   64
+#define MAX_SOCKET  (1<<16)
 
 /* application level socket */
 struct socket {
-    int type;           /* socket type */
+    int id;             /* socket id */
     int fd;             /* socket fd */
+    int type;           /* socket type */
 };
 
 struct socket_server {
@@ -115,13 +120,55 @@ struct socket_server {
     int recv_command_fd;/* recv command to engine */
     int event_count;    /* totol count */
     int event_index;    /* current process index */
-    struct event ev[MAX_EVENT];
+    int alloc_id;       /* for alloc application socket id */
+    struct event event_list[MAX_EVENT];     /* process event list */
+    struct socket socket_map[MAX_SOCKET];   /* application socket map */
 };
 
-#define SOCKET_TYPE_INVALID -1
-#define SOCKET_TYPE_LISTEN  1
 
-#define FD_TYPE_PIPE        0
+#define SOCKET_TYPE_INVALID     0
+#define SOCKET_TYPE_RESERVE     1
+#define SOCKET_TYPE_PLISTEN     2
+#define SOCKET_TYPE_LISTEN      3
+#define SOCKET_TYPE_CONNECTING  4
+#define SOCKET_TYPE_CONNECTED   5
+#define SOCKET_TYPE_HALFCLOSE   6
+#define SOCKET_TYPE_PACCEPT     7
+#define SOCKET_TYPE_BIND        8
+
+#define FD_TYPE_PIPE            0
+
+#define HASH_ID(id) (((unsigned)id) % MAX_SOCKET)
+
+static int
+generate_id(struct socket_server* ss) {
+    int i;
+
+    for (i = 0; i < MAX_SOCKET; ++i) {
+        int id = ATOM_INC(&(ss->alloc_id));
+        if (id < 0) {
+            id = ATOM_AND(&(ss->alloc_id), 0x7fffffff);
+        }
+
+        struct socket* s = &ss->socket_map[HASH_ID(id)];
+
+        /* Have found a unuse socket struct */
+        if (s->type == SOCKET_TYPE_INVALID) {
+            /* Try to lock it */
+            if (ATOM_CAS(&s->type, SOCKET_TYPE_INVALID, SOCKET_TYPE_RESERVE)) {
+                /* Lock it successful */
+                s->id = id;
+                s->fd = -1;
+                return id;
+            } else {
+                /* Lock by other thread, retry it. */
+                --i;
+            }
+        }
+    }
+
+    return -1;
+}
 
 static struct socket*
 new_socket(int type, int fd) {
@@ -170,7 +217,14 @@ create_socket_server() {
     ss->send_command_fd = pipe_fd[1];
     ss->event_count = 0;
     ss->event_index = 0;
-	memset(&ss->ev, 0, sizeof(ss->ev));
+    ss->alloc_id = 0;
+	memset(&ss->event_list, 0, sizeof(ss->event_list));
+
+    int i;
+    for (i = 0; i < MAX_SOCKET; ++i) {
+        struct socket* s = &ss->socket_map[i];
+        s->type = SOCKET_TYPE_INVALID;
+    }
 
     return ss;
 }
@@ -182,7 +236,10 @@ close_socket_server(struct socket_server* ss) {
     engine_release(ss->epoll_fd);
 }
 
-/* #pragma pack(push, 1) */
+/* Do not alignment {
+ * Because we assume that the memory of field in struct is continuous.
+ * */
+#pragma pack(push, 1)
 
 struct listen_command {
     int fd;    /* listen fd */
@@ -197,7 +254,8 @@ struct engine_command {
     } u;
 };
 
-/* #pragma pack(pop) */
+#pragma pack(pop)
+/* } */
 
 static void
 send_engine_command(struct socket_server* ss, struct engine_command* cmd, uint8_t type, uint8_t len) {
@@ -236,7 +294,6 @@ block_readpipe(int pipe_fd, void* buffer, int sz) {
 static void
 exec_listen_command(struct listen_command* command) {
     fprintf(stdout, "exec listen command\n");
-    fprintf(stdout, "fd = %d\n", command->fd);
 }
 
 static void
@@ -340,8 +397,6 @@ socket_listen(struct socket_server* ss, const char* host, int port, int backlog)
     struct engine_command cmd;
     cmd.u.listen.fd = listen_fd;
 
-    printf("listen_fd: %d\n", listen_fd);
-
     send_engine_command(ss, &cmd, 'L', sizeof(cmd.u.listen));
 }
 
@@ -351,7 +406,7 @@ network_main_loop(struct socket_server* ss) {
 
         /* all event have process */
         if (ss->event_index == ss->event_count) {
-            ss->event_count = engine_wait(ss->epoll_fd, ss->ev, MAX_EVENT);
+            ss->event_count = engine_wait(ss->epoll_fd, ss->event_list, MAX_EVENT);
             ss->event_index = 0;
 
             if (ss->event_count <= 0) {
@@ -361,7 +416,7 @@ network_main_loop(struct socket_server* ss) {
             }
         }
 
-        struct event* e = &ss->ev[ss->event_index++];
+        struct event* e = &ss->event_list[ss->event_index++];
         struct socket* s = e->s;
 
         if (s == NULL) {
@@ -408,7 +463,7 @@ int main() {
     pthread_t network;
     create_thread(&network, thread_network, ss);
 
-    socket_listen(ss, "127.0.0.1", 5000, BACKLOG);
+    /* socket_listen(ss, "127.0.0.1", 5000, BACKLOG); */
 
     pthread_join(network, NULL);
     close_socket_server(ss);
