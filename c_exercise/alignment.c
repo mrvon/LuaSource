@@ -119,6 +119,33 @@ struct J {
 };
 #pragma pack(pop)
 
+
+struct K_ {
+    int a; // [0, 3]
+};
+
+struct K {
+    char a; // [0]
+    char b; // [1]
+    union {
+        char c[256]; // [4, 263] ?
+        struct K_ d; // [4, 11]  ?
+    } u;
+};
+
+struct L_ {
+    int a; // [0, 3]
+};
+
+struct L {
+    // explicit alignment
+    char a[8]; // [0, 7]
+    union {
+        char b[256]; // [8, 263]
+        struct L_ c; // [8, 11]
+    } u;
+};
+
 struct O {
     int     a; // [0. 3]
     short   b; // [4, 5]
@@ -217,6 +244,17 @@ int main(int argc, char const* argv[])
     assert(offsetof(struct J, e) == 15);
     assert(__alignof__(struct J) == 1);
     assert(sizeof(struct J) == 19);
+
+    assert(offsetof(struct K, a) == 0);
+    assert(offsetof(struct K, b) == 1);
+    /* assert(offsetof(struct K, u.c) == 4); */
+    /* assert(offsetof(struct K, u.d) == 4); */
+
+    assert(offsetof(struct L, a) == 0);
+    assert(offsetof(struct L, u.b) == 8);
+    assert(offsetof(struct L, u.c) == 8);
+    assert(offsetof(struct L, u.c.a) == 8);
+    assert(sizeof(struct L) == 256 + 8);
 
     assert(offsetof(struct O, a) == 0);
     assert(offsetof(struct O, b) == 4);

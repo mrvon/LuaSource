@@ -194,7 +194,7 @@ struct engine_command {
     union {
         char buffer[256];
         struct listen_command listen;
-    };
+    } u;
 };
 
 /* #pragma pack(pop) */
@@ -338,11 +338,11 @@ socket_listen(struct socket_server* ss, const char* host, int port, int backlog)
     }
 
     struct engine_command cmd;
-    cmd.listen.fd = listen_fd;
+    cmd.u.listen.fd = listen_fd;
 
     printf("listen_fd: %d\n", listen_fd);
 
-    send_engine_command(ss, &cmd, 'L', sizeof(cmd.listen));
+    send_engine_command(ss, &cmd, 'L', sizeof(cmd.u.listen));
 }
 
 static int
