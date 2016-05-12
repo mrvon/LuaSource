@@ -183,7 +183,7 @@ new_socket(int type, int fd) {
 }
 
 static struct socket_server*
-create_socket_server() {
+socket_server_create() {
     int pipe_fd[2];
     int epoll_fd = engine_create();
 
@@ -230,10 +230,19 @@ create_socket_server() {
 }
 
 static void
-close_socket_server(struct socket_server* ss) {
+socket_server_release(struct socket_server* ss) {
+    int i;
+    for (i = 0; i < MAX_SOCKET; ++i) {
+        struct socket*s = &ss->socket_map[i];
+        if (s->type != SOCKET_TYPE_RESERVE) {
+            /* TODO */
+            /* force_close(); */
+        }
+    }
     close(ss->send_command_fd);
     close(ss->recv_command_fd);
     engine_release(ss->epoll_fd);
+    free((void*)ss);
 }
 
 /* Do not alignment {
@@ -455,7 +464,7 @@ create_thread(pthread_t *thread, void *(*start_routine) (void *), void *arg) {
 }
 
 int main() {
-    struct socket_server* ss = create_socket_server();
+    struct socket_server* ss = socket_server_create();
     if (ss == NULL) {
         return;
     }
@@ -466,7 +475,7 @@ int main() {
     /* socket_listen(ss, "127.0.0.1", 5000, BACKLOG); */
 
     pthread_join(network, NULL);
-    close_socket_server(ss);
+    socket_server_release(ss);
 
     return 0;
 }
