@@ -102,6 +102,12 @@ engine_noblocking(int socket_fd) {
     fcntl(socket_fd, F_SETFL, flag | O_NONBLOCK);
 }
 
+static void
+socket_keepalive(int fd) {
+	int keepalive = 1;
+	setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (void *)&keepalive , sizeof(keepalive));
+}
+
 /* ---------------------------------------------------------------------------*/
 
 #define MAX_EVENT   64
@@ -135,8 +141,7 @@ struct socket_server {
 #define SOCKET_TYPE_HALFCLOSE   6
 #define SOCKET_TYPE_PACCEPT     7
 #define SOCKET_TYPE_BIND        8
-
-#define FD_TYPE_PIPE            0
+#define SOCKET_TYPE_PIPE        9
 
 #define HASH_ID(id) (((unsigned)id) % MAX_SOCKET)
 
@@ -171,13 +176,20 @@ generate_id(struct socket_server* ss) {
 }
 
 static struct socket*
-new_socket(int type, int fd) {
-    /* TODO SHOULD USE HASH TABLE */
-    struct socket* s = malloc(sizeof(struct socket));
-    assert(s);
+new_socket(struct socket_server* ss, int id, int fd, int type, int is_add) {
+    struct socket* s = &ss->socket_map[HASH_ID(id)];
+    assert(s->type == SOCKET_TYPE_RESERVE);
 
-    s->type = type;
+    if (is_add) {
+        if (engine_add(ss->epoll_fd, fd, s)) {
+            s->type = SOCKET_TYPE_INVALID;
+            return NULL;
+        }
+    }
+
+    s->id = id;
     s->fd = fd;
+    s->type = type;
 
     return s;
 }
@@ -198,17 +210,6 @@ socket_server_create() {
         return NULL;
     }
 
-    /* It's not a real socket */
-    struct socket* recv_socket = new_socket(FD_TYPE_PIPE, pipe_fd[0]);
-
-    if (engine_add(epoll_fd, pipe_fd[0], recv_socket)) {
-        fprintf(stderr, "add pipe recv fd to epoll failed.\n");
-        close(pipe_fd[0]);
-        close(pipe_fd[1]);
-        engine_release(epoll_fd);
-        return NULL;
-    }
-
     struct socket_server* ss = malloc(sizeof(*ss));
     assert(ss);
 
@@ -226,7 +227,26 @@ socket_server_create() {
         s->type = SOCKET_TYPE_INVALID;
     }
 
+    /* It's not a real socket */
+    int id = generate_id(ss);
+    if (id < 0) {
+        goto _failed;
+    }
+
+    struct socket* s = new_socket(ss, id, pipe_fd[0], SOCKET_TYPE_PIPE, true);
+    if (s == NULL) {
+        goto _failed;
+    }
+
     return ss;
+
+_failed:
+    fprintf(stderr, "add pipe recv fd to epoll failed.\n");
+    close(pipe_fd[0]);
+    close(pipe_fd[1]);
+    engine_release(epoll_fd);
+    free((void*)ss);
+    return NULL;
 }
 
 static void
@@ -245,10 +265,31 @@ socket_server_release(struct socket_server* ss) {
     free((void*)ss);
 }
 
+
+static void
+block_readpipe(int pipe_fd, void* buffer, int sz) {
+    for (;;) {
+        int n = read(pipe_fd, buffer, sz);
+        if (n < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            fprintf(stderr, "read pipe error %s.\n", strerror(errno));
+            return;
+        }
+        assert(n == sz);
+        return;
+    }
+}
+
 /* Do not alignment {
  * Because we assume that the memory of field in struct is continuous.
  * */
 #pragma pack(push, 1)
+
+struct start_command {
+    int id; /* socket id */
+};
 
 struct listen_command {
     int id; /* socket id */
@@ -260,12 +301,19 @@ struct engine_command {
     uint8_t len;
     union {
         char buffer[256];
+        struct start_command  start;
         struct listen_command listen;
     } u;
 };
 
 #pragma pack(pop)
 /* } */
+
+union sockaddr_all {
+	struct sockaddr s;
+	struct sockaddr_in v4;
+	struct sockaddr_in6 v6;
+};
 
 static void
 send_engine_command(struct socket_server* ss, struct engine_command* cmd, uint8_t type, uint8_t len) {
@@ -286,29 +334,48 @@ send_engine_command(struct socket_server* ss, struct engine_command* cmd, uint8_
 }
 
 static void
-block_readpipe(int pipe_fd, void* buffer, int sz) {
-    for (;;) {
-        int n = read(pipe_fd, buffer, sz);
-        if (n < 0) {
-            if (errno == EINTR) {
-                continue;
-            }
-            fprintf(stderr, "read pipe error %s.\n", strerror(errno));
+exec_start_command(struct socket_server* ss, struct start_command* cmd) {
+    fprintf(stdout, "exec start command - id(%d)\n", cmd->id);
+
+    struct socket *s = &ss->socket_map[HASH_ID(cmd->id)];
+    if (s == NULL) {
+        return;
+    }
+
+    if (s->type == SOCKET_TYPE_INVALID || s->id != cmd->id) {
+        return;
+    }
+
+    if (s->type == SOCKET_TYPE_PLISTEN) {
+        if (engine_add(ss->epoll_fd, s->fd, s)) {
+            /* force_close(); */
             return;
         }
-        assert(n == sz);
-        return;
+
+        s->type = SOCKET_TYPE_LISTEN;
     }
 }
 
 static void
-exec_listen_command(struct listen_command* command) {
-    fprintf(stdout, "exec listen command\n");
-    fprintf(stdout, "id=%d fd=%d\n", command->id, command->fd);
+exec_listen_command(struct socket_server* ss, struct listen_command* cmd) {
+    fprintf(stdout, "exec listen command - id(%d) fd(%d)\n", cmd->id, cmd->fd);
+
+    struct socket* s = new_socket(ss, cmd->id, cmd->fd, SOCKET_TYPE_PLISTEN, false);
+    if (s == NULL) {
+        goto _failed;
+    }
+
+    return;
+
+_failed:
+    close(cmd->fd);
+    ss->socket_map[HASH_ID(cmd->id)].type = SOCKET_TYPE_INVALID;
+
+    return;
 }
 
 static void
-process_engine_command(struct event* e, struct socket* s) {
+process_engine_command(struct socket_server* ss, struct event* e, struct socket* s) {
     if (e->read) {
         uint8_t header[2];
         uint8_t buffer[256];
@@ -321,8 +388,11 @@ process_engine_command(struct event* e, struct socket* s) {
         block_readpipe(s->fd, buffer, len);
 
         switch (type) {
+            case 'S':
+                exec_start_command(ss, (struct start_command*)buffer);
+                return;
             case 'L':
-                exec_listen_command((struct listen_command*)buffer);
+                exec_listen_command(ss, (struct listen_command*)buffer);
                 return;
             default:
                 fprintf(stderr, "unknown engine command.\n");
@@ -376,6 +446,7 @@ raw_bind(const char* host, int port, int protocol, int* family) {
 
     freeaddrinfo(ai_list);
     return fd;
+
 _failed:
     close(fd);
 _failed_fd:
@@ -397,7 +468,53 @@ raw_listen(const char* host, int port, int backlog) {
     return listen_fd;
 }
 
+static int
+raw_accept(struct socket_server* ss, struct socket* s) {
+    union sockaddr_all u;
+    socklen_t len = sizeof(u);
+    int fd = accept(s->fd, &u.s, &len);
+    if (fd < 0) {
+        if (errno == EMFILE || errno == ENFILE) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+
+    int id = generate_id(ss);
+    if (id < 0) {
+        close(fd);
+        return 0;
+    }
+
+    socket_keepalive(fd);
+    engine_noblocking(fd);
+
+    struct socket* ns = new_socket(ss, id, fd, SOCKET_TYPE_PACCEPT, false);
+    if (ns == NULL) {
+        close(fd);
+        return 0;
+    }
+
+    /*
+    void* sin_addr = (u.s.sa_family == AF_INET) ? (void*)&u.v4.sin_addr : (void*)&u.v6.sin6_addr;
+    int sin_port = ntohs((u.s.sa_family == AF_INET) ? u.v4.sin_port : u.v6.sin6_port);
+    char tmp[INET6_ADDRSTRLEN];
+    */
+
+    return 1;
+}
+
 /* ---------------------------------------------------------------------------*/
+static void
+socket_server_start(struct socket_server* ss, int id) {
+    struct engine_command cmd;
+
+    cmd.u.start.id = id;
+
+    send_engine_command(ss, &cmd, 'S', sizeof(cmd.u.start));
+}
+
 static int
 socket_server_listen(struct socket_server* ss, const char* host, int port, int backlog) {
     int listen_fd = raw_listen(host, port, backlog);
@@ -445,8 +562,12 @@ network_main_loop(struct socket_server* ss) {
         }
 
         switch (s->type) {
-            case FD_TYPE_PIPE:
-                process_engine_command(e, s);
+            case SOCKET_TYPE_LISTEN: {
+                    raw_accept(ss, s);
+                }
+                break;
+            case SOCKET_TYPE_PIPE:
+                process_engine_command(ss, e, s);
                 break;
         }
 
@@ -484,7 +605,8 @@ int main() {
     pthread_t network;
     create_thread(&network, thread_network, ss);
 
-    socket_server_listen(ss, "127.0.0.1", 5000, BACKLOG);
+    int id = socket_server_listen(ss, "127.0.0.1", 5000, BACKLOG);
+    socket_server_start(ss, id);
 
     pthread_join(network, NULL);
     socket_server_release(ss);
