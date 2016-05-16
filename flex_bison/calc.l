@@ -31,7 +31,12 @@
 int main(int argc, char** argv) {
     int tok;
 
-    while (tok = yylex()) {
+    while (1) {
+        tok = yylex();
+        if (tok == 0) {
+            break;
+        }
+
         printf("%d", tok);
         if (tok == NUMBER) {
             printf(" = %d\n", yylval);
