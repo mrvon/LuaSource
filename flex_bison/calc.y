@@ -31,8 +31,10 @@ term: NUMBER
 
 int main(void) {
     yyparse();
+    return 0;
 }
 
-void yyerror(char* s) {
+int yyerror(char* s) {
     fprintf(stderr, "error: %s\n", s);
+    return 0;
 }
