@@ -17,9 +17,9 @@ calc: calc.l calc.y
 
 # clean auto generate file
 clean:
-	rm wc.c
-	rm calc_lexer.c calc_parser.h calc_parser.c
+	rm -f wc.c
+	rm -f calc_lexer.c calc_parser.h calc_parser.c
 
 cleanall: clean
-	rm wc
-	rm calc
+	rm -f wc
+	rm -f calc
