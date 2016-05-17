@@ -1,8 +1,25 @@
+# Your platform
+PLATFORM= none
+
+# bundle all
+all: wc calc
+
+# unix wc
+wc: wc.l
+	flex -o wc.c wc.l
+	cc -o $@ wc.c -lfl
+
 # calculator
 calc: calc.l calc.y
 	yacc -d -o calc_parser.c calc.y
 	flex -o calc_lexer.c calc.l
 	cc -o $@ calc_lexer.c calc_parser.c -lfl
 
+# clean auto generate file
 clean:
-	rm calc calc_lexer.c calc_parser.h calc_parser.c
+	rm wc.c
+	rm calc_lexer.c calc_parser.h calc_parser.c
+
+cleanall: clean
+	rm wc
+	rm calc
