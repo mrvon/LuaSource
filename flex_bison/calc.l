@@ -1,7 +1,7 @@
 /* recognize takens for the calculator and print them out */
 
 %{
-#include "y.tab.h"
+#include "calc_parser.h"
 %}
 
 %%
