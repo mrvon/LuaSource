@@ -6,7 +6,8 @@
 /* declare tokens */
 %token NUMBER
 %token ADD SUB MUL DIV ABS
-%token EOL
+%token OP CP /* open and close parentheses */
+%token EOL   /* end of line */
 
 %%
 
@@ -26,6 +27,7 @@ factor: term
 
 term: NUMBER
     | ABS term { $$ = $2 >= 0 ? $2 : -$2; }
+    | OP exp CP { $$ = $2; }
     ;
 
 %%
