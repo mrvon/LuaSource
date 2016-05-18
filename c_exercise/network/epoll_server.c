@@ -100,7 +100,7 @@ engine_wait(int epoll_fd, struct event *e, int max) {
 }
 
 static void
-engine_noblocking(int socket_fd) {
+engine_nonblocking(int socket_fd) {
     int flag = fcntl(socket_fd, F_GETFL, 0);
     if (flag == -1) {
         return;
@@ -593,7 +593,7 @@ raw_accept(struct socket_server* ss, struct socket* s, struct socket_message* re
     }
 
     socket_keepalive(fd);
-    engine_noblocking(fd);
+    engine_nonblocking(fd);
 
     struct socket* ns = new_socket(ss, id, fd, SOCKET_TYPE_PACCEPT, false);
     if (ns == NULL) {
