@@ -341,6 +341,10 @@ struct listen_command {
     int fd; /* listen fd */
 };
 
+struct close_command {
+    int id; /* socket id */
+};
+
 struct engine_command {
     uint8_t type;
     uint8_t len;
@@ -348,6 +352,7 @@ struct engine_command {
         char buffer[256];
         struct start_command  start;
         struct listen_command listen;
+        struct close_command  close;
     } u;
 };
 
@@ -379,7 +384,7 @@ send_engine_command(struct socket_server* ss, struct engine_command* cmd, uint8_
 }
 
 static int
-exec_start_command(
+exec_start_socket(
         struct socket_server* ss,
         struct start_command* cmd,
         struct socket_message* result) {
@@ -388,7 +393,7 @@ exec_start_command(
     result->ud = 0;
     result->data = NULL;
 
-    fprintf(stdout, "exec start command - id(%d)\n", cmd->id);
+    fprintf(stdout, "exec start socket - id(%d)\n", cmd->id);
 
     struct socket *s = &ss->socket_map[HASH_ID(cmd->id)];
     if (s == NULL) {
@@ -423,12 +428,12 @@ exec_start_command(
 }
 
 static int
-exec_listen_command(
+exec_listen_socket(
         struct socket_server* ss,
         struct listen_command* cmd,
         struct socket_message* result) {
 
-    fprintf(stdout, "exec listen command - id(%d) fd(%d)\n", cmd->id, cmd->fd);
+    fprintf(stdout, "exec listen socket - id(%d) fd(%d)\n", cmd->id, cmd->fd);
 
     struct socket* s = new_socket(ss, cmd->id, cmd->fd, SOCKET_TYPE_PLISTEN, false);
     if (s == NULL) {
@@ -442,6 +447,29 @@ _failed:
     ss->socket_map[HASH_ID(cmd->id)].type = SOCKET_TYPE_INVALID;
 
     return SOCKET_ERROR;
+}
+
+static int
+exec_close_socket(
+        struct socket_server* ss,
+        struct close_command* cmd,
+        struct socket_message* result) {
+
+    fprintf(stdout, "exec close socket - id(%d)\n", cmd->id);
+
+    struct socket *s = &ss->socket_map[HASH_ID(cmd->id)];
+    if (s->type == SOCKET_TYPE_INVALID || s->id != cmd->id) {
+        result->id = cmd->id;
+        result->ud = 0;
+        result->data = NULL;
+        return SOCKET_CLOSE;
+    }
+
+    // TODO SOCKET_TYPE_HALFCLOSE
+
+    result->id = cmd->id;
+    force_close(ss, s, result);
+    return SOCKET_CLOSE;
 }
 
 static int
@@ -464,9 +492,11 @@ process_engine_command(
 
         switch (type) {
             case 'S':
-                return exec_start_command(ss, (struct start_command*)buffer, result);
+                return exec_start_socket(ss, (struct start_command*)buffer, result);
             case 'L':
-                return exec_listen_command(ss, (struct listen_command*)buffer, result);
+                return exec_listen_socket(ss, (struct listen_command*)buffer, result);
+            case 'K':
+                return exec_close_socket(ss, (struct close_command*)buffer, result);
             default:
                 fprintf(stderr, "SocketEngine: unknown engine command.\n");
                 return -1;
@@ -610,6 +640,21 @@ socket_server_listen(struct socket_server* ss, const char* host, int port, int b
     return socket_id;
 }
 
+static void
+socket_server_close(struct socket_server* ss, int id) {
+    struct engine_command cmd;
+
+    cmd.u.close.id = id;
+
+    send_engine_command(ss, &cmd, 'K', sizeof(cmd.u.close));
+}
+
+// Different from socket_server_close is that will not half close when send buffer still have data in it.
+static void
+socket_server_shutdown() {
+    // TODO
+}
+
 // return -1 (ignore) when error
 static int
 read_socket_tcp(struct socket_server* ss, struct socket* s, struct socket_message* result) {
@@ -717,6 +762,7 @@ static void*
 thread_network(void* ud) {
     struct socket_server* ss = (struct socket_server*)ud;
     struct socket_message result;
+    int i;
 
     for(;;) {
         int type = socket_server_poll(ss, &result);
@@ -734,6 +780,15 @@ thread_network(void* ud) {
                 break;
             case SOCKET_DATA:
                 fprintf(stdout, "SOCKET DATA: FROM SOCKET(%d) SIZE(%d)\n", result.id, result.ud);
+                for(i = 0; i < result.ud; ++i) {
+                    if (result.data[i] == EOF) {
+                        socket_server_close(ss, result.id);
+                        break;
+                    }
+                    else {
+                        fprintf(stdout, "%c", result.data[i]);
+                    }
+                }
                 break;
         }
     }
