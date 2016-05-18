@@ -1,5 +1,5 @@
 /* recognize takens for the calculator and print them out */
-
+%option noyywrap
 %{
 #include "calc_parser.h"
 %}
