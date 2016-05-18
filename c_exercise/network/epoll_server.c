@@ -131,6 +131,10 @@ struct socket_server {
     struct socket socket_map[MAX_SOCKET];   /* application socket map */
 };
 
+struct socket_message {
+    int id; /* socket id */
+    int ud; /* for accept message, ud is accept id; for data, ud is size of data; */
+};
 
 #define SOCKET_TYPE_INVALID     0
 #define SOCKET_TYPE_RESERVE     1
@@ -142,6 +146,14 @@ struct socket_server {
 #define SOCKET_TYPE_PACCEPT     7
 #define SOCKET_TYPE_BIND        8
 #define SOCKET_TYPE_PIPE        9
+
+#define SOCKET_DATA     0
+#define SOCKET_CLOSE    1
+#define SOCKET_OPEN     2
+#define SOCKET_ACCEPT   3
+#define SOCKET_ERROR    4
+#define SOCKET_EXIT     5
+#define SOCKET_UDP      6
 
 #define HASH_ID(id) (((unsigned)id) % MAX_SOCKET)
 
@@ -200,13 +212,13 @@ socket_server_create() {
     int epoll_fd = engine_create();
 
     if (engine_invalid(epoll_fd)) {
-        fprintf(stderr, "create epoll failed.\n");
+        fprintf(stderr, "SocketEngine: create epoll failed.\n");
         return NULL;
     }
 
     if (pipe(pipe_fd)) {
         engine_release(epoll_fd);
-        fprintf(stderr, "create pipe pair failed.\n");
+        fprintf(stderr, "SocketEngine: create pipe pair failed.\n");
         return NULL;
     }
 
@@ -241,7 +253,7 @@ socket_server_create() {
     return ss;
 
 _failed:
-    fprintf(stderr, "add pipe recv fd to epoll failed.\n");
+    fprintf(stderr, "SocketEngine: add pipe recv fd to epoll failed.\n");
     close(pipe_fd[0]);
     close(pipe_fd[1]);
     engine_release(epoll_fd);
@@ -274,7 +286,7 @@ block_readpipe(int pipe_fd, void* buffer, int sz) {
             if (errno == EINTR) {
                 continue;
             }
-            fprintf(stderr, "read pipe error %s.\n", strerror(errno));
+            fprintf(stderr, "SocketEngine: read pipe error %s.\n", strerror(errno));
             return;
         }
         assert(n == sz);
@@ -324,7 +336,7 @@ send_engine_command(struct socket_server* ss, struct engine_command* cmd, uint8_
         int n = write(ss->send_command_fd, cmd, len + 2);
         if (n < 0) {
             if (errno != EINTR) {
-                fprintf(stderr, "send engine command error %s.\n", strerror(errno));
+                fprintf(stderr, "SocketEngine: send engine command error %s.\n", strerror(errno));
             }
             continue;
         }
@@ -333,31 +345,45 @@ send_engine_command(struct socket_server* ss, struct engine_command* cmd, uint8_
     }
 }
 
-static void
-exec_start_command(struct socket_server* ss, struct start_command* cmd) {
+static int
+exec_start_command(
+        struct socket_server* ss,
+        struct start_command* cmd,
+        struct socket_message* result) {
+
     fprintf(stdout, "exec start command - id(%d)\n", cmd->id);
 
     struct socket *s = &ss->socket_map[HASH_ID(cmd->id)];
     if (s == NULL) {
-        return;
+        return SOCKET_ERROR;
     }
 
     if (s->type == SOCKET_TYPE_INVALID || s->id != cmd->id) {
-        return;
+        return SOCKET_ERROR;
     }
 
     if (s->type == SOCKET_TYPE_PLISTEN) {
         if (engine_add(ss->epoll_fd, s->fd, s)) {
             /* force_close(); */
-            return;
+            return SOCKET_ERROR;
         }
 
         s->type = SOCKET_TYPE_LISTEN;
+
+        result->id = s->id;
+
+        return SOCKET_OPEN;
     }
+
+    return -1;
 }
 
-static void
-exec_listen_command(struct socket_server* ss, struct listen_command* cmd) {
+static int
+exec_listen_command(
+        struct socket_server* ss,
+        struct listen_command* cmd,
+        struct socket_message* result) {
+
     fprintf(stdout, "exec listen command - id(%d) fd(%d)\n", cmd->id, cmd->fd);
 
     struct socket* s = new_socket(ss, cmd->id, cmd->fd, SOCKET_TYPE_PLISTEN, false);
@@ -365,17 +391,22 @@ exec_listen_command(struct socket_server* ss, struct listen_command* cmd) {
         goto _failed;
     }
 
-    return;
+    return -1;
 
 _failed:
     close(cmd->fd);
     ss->socket_map[HASH_ID(cmd->id)].type = SOCKET_TYPE_INVALID;
 
-    return;
+    return SOCKET_ERROR;
 }
 
-static void
-process_engine_command(struct socket_server* ss, struct event* e, struct socket* s) {
+static int
+process_engine_command(
+        struct socket_server* ss,
+        struct event* e,
+        struct socket* s,
+        struct socket_message* result) {
+
     if (e->read) {
         uint8_t header[2];
         uint8_t buffer[256];
@@ -389,14 +420,12 @@ process_engine_command(struct socket_server* ss, struct event* e, struct socket*
 
         switch (type) {
             case 'S':
-                exec_start_command(ss, (struct start_command*)buffer);
-                return;
+                return exec_start_command(ss, (struct start_command*)buffer, result);
             case 'L':
-                exec_listen_command(ss, (struct listen_command*)buffer);
-                return;
+                return exec_listen_command(ss, (struct listen_command*)buffer, result);
             default:
-                fprintf(stderr, "unknown engine command.\n");
-                return;
+                fprintf(stderr, "SocketEngine: unknown engine command.\n");
+                return -1;
         }
     }
 }
@@ -469,12 +498,14 @@ raw_listen(const char* host, int port, int backlog) {
 }
 
 static int
-raw_accept(struct socket_server* ss, struct socket* s) {
+raw_accept(struct socket_server* ss, struct socket* s, struct socket_message* result) {
     union sockaddr_all u;
     socklen_t len = sizeof(u);
     int fd = accept(s->fd, &u.s, &len);
     if (fd < 0) {
         if (errno == EMFILE || errno == ENFILE) {
+            result->id = s->id;
+            result->ud = 0;
             return -1;
         } else {
             return 0;
@@ -496,11 +527,8 @@ raw_accept(struct socket_server* ss, struct socket* s) {
         return 0;
     }
 
-    /*
-    void* sin_addr = (u.s.sa_family == AF_INET) ? (void*)&u.v4.sin_addr : (void*)&u.v6.sin6_addr;
-    int sin_port = ntohs((u.s.sa_family == AF_INET) ? u.v4.sin_port : u.v6.sin6_port);
-    char tmp[INET6_ADDRSTRLEN];
-    */
+    result->id = s->id;
+    result->ud = id;
 
     return 1;
 }
@@ -539,7 +567,7 @@ socket_server_listen(struct socket_server* ss, const char* host, int port, int b
 }
 
 static int
-network_main_loop(struct socket_server* ss) {
+socket_server_poll(struct socket_server* ss, struct socket_message* result) {
     for (;;) {
 
         /* all event have process */
@@ -562,29 +590,53 @@ network_main_loop(struct socket_server* ss) {
         }
 
         switch (s->type) {
-            case SOCKET_TYPE_LISTEN: {
-                    raw_accept(ss, s);
-                }
+            case SOCKET_TYPE_CONNECTING:
+                // TODO
+                assert(false);
                 break;
             case SOCKET_TYPE_PIPE:
-                process_engine_command(ss, e, s);
+                return process_engine_command(ss, e, s, result);
+            case SOCKET_TYPE_LISTEN: {
+                    int ok = raw_accept(ss, s, result);
+                    if (ok > 0) {
+                        return SOCKET_ACCEPT;
+                    } else if (ok < 0) {
+                        return SOCKET_ERROR;
+                    }
+                    // when ok == 0, retry
+                }
+                break;
+            case SOCKET_TYPE_INVALID:
+                fprintf(stderr, "SocketEngine: invalid socket\n");
+                break;
+            default: {
+                    if (e->read) {
+                    }
+                    if (e->write) {
+                    }
+                }
                 break;
         }
 
     }
 }
 
-static int
-network_main_loop_wrapper(void* ud) {
-    struct socket_server* ss = (struct socket_server*)ud;
-
-    network_main_loop(ss);
-}
-
 static void*
 thread_network(void* ud) {
+    struct socket_server* ss = (struct socket_server*)ud;
+    struct socket_message result;
+
     for(;;) {
-        network_main_loop_wrapper(ud);
+        int type = socket_server_poll(ss, &result);
+
+        switch (type) {
+            case SOCKET_OPEN:
+                fprintf(stdout, "SOCKET OPEN: (%d)\n", result.id);
+                break;
+            case SOCKET_ACCEPT:
+                fprintf(stdout, "SOCKET ACCEPT: NEW SOCKET(%d) FROM LISTEN SOCKET(%d)\n", result.ud, result.id);
+                break;
+        }
     }
 }
 
