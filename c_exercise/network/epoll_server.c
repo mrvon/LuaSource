@@ -214,6 +214,31 @@ new_socket(struct socket_server* ss, int id, int fd, int type, int is_add) {
     return s;
 }
 
+static void
+force_close(struct socket_server* ss, struct socket* s, struct socket_message* result) {
+    result->id = s->id;
+    result->ud = 0;
+    result->data = NULL;
+
+    if (s->type == SOCKET_TYPE_INVALID) {
+        return;
+    }
+
+    assert(s->type != SOCKET_TYPE_RESERVE);
+
+    if (s->type != SOCKET_TYPE_PACCEPT && s->type != SOCKET_TYPE_PLISTEN) {
+        engine_del(ss->epoll_fd, s->fd);
+    }
+
+    if (s->type != SOCKET_TYPE_BIND) {
+        if (close(s->fd) < 0) {
+            perror("SocketEngine: close socket.");
+        }
+    }
+
+    s->type = SOCKET_TYPE_INVALID;
+}
+
 static struct socket_server*
 socket_server_create() {
     int pipe_fd[2];
@@ -271,12 +296,12 @@ _failed:
 
 static void
 socket_server_release(struct socket_server* ss) {
+    struct socket_message dummy;
     int i;
     for (i = 0; i < MAX_SOCKET; ++i) {
         struct socket*s = &ss->socket_map[i];
         if (s->type != SOCKET_TYPE_RESERVE) {
-            /* TODO */
-            /* force_close(); */
+            force_close(ss, s, &dummy);
         }
     }
     close(ss->send_command_fd);
@@ -610,8 +635,12 @@ read_socket_tcp(struct socket_server* ss, struct socket* s, struct socket_messag
 
     if (n == 0) {
         free((void*)buffer);
-        /* force_close(); */
+        force_close(ss, s, result);
         return SOCKET_CLOSE;
+    }
+
+    if (s->type == SOCKET_TYPE_HALFCLOSE) {
+        // TODO
     }
 
     result->id = s->id;
@@ -694,7 +723,10 @@ thread_network(void* ud) {
 
         switch (type) {
             case SOCKET_OPEN:
-                fprintf(stdout, "SOCKET OPEN: (%d)\n", result.id);
+                fprintf(stdout, "SOCKET OPEN: SOCKET(%d)\n", result.id);
+                break;
+            case SOCKET_CLOSE:
+                fprintf(stdout, "SOCKET CLOSE: SOCKET(%d)\n", result.id);
                 break;
             case SOCKET_ACCEPT:
                 fprintf(stdout, "SOCKET ACCEPT: NEW SOCKET(%d) FROM LISTEN SOCKET(%d)\n", result.ud, result.id);
