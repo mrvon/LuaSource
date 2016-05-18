@@ -25,6 +25,13 @@
 
 #define BACKLOG 32
 
+// EAGAIN and EWOULDBLOCK may be not the same value.
+#if (EAGAIN != EWOULDBLOCK)
+#define AGAIN_WOULDBLOCK EAGAIN : case EWOULDBLOCK
+#else
+#define AGAIN_WOULDBLOCK EAGAIN
+#endif
+
 /* ---------------------------------------------------------------------------*/
 /* simple interface */
 
@@ -134,6 +141,7 @@ struct socket_server {
 struct socket_message {
     int id; /* socket id */
     int ud; /* for accept message, ud is accept id; for data, ud is size of data; */
+    char* data;
 };
 
 #define SOCKET_TYPE_INVALID     0
@@ -351,6 +359,10 @@ exec_start_command(
         struct start_command* cmd,
         struct socket_message* result) {
 
+    result->id = cmd->id;
+    result->ud = 0;
+    result->data = NULL;
+
     fprintf(stdout, "exec start command - id(%d)\n", cmd->id);
 
     struct socket *s = &ss->socket_map[HASH_ID(cmd->id)];
@@ -370,7 +382,14 @@ exec_start_command(
 
         s->type = SOCKET_TYPE_LISTEN;
 
-        result->id = s->id;
+        return SOCKET_OPEN;
+    } else if (s->type == SOCKET_TYPE_PACCEPT) {
+        if (engine_add(ss->epoll_fd, s->fd, s)) {
+            /* force_close(); */
+            return SOCKET_ERROR;
+        }
+
+        s->type = SOCKET_TYPE_CONNECTED;
 
         return SOCKET_OPEN;
     }
@@ -566,6 +585,42 @@ socket_server_listen(struct socket_server* ss, const char* host, int port, int b
     return socket_id;
 }
 
+// return -1 (ignore) when error
+static int
+read_socket_tcp(struct socket_server* ss, struct socket* s, struct socket_message* result) {
+    const int sz = 1024; // TODO
+    char* buffer = malloc(sz);
+    int n = (int) read(s->fd, buffer, sz);
+
+    if (n < 0) {
+        free((void*)buffer);
+        switch (errno) {
+            case EINTR:
+                break;
+            case AGAIN_WOULDBLOCK:
+                fprintf(stderr, "SocketEngine: EAGAIN capture.\n");
+                break;
+            default:
+                // close when error
+                /* force_close(); */
+                return SOCKET_ERROR;
+        }
+        return -1;
+    }
+
+    if (n == 0) {
+        free((void*)buffer);
+        /* force_close(); */
+        return SOCKET_CLOSE;
+    }
+
+    result->id = s->id;
+    result->ud = n;
+    result->data = buffer;
+
+    return SOCKET_DATA;
+}
+
 static int
 socket_server_poll(struct socket_server* ss, struct socket_message* result) {
     for (;;) {
@@ -611,8 +666,16 @@ socket_server_poll(struct socket_server* ss, struct socket_message* result) {
                 break;
             default: {
                     if (e->read) {
+                        int type;
+                        type = read_socket_tcp(ss, s, result);
+
+                        if (type == -1) {
+                            break;
+                        }
+                        return type;
                     }
                     if (e->write) {
+                        /* TODO */
                     }
                 }
                 break;
@@ -635,6 +698,10 @@ thread_network(void* ud) {
                 break;
             case SOCKET_ACCEPT:
                 fprintf(stdout, "SOCKET ACCEPT: NEW SOCKET(%d) FROM LISTEN SOCKET(%d)\n", result.ud, result.id);
+                socket_server_start(ss, result.ud);
+                break;
+            case SOCKET_DATA:
+                fprintf(stdout, "SOCKET DATA: FROM SOCKET(%d) SIZE(%d)\n", result.id, result.ud);
                 break;
         }
     }
