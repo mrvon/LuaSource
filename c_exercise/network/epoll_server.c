@@ -25,7 +25,7 @@
 
 #define BACKLOG 32
 
-// EAGAIN and EWOULDBLOCK may be not the same value.
+// EAGAIN and EWOULDBLOCK may be not the same value. see *Man 2 socket*
 #if (EAGAIN != EWOULDBLOCK)
 #define AGAIN_WOULDBLOCK EAGAIN : case EWOULDBLOCK
 #else
@@ -33,7 +33,7 @@
 #endif
 
 /* ---------------------------------------------------------------------------*/
-/* simple interface */
+/* simple epoll interface */
 
 struct event {
 	void* s;        /* application socket */
@@ -670,15 +670,15 @@ read_socket_tcp(struct socket_server* ss, struct socket* s, struct socket_messag
     if (n < 0) {
         free((void*)buffer);
         switch (errno) {
-            // the call was interrupted by a signal before any data was read.
             case EINTR:
+                // the call was interrupted by a signal before any data was read.
                 break;
-            // EAGAIN or EWOULDBLOCK
-            // The file descriptor fd refers to a socket and has been marked nonblocking
-            // (O_NONBLOCK), and the read would block. POSIX.1-2001 allows either error
-            // to be returned for this case, and does not require these constants to have
-            // the same value, so a portable application should check for both possibilities.
             case AGAIN_WOULDBLOCK:
+                // EAGAIN or EWOULDBLOCK
+                // The file descriptor fd refers to a socket and has been marked nonblocking
+                // (O_NONBLOCK), and the read would block. POSIX.1-2001 allows either error
+                // to be returned for this case, and does not require these constants to have
+                // the same value, so a portable application should check for both possibilities.
                 fprintf(stderr, "SocketEngine: EAGAIN capture.\n");
                 break;
             default:
@@ -751,6 +751,8 @@ socket_server_poll(struct socket_server* ss, struct socket_message* result) {
                 fprintf(stderr, "SocketEngine: invalid socket\n");
                 break;
             default: {
+                    assert(s->type == SOCKET_TYPE_CONNECTED); // FIXME
+
                     if (e->read) {
                         int type;
                         type = read_socket_tcp(ss, s, result);
