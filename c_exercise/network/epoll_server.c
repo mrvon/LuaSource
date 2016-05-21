@@ -711,7 +711,7 @@ static int
 socket_server_poll(struct socket_server* ss, struct socket_message* result) {
     for (;;) {
 
-        /* all event have process */
+        /* all events have been processed, get new events from engine */
         if (ss->event_index == ss->event_count) {
             ss->event_count = engine_wait(ss->epoll_fd, ss->event_list, MAX_EVENT);
             ss->event_index = 0;
