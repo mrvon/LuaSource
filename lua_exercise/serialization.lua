@@ -68,11 +68,12 @@ function aux_serialize(out_arr, o, indent_level)
     end
 end
 
-
+--[[
 print(serialize({a = 12, b = 'lua', key = 'another "one"', "hello world"}))
 print(serialize({[1] = 12, [2] = 'lua', [3] = 'another "one"'}))
 print(serialize({["1a"] = 12, ["1b"] = 'lua', ["1c"] = 'another "one"'}))
 print(serialize({["1a"] = {nest_str = "Hello world", {nest_str = "Hi!", nest_str_2 = "World"}}, ["1b"] = 'lua', ["1c"] = 'another "one"'}))
+]]
 
 --------------------------------------------------------------------------------
 -- serialize support loop and share
@@ -127,7 +128,7 @@ local loop_t = {
 }
 loop_t.self = loop_t
 
--- print(loop_seri("loop_t", loop_t))
+print(loop_seri("loop_t", loop_t))
 
 function seri(seri_table)
     return "do local " .. loop_seri("ret", seri_table) .. "return ret end"
@@ -171,5 +172,7 @@ share_2.self = share_2
 share_1.ref = share_2
 share_2.ref = share_1
 
+--[[
 print(loop_seri(share_1.name, share_1, share_t))
 print(loop_seri(share_2.name, share_2, share_t))
+]]
