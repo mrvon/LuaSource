@@ -122,12 +122,28 @@ socket_keepalive(int fd) {
 #define MAX_EVENT   64
 #define MAX_SOCKET  (1<<16)
 
+// Link-list structure
+struct write_buffer {
+    struct write_buffer* next;  /* link to next buffer */
+    void* buffer;   /* data buffer */
+    char* write_ptr;/* current write pointer */
+    int sz;         /* remain size of data buffer haven't been write */
+};
+
+struct write_buff_list {
+    struct write_buffer* head;
+    struct write_buffer* tail;
+};
+
 /* application level socket */
 struct socket {
-    int id;             /* socket id */
-    int fd;             /* socket fd */
-    int type;           /* socket type */
-    int read_buff_size; /* read buffer size */
+    int id;     /* socket id */
+    int fd;     /* socket fd */
+    int type;   /* socket type */
+    int read_buff_size;          /* read buffer size */
+    int64_t write_buff_size;     /* current size of data in the write buff list */
+    struct write_buff_list high; /* high priority write buffer list */
+    struct write_buff_list low;  /* low priority write buffer list */
 };
 
 struct socket_server {
@@ -166,6 +182,9 @@ struct socket_message {
 #define SOCKET_EXIT     5
 #define SOCKET_UDP      6
 
+#define PRIORITY_HIGH   0
+#define PRIORITY_LOW    1
+
 #define HASH_ID(id) (((unsigned)id) % MAX_SOCKET)
 
 static int
@@ -198,6 +217,12 @@ generate_id(struct socket_server* ss) {
     return -1;
 }
 
+static inline void
+check_write_buff_list(struct write_buff_list* l) {
+    assert(l->head == NULL);
+    assert(l->tail == NULL);
+}
+
 static struct socket*
 new_socket(struct socket_server* ss, int id, int fd, int type, int is_add) {
     struct socket* s = &ss->socket_map[HASH_ID(id)];
@@ -214,6 +239,9 @@ new_socket(struct socket_server* ss, int id, int fd, int type, int is_add) {
     s->fd = fd;
     s->type = type;
     s->read_buff_size = MIN_READ_BUFFER;
+    s->write_buff_size = 0;
+    check_write_buff_list(&s->high);
+    check_write_buff_list(&s->low);
 
     return s;
 }
@@ -241,6 +269,12 @@ force_close(struct socket_server* ss, struct socket* s, struct socket_message* r
     }
 
     s->type = SOCKET_TYPE_INVALID;
+}
+
+static inline void
+clear_write_buff_list(struct write_buff_list* list) {
+    list->head = NULL;
+    list->tail = NULL;
 }
 
 static struct socket_server*
@@ -274,6 +308,8 @@ socket_server_create() {
     for (i = 0; i < MAX_SOCKET; ++i) {
         struct socket* s = &ss->socket_map[i];
         s->type = SOCKET_TYPE_INVALID;
+        clear_write_buff_list(&s->high);
+        clear_write_buff_list(&s->low);
     }
 
     /* It's not a real socket */
@@ -351,6 +387,12 @@ struct close_command {
     int id; /* socket id */
 };
 
+struct send_command {
+    int id; /* socket id */
+    char* buffer;
+    int sz; /* buffer size */
+};
+
 struct engine_command {
     uint8_t type;
     uint8_t len;
@@ -359,6 +401,7 @@ struct engine_command {
         struct start_command  start;
         struct listen_command listen;
         struct close_command  close;
+        struct send_command   send;
     } u;
 };
 
@@ -370,6 +413,185 @@ union sockaddr_all {
 	struct sockaddr_in v4;
 	struct sockaddr_in6 v6;
 };
+
+static struct write_buffer*
+append_send_buffer__(
+        struct socket_server* ss,
+        struct write_buff_list* l,
+        struct send_command* cmd,
+        int n) {
+
+    struct write_buffer* buf = malloc(sizeof(*buf));
+    buf->buffer = cmd->buffer;
+    buf->write_ptr = cmd->buffer + n;
+    buf->sz = cmd->sz;
+    buf->next = NULL;
+
+    // Link to write buffer list
+    if (l->head == NULL) {
+        l->head = l->tail = buf;
+    } else {
+        assert(l->tail != NULL);
+        assert(l->tail->next == NULL);
+        l->tail->next = buf;
+        l->tail = buf;
+    }
+
+    return buf;
+}
+
+// append data into high priority writting queue, and wait engine send it out.
+static void
+append_send_buffer_high(
+        struct socket_server* ss,
+        struct socket* s,
+        struct send_command* cmd,
+        int n) {
+    // n is mean write buffer offset
+    struct write_buffer* buf = append_send_buffer__(ss, &s->high, cmd, n);
+    // accumulate buf->sz(buff have not yet send) to write_buff_size
+    s->write_buff_size += buf->sz;
+}
+
+// append data into low priority writting queue, and wait engine send it out.
+static void
+append_send_buffer_low(
+        struct socket_server* ss,
+        struct socket* s,
+        struct send_command* cmd) {
+    struct write_buffer* buf = append_send_buffer__(ss, &s->low, cmd, 0);
+    // accumulate buf->sz(buff have not yet send) to write_buff_size
+    s->write_buff_size += buf->sz;
+}
+
+static inline int
+is_send_buffer_empty(struct socket* s) {
+    return (s->high.head == NULL && s->low.head == NULL);
+}
+
+static inline void
+write_buffer_free(struct write_buffer* buff) {
+    free(buff->buffer);
+    free(buff);
+}
+
+static int
+send_write_buff_list(
+        struct socket_server* ss,
+        struct socket* s,
+        struct write_buff_list* l,
+        struct socket_message* result) {
+
+    while (l->head) {
+        struct write_buffer* tmp = l->head;
+
+        for (;;) {
+            int sz = write(s->fd, tmp->write_ptr, tmp->sz);
+            if (sz < 0) {
+                switch(errno) {
+                    case EINTR:
+                        continue;
+                    case AGAIN_WOULDBLOCK:
+                        return -1;
+                }
+                force_close(ss, s, result);
+                return SOCKET_CLOSE;
+            }
+
+            s->write_buff_size -= sz;
+
+            // Only send partial buffer, move write_ptr and minus sz
+            if (sz != tmp->sz) {
+                tmp->write_ptr += sz;
+                tmp->sz -= sz;
+                return -1;
+            }
+            break;
+        }
+
+        l->head = tmp->next;
+        write_buffer_free(tmp);
+    }
+
+    l->tail = NULL;
+
+    return -1;
+}
+
+static inline int
+is_write_buff_list_uncomplete(struct write_buff_list* s) {
+    struct write_buffer* buf = s->head;
+    if (buf == NULL) {
+        return 0;
+    }
+
+    return (void*)buf->write_ptr != buf->buffer;
+}
+
+static void
+raise_write_buff_list_uncomplete(
+        struct write_buff_list* high,
+        struct write_buff_list* low) {
+
+    struct write_buffer* tmp = low->head;
+    low->head = tmp->next;
+    if (low->head == NULL) {
+        low->tail = NULL;
+    }
+
+    // move head of low priority list (tmp) to the empty high priority list
+    assert(high->head == NULL);
+
+    tmp->next = NULL;
+    high->head = high->tail = tmp;
+}
+
+/*
+	Each socket has two write buffer list, high priority and low priority.
+
+	1. send high list as far as possible.
+	2. If high list is empty, try to send low list.
+	3. If low list head is uncomplete (send a part before), move the head of low list to empty high list (call raise_write_buff_list_uncomplete) .
+	4. If two lists are both empty, turn off the event.
+ */
+static int
+send_write_buffer(
+        struct socket_server* ss,
+        struct socket* s,
+        struct socket_message* result) {
+    // Low priority list is never uncomplete TODO
+    assert(! is_write_buff_list_uncomplete(&s->low));
+
+    // STEP 1
+    if (send_write_buff_list(ss, s, &s->high, result) == SOCKET_CLOSE) {
+        return SOCKET_CLOSE;
+    }
+
+    // HIGH PRIORITY List is empty
+    if (s->high.head == NULL) {
+        // STEP 2
+        // LOW PRIORITY List is not empty
+        if (s->low.head != NULL) {
+            if (send_write_buff_list(ss, s, &s->low, result) == SOCKET_CLOSE) {
+                return SOCKET_CLOSE;
+            }
+            // STEP 3
+            if (is_write_buff_list_uncomplete(&s->low)) {
+                raise_write_buff_list_uncomplete(&s->high, &s->low);
+            }
+        } else {
+            // STEP 4
+            engine_write(ss->epoll_fd, s->fd, s, false);
+
+            if (s->type == SOCKET_TYPE_HALFCLOSE) {
+                force_close(ss, s, result);
+                return SOCKET_CLOSE;
+            }
+        }
+    }
+
+    return -1;
+}
 
 static void
 send_engine_command(struct socket_server* ss, struct engine_command* cmd, uint8_t type, uint8_t len) {
@@ -465,7 +687,7 @@ close_socket(
 
     fprintf(stdout, "EXEC CLOSE SOCKET CMD - id(%d)\n", cmd->id);
 
-    struct socket *s = &ss->socket_map[HASH_ID(cmd->id)];
+    struct socket* s = &ss->socket_map[HASH_ID(cmd->id)];
     if (s->type == SOCKET_TYPE_INVALID || s->id != cmd->id) {
         result->id = cmd->id;
         result->ud = 0;
@@ -479,6 +701,67 @@ close_socket(
     force_close(ss, s, result);
     return SOCKET_CLOSE;
 }
+
+static int
+send_socket(
+        struct socket_server* ss,
+        struct send_command* cmd,
+        struct socket_message* result,
+        int priority) {
+
+    fprintf(stdout, "EXEC SEND SOCKET CMD - id(%d)\n", cmd->id);
+
+    struct socket* s = &ss->socket_map[HASH_ID(cmd->id)];
+    if (s->type == SOCKET_TYPE_INVALID || s->id != cmd->id
+        || s->type == SOCKET_TYPE_HALFCLOSE
+        || s->type == SOCKET_TYPE_PACCEPT) {
+        free((void*)cmd->buffer);
+        return -1;
+    }
+
+    if (s->type == SOCKET_TYPE_PLISTEN || s->type == SOCKET_TYPE_LISTEN) {
+        free((void*)cmd->buffer);
+        fprintf(stderr, "SocketEngine: write to listen fd %d.\n", cmd->id);
+        return -1;
+    }
+
+    if (is_send_buffer_empty(s) && s->type == SOCKET_TYPE_CONNECTED) {
+        // Send directly
+        int n = write(s->fd, cmd->buffer, cmd->sz);
+        if (n < 0) {
+            switch(errno) {
+                case EINTR:
+                case AGAIN_WOULDBLOCK:
+                    n = 0;
+                    break;
+                default:
+                    fprintf(stderr, "SocketEngine: write to %d (fd = %d) error:%s.\n",
+                            s->id, s->fd, strerror(errno));
+                    force_close(ss, s, result);
+                    free((void*)cmd->buffer);
+                    return SOCKET_CLOSE;
+            }
+        }
+
+        if (n == cmd->sz) {
+            free((void*)cmd->buffer);
+            return -1;
+        }
+
+        // add to high priority list, even priority == PRIORITY_LOW,
+        // because high priority is empty now!
+        append_send_buffer_high(ss, s, cmd, n);
+    } else {
+        if (priority == PRIORITY_LOW) {
+            append_send_buffer_low(ss, s, cmd);
+        } else {
+            append_send_buffer_high(ss, s, cmd, 0);
+        }
+    }
+
+    return -1;
+}
+
 
 static int
 process_engine_command(
@@ -505,6 +788,10 @@ process_engine_command(
                 return listen_socket(ss, (struct listen_command*)buffer, result);
             case 'K':
                 return close_socket(ss, (struct close_command*)buffer, result);
+            case 'D':
+                return send_socket(ss, (struct send_command*)buffer, result, PRIORITY_HIGH);
+            case 'P':
+                return send_socket(ss, (struct send_command*)buffer, result, PRIORITY_LOW);
             default:
                 fprintf(stderr, "SocketEngine: unknown engine command.\n");
                 return -1;
@@ -616,7 +903,9 @@ raw_accept(struct socket_server* ss, struct socket* s, struct socket_message* re
 }
 
 /* ---------------------------------------------------------------------------*/
-static void
+/* socket server interface */
+
+void
 socket_server_start(struct socket_server* ss, int id) {
     struct engine_command cmd;
 
@@ -625,7 +914,7 @@ socket_server_start(struct socket_server* ss, int id) {
     send_engine_command(ss, &cmd, 'S', sizeof(cmd.u.start));
 }
 
-static int
+int
 socket_server_listen(struct socket_server* ss, const char* host, int port, int backlog) {
     int listen_fd = raw_listen(host, port, backlog);
     if (listen_fd < 0) {
@@ -648,7 +937,7 @@ socket_server_listen(struct socket_server* ss, const char* host, int port, int b
     return socket_id;
 }
 
-static void
+void
 socket_server_close(struct socket_server* ss, int id) {
     struct engine_command cmd;
 
@@ -658,9 +947,51 @@ socket_server_close(struct socket_server* ss, int id) {
 }
 
 // Different from socket_server_close is that will not half close when send buffer still have data in it.
-static void
+void
 socket_server_shutdown() {
     // TODO
+}
+
+// return -1 when error
+int64_t
+socket_server_send(struct socket_server* ss, int id, const void* buffer, int sz) {
+    struct socket* s = &ss->socket_map[HASH_ID(id)];
+    if (s->id != id || s->type == SOCKET_TYPE_INVALID) {
+        free((void*)buffer);
+        return -1;
+    }
+
+    struct engine_command cmd;
+
+    cmd.u.send.id = id;
+    cmd.u.send.buffer = (char*)buffer;
+    cmd.u.send.sz = sz;
+
+    send_engine_command(ss, &cmd, 'D', sizeof(cmd.u.send));
+
+    return s->write_buff_size;
+}
+
+void
+socket_server_send_lowpriority(
+        struct socket_server* ss,
+        int id,
+        const void* buffer,
+        int sz) {
+
+    struct socket* s = &ss->socket_map[HASH_ID(id)];
+    if (s->id != id || s->type == SOCKET_TYPE_INVALID) {
+        free((void*)buffer);
+        return;
+    }
+
+    struct engine_command cmd;
+
+    cmd.u.send.id = id;
+    cmd.u.send.buffer = (char*)buffer;
+    cmd.u.send.sz = sz;
+
+    send_engine_command(ss, &cmd, 'P', sizeof(cmd.u.send));
 }
 
 // return -1 (ignore) when error
@@ -717,7 +1048,7 @@ read_socket_tcp(struct socket_server* ss, struct socket* s, struct socket_messag
     return SOCKET_DATA;
 }
 
-static int
+int
 socket_server_poll(struct socket_server* ss, struct socket_message* result) {
     for (;;) {
 
@@ -773,7 +1104,13 @@ socket_server_poll(struct socket_server* ss, struct socket_message* result) {
                         return type;
                     }
                     if (e->write) {
-                        /* TODO */
+                        int type = send_write_buffer(ss, s, result);
+                        if (type == -1) {
+                            break;
+                        }
+                        else {
+                            return type;
+                        }
                     }
                 }
                 break;
@@ -782,6 +1119,7 @@ socket_server_poll(struct socket_server* ss, struct socket_message* result) {
     }
 }
 
+/* ---------------------------------------------------------------------------*/
 static void*
 thread_network(void* ud) {
     struct socket_server* ss = (struct socket_server*)ud;
