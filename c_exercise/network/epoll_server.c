@@ -317,6 +317,8 @@ block_readpipe(int pipe_fd, void* buffer, int sz) {
         int n = read(pipe_fd, buffer, sz);
         if (n < 0) {
             if (errno == EINTR) {
+                // the call was interrupted by a signal before any data was read,
+                // so retry it.
                 continue;
             }
             fprintf(stderr, "SocketEngine: read pipe error %s.\n", strerror(errno));
@@ -376,6 +378,8 @@ send_engine_command(struct socket_server* ss, struct engine_command* cmd, uint8_
             if (errno != EINTR) {
                 fprintf(stderr, "SocketEngine: send engine command error %s.\n", strerror(errno));
             }
+            // the call was interrupted by a signal before any data was read,
+            // so retry it.
             continue;
         }
         assert(n == len + 2);
@@ -384,7 +388,7 @@ send_engine_command(struct socket_server* ss, struct engine_command* cmd, uint8_
 }
 
 static int
-exec_start_socket(
+start_socket(
         struct socket_server* ss,
         struct start_command* cmd,
         struct socket_message* result) {
@@ -393,7 +397,7 @@ exec_start_socket(
     result->ud = 0;
     result->data = NULL;
 
-    fprintf(stdout, "exec start socket - id(%d)\n", cmd->id);
+    fprintf(stdout, "EXEC START SOCKET CMD - id(%d)\n", cmd->id);
 
     struct socket *s = &ss->socket_map[HASH_ID(cmd->id)];
     if (s == NULL) {
@@ -428,12 +432,12 @@ exec_start_socket(
 }
 
 static int
-exec_listen_socket(
+listen_socket(
         struct socket_server* ss,
         struct listen_command* cmd,
         struct socket_message* result) {
 
-    fprintf(stdout, "exec listen socket - id(%d) fd(%d)\n", cmd->id, cmd->fd);
+    fprintf(stdout, "EXEC LISTEN SOCKET CMD - id(%d) fd(%d)\n", cmd->id, cmd->fd);
 
     struct socket* s = new_socket(ss, cmd->id, cmd->fd, SOCKET_TYPE_PLISTEN, false);
     if (s == NULL) {
@@ -450,12 +454,12 @@ _failed:
 }
 
 static int
-exec_close_socket(
+close_socket(
         struct socket_server* ss,
         struct close_command* cmd,
         struct socket_message* result) {
 
-    fprintf(stdout, "exec close socket - id(%d)\n", cmd->id);
+    fprintf(stdout, "EXEC CLOSE SOCKET CMD - id(%d)\n", cmd->id);
 
     struct socket *s = &ss->socket_map[HASH_ID(cmd->id)];
     if (s->type == SOCKET_TYPE_INVALID || s->id != cmd->id) {
@@ -492,11 +496,11 @@ process_engine_command(
 
         switch (type) {
             case 'S':
-                return exec_start_socket(ss, (struct start_command*)buffer, result);
+                return start_socket(ss, (struct start_command*)buffer, result);
             case 'L':
-                return exec_listen_socket(ss, (struct listen_command*)buffer, result);
+                return listen_socket(ss, (struct listen_command*)buffer, result);
             case 'K':
-                return exec_close_socket(ss, (struct close_command*)buffer, result);
+                return close_socket(ss, (struct close_command*)buffer, result);
             default:
                 fprintf(stderr, "SocketEngine: unknown engine command.\n");
                 return -1;
@@ -662,22 +666,30 @@ read_socket_tcp(struct socket_server* ss, struct socket* s, struct socket_messag
     char* buffer = malloc(sz);
     int n = (int) read(s->fd, buffer, sz);
 
+    // -1 indicates error
     if (n < 0) {
         free((void*)buffer);
         switch (errno) {
+            // the call was interrupted by a signal before any data was read.
             case EINTR:
                 break;
+            // EAGAIN or EWOULDBLOCK
+            // The file descriptor fd refers to a socket and has been marked nonblocking
+            // (O_NONBLOCK), and the read would block. POSIX.1-2001 allows either error
+            // to be returned for this case, and does not require these constants to have
+            // the same value, so a portable application should check for both possibilities.
             case AGAIN_WOULDBLOCK:
                 fprintf(stderr, "SocketEngine: EAGAIN capture.\n");
                 break;
             default:
                 // close when error
-                /* force_close(); */
+                force_close(ss, s, result);
                 return SOCKET_ERROR;
         }
         return -1;
     }
 
+    // zero indicates socket close
     if (n == 0) {
         free((void*)buffer);
         force_close(ss, s, result);
