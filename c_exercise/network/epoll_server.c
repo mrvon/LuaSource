@@ -25,6 +25,8 @@
 
 #define BACKLOG 32
 
+#define MIN_READ_BUFFER 64
+
 // EAGAIN and EWOULDBLOCK may be not the same value. see *Man 2 socket*
 #if (EAGAIN != EWOULDBLOCK)
 #define AGAIN_WOULDBLOCK EAGAIN : case EWOULDBLOCK
@@ -125,6 +127,7 @@ struct socket {
     int id;             /* socket id */
     int fd;             /* socket fd */
     int type;           /* socket type */
+    int read_buff_size; /* read buffer size */
 };
 
 struct socket_server {
@@ -210,6 +213,7 @@ new_socket(struct socket_server* ss, int id, int fd, int type, int is_add) {
     s->id = id;
     s->fd = fd;
     s->type = type;
+    s->read_buff_size = MIN_READ_BUFFER;
 
     return s;
 }
@@ -662,9 +666,8 @@ socket_server_shutdown() {
 // return -1 (ignore) when error
 static int
 read_socket_tcp(struct socket_server* ss, struct socket* s, struct socket_message* result) {
-    const int sz = 1024; // TODO
-    char* buffer = malloc(sz);
-    int n = (int) read(s->fd, buffer, sz);
+    char* buffer = malloc(s->read_buff_size);
+    int n = (int) read(s->fd, buffer, s->read_buff_size);
 
     // -1 indicates error
     if (n < 0) {
@@ -698,6 +701,13 @@ read_socket_tcp(struct socket_server* ss, struct socket* s, struct socket_messag
 
     if (s->type == SOCKET_TYPE_HALFCLOSE) {
         // TODO
+    }
+
+    // Dynamic buffer size scaling
+    if (n == s->read_buff_size) {
+        s->read_buff_size *= 2;
+    } else if (s->read_buff_size > MIN_READ_BUFFER && n * 2 < s->read_buff_size) {
+        s->read_buff_size /= 2;
     }
 
     result->id = s->id;
