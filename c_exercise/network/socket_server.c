@@ -22,6 +22,10 @@
 /* atomic function */
 #include "atomic.h"
 
+#define ffprintf(fd, fmt, ...) \
+    fprintf(fd, fmt, ##__VA_ARGS__); \
+    fflush(fd);
+
 #define BACKLOG 32
 
 #define MIN_READ_BUFFER 64
@@ -204,13 +208,13 @@ socket_server_create() {
     int epoll_fd = engine_create();
 
     if (engine_invalid(epoll_fd)) {
-        fprintf(stderr, "SocketEngine: create epoll failed.\n");
+        ffprintf(stderr, "SocketEngine: create epoll failed.\n");
         return NULL;
     }
 
     if (pipe(pipe_fd)) {
         engine_release(epoll_fd);
-        fprintf(stderr, "SocketEngine: create pipe pair failed.\n");
+        ffprintf(stderr, "SocketEngine: create pipe pair failed.\n");
         return NULL;
     }
 
@@ -247,7 +251,7 @@ socket_server_create() {
     return ss;
 
 _failed:
-    fprintf(stderr, "SocketEngine: add pipe recv fd to epoll failed.\n");
+    ffprintf(stderr, "SocketEngine: add pipe recv fd to epoll failed.\n");
     close(pipe_fd[0]);
     close(pipe_fd[1]);
     engine_release(epoll_fd);
@@ -282,7 +286,7 @@ block_readpipe(int pipe_fd, void* buffer, int sz) {
                 // so retry it.
                 continue;
             }
-            fprintf(stderr, "SocketEngine: read pipe error %s.\n", strerror(errno));
+            ffprintf(stderr, "SocketEngine: read pipe error %s.\n", strerror(errno));
             return;
         }
         assert(n == sz);
@@ -523,7 +527,7 @@ send_engine_command(struct socket_server* ss, struct engine_command* cmd, uint8_
         int n = write(ss->send_command_fd, cmd, len + 2);
         if (n < 0) {
             if (errno != EINTR) {
-                fprintf(stderr, "SocketEngine: send engine command error %s.\n", strerror(errno));
+                ffprintf(stderr, "SocketEngine: send engine command error %s.\n", strerror(errno));
             }
             // the call was interrupted by a signal before any data was read,
             // so retry it.
@@ -544,7 +548,7 @@ start_socket(
     result->ud = 0;
     result->data = NULL;
 
-    fprintf(stdout, "EXEC START SOCKET CMD - id(%d)\n", cmd->id);
+    ffprintf(stdout, "EXEC START SOCKET CMD - id(%d)\n", cmd->id);
 
     struct socket *s = &ss->socket_map[HASH_ID(cmd->id)];
     if (s == NULL) {
@@ -584,7 +588,7 @@ listen_socket(
         struct listen_command* cmd,
         struct socket_message* result) {
 
-    fprintf(stdout, "EXEC LISTEN SOCKET CMD - id(%d) fd(%d)\n", cmd->id, cmd->fd);
+    ffprintf(stdout, "EXEC LISTEN SOCKET CMD - id(%d) fd(%d)\n", cmd->id, cmd->fd);
 
     struct socket* s = new_socket(ss, cmd->id, cmd->fd, SOCKET_TYPE_PLISTEN, false);
     if (s == NULL) {
@@ -606,7 +610,7 @@ close_socket(
         struct close_command* cmd,
         struct socket_message* result) {
 
-    fprintf(stdout, "EXEC CLOSE SOCKET CMD - id(%d)\n", cmd->id);
+    ffprintf(stdout, "EXEC CLOSE SOCKET CMD - id(%d)\n", cmd->id);
 
     struct socket* s = &ss->socket_map[HASH_ID(cmd->id)];
     if (s->type == SOCKET_TYPE_INVALID || s->id != cmd->id) {
@@ -630,7 +634,7 @@ send_socket(
         struct socket_message* result,
         int priority) {
 
-    fprintf(stdout, "EXEC SEND SOCKET CMD - id(%d)\n", cmd->id);
+    ffprintf(stdout, "EXEC SEND SOCKET CMD - id(%d)\n", cmd->id);
 
     struct socket* s = &ss->socket_map[HASH_ID(cmd->id)];
     if (s->type == SOCKET_TYPE_INVALID || s->id != cmd->id
@@ -642,7 +646,7 @@ send_socket(
 
     if (s->type == SOCKET_TYPE_PLISTEN || s->type == SOCKET_TYPE_LISTEN) {
         free((void*)cmd->buffer);
-        fprintf(stderr, "SocketEngine: write to listen fd %d.\n", cmd->id);
+        ffprintf(stderr, "SocketEngine: write to listen fd %d.\n", cmd->id);
         return -1;
     }
 
@@ -656,7 +660,7 @@ send_socket(
                     n = 0;
                     break;
                 default:
-                    fprintf(stderr, "SocketEngine: write to %d (fd = %d) error:%s.\n",
+                    ffprintf(stderr, "SocketEngine: write to %d (fd = %d) error:%s.\n",
                             s->id, s->fd, strerror(errno));
                     force_close(ss, s, result);
                     free((void*)cmd->buffer);
@@ -714,7 +718,7 @@ process_engine_command(
             case 'P':
                 return send_socket(ss, (struct send_command*)buffer, result, PRIORITY_LOW);
             default:
-                fprintf(stderr, "SocketEngine: unknown engine command.\n");
+                ffprintf(stderr, "SocketEngine: unknown engine command.\n");
                 return -1;
         }
     }
@@ -936,7 +940,7 @@ read_socket_tcp(struct socket_server* ss, struct socket* s, struct socket_messag
                 // (O_NONBLOCK), and the read would block. POSIX.1-2001 allows either error
                 // to be returned for this case, and does not require these constants to have
                 // the same value, so a portable application should check for both possibilities.
-                fprintf(stderr, "SocketEngine: EAGAIN capture.\n");
+                ffprintf(stderr, "SocketEngine: EAGAIN capture.\n");
                 break;
             default:
                 // close when error
@@ -1012,7 +1016,7 @@ socket_server_poll(struct socket_server* ss, struct socket_message* result) {
                 }
                 break;
             case SOCKET_TYPE_INVALID:
-                fprintf(stderr, "SocketEngine: invalid socket\n");
+                ffprintf(stderr, "SocketEngine: invalid socket\n");
                 break;
             default: {
                     assert(s->type == SOCKET_TYPE_CONNECTED); // FIXME
@@ -1054,24 +1058,24 @@ thread_network(void* ud) {
 
         switch (type) {
             case SOCKET_OPEN:
-                fprintf(stdout, "SOCKET OPEN: SOCKET(%d)\n", result.id);
+                ffprintf(stdout, "SOCKET OPEN: SOCKET(%d)\n", result.id);
                 break;
             case SOCKET_CLOSE:
-                fprintf(stdout, "SOCKET CLOSE: SOCKET(%d)\n", result.id);
+                ffprintf(stdout, "SOCKET CLOSE: SOCKET(%d)\n", result.id);
                 break;
             case SOCKET_ACCEPT:
-                fprintf(stdout, "SOCKET ACCEPT: NEW SOCKET(%d) FROM LISTEN SOCKET(%d)\n", result.ud, result.id);
+                ffprintf(stdout, "SOCKET ACCEPT: NEW SOCKET(%d) FROM LISTEN SOCKET(%d)\n", result.ud, result.id);
                 socket_server_start(ss, result.ud);
                 break;
             case SOCKET_DATA:
-                fprintf(stdout, "SOCKET DATA: FROM SOCKET(%d) SIZE(%d)\n", result.id, result.ud);
+                ffprintf(stdout, "SOCKET DATA: FROM SOCKET(%d) SIZE(%d)\n", result.id, result.ud);
                 for(i = 0; i < result.ud; ++i) {
                     if (result.data[i] == EOF) {
                         socket_server_close(ss, result.id);
                         break;
                     }
                     else {
-                        fprintf(stdout, "%c", result.data[i]);
+                        ffprintf(stdout, "%c", result.data[i]);
                     }
                 }
                 break;
@@ -1082,7 +1086,7 @@ thread_network(void* ud) {
 static void
 create_thread(pthread_t *thread, void *(*start_routine) (void *), void *arg) {
 	if (pthread_create(thread, NULL, start_routine, arg)) {
-		fprintf(stderr, "Create thread failed");
+		ffprintf(stderr, "Create thread failed");
 		exit(1);
 	}
 }
