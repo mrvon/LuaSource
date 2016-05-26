@@ -16,8 +16,12 @@ int main(void)
 	struct sockaddr_in daddr;
 	char packet[50];
 	/* point the iphdr to the beginning of the packet */
-	struct iphdr *ip = (struct iphdr *)packet;  
+	struct iphdr *ip = (struct iphdr *)packet;
 
+
+    /* On Linux when setting the protocol as IPPROTO_RAW, then by default the
+     * kernel sets the IP_HDRINCL option and thus does not prepend its own IP header.
+     */
 	if ((s = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0) {
 		perror("error:");
 		exit(EXIT_FAILURE);
@@ -28,7 +32,7 @@ int main(void)
 	inet_pton(AF_INET, DEST, (struct in_addr *)&daddr.sin_addr.s_addr);
 	memset(daddr.sin_zero, 0, sizeof(daddr.sin_zero));
 	memset(packet, 'A', sizeof(packet));   /* payload will be all As */
-	
+
 	ip->ihl = 5;
 	ip->version = 4;
 	ip->tos = 0;
@@ -42,7 +46,7 @@ int main(void)
 
 	while(1) {
 		sleep(1);
-		if (sendto(s, (char *)packet, sizeof(packet), 0, 
+		if (sendto(s, (char *)packet, sizeof(packet), 0,
 			(struct sockaddr *)&daddr, (socklen_t)sizeof(daddr)) < 0)
 			perror("packet send error:");
 	}
