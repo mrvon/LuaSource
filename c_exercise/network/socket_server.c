@@ -1092,6 +1092,9 @@ create_thread(pthread_t *thread, void *(*start_routine) (void *), void *arg) {
 }
 
 int main() {
+    const char* server_ip = "127.0.0.1";
+    const int server_port = 2013;
+
     struct socket_server* ss = socket_server_create();
     if (ss == NULL) {
         return 0;
@@ -1100,7 +1103,7 @@ int main() {
     pthread_t network;
     create_thread(&network, thread_network, ss);
 
-    int id = socket_server_listen(ss, "127.0.0.1", 5000, BACKLOG);
+    int id = socket_server_listen(ss, server_ip, server_port, BACKLOG);
     socket_server_start(ss, id);
 
     pthread_join(network, NULL);
