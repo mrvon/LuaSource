@@ -2,6 +2,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
 int main(int argc, char const* argv[]) {
     const char* server_ip = "127.0.0.1";
@@ -9,6 +11,7 @@ int main(int argc, char const* argv[]) {
 
     int fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) {
+        fprintf(stderr, "%s\n", strerror(errno));
         return 0;
     }
 
@@ -19,10 +22,25 @@ int main(int argc, char const* argv[]) {
 
     int r = connect(fd, (struct sockaddr*)& addr, sizeof(struct sockaddr_in));
     if (r == -1) {
+        fprintf(stderr, "%s\n", strerror(errno));
         return 0;
     }
 
     sleep(1);
+
+    r = shutdown(fd, SHUT_WR);
+    if (r == -1) {
+        fprintf(stderr, "%s\n", strerror(errno));
+        return 0;
+    }
+
+    sleep(1);
+
+    r = close(fd);
+    if (r == -1) {
+        fprintf(stderr, "%s\n", strerror(errno));
+        return 0;
+    }
 
     return 0;
 }
