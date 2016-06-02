@@ -7,6 +7,27 @@
 #define OK 0
 #define ERR 1
 
+static g_write_point = 0;
+static char g_output_buffer[1024] = {0};
+
+void reset_buffer() {
+    g_write_point = 0;
+    memset(g_output_buffer, 0, sizeof(g_output_buffer));
+}
+
+void push_char(char c) {
+    g_output_buffer[g_write_point] = c;
+    g_write_point++;
+}
+
+void push_string(const char* str) {
+    while (*str != EOF) {
+        g_output_buffer[g_write_point] = *str;
+        str++;
+        g_write_point++;
+    }
+}
+
 int read_identifier() {
     return OK;
 }
@@ -56,7 +77,11 @@ int read_c_comment() {
     int state = 1;
 
     c = getchar();
-    putchar(c);
+    if (c == EOF) {
+        return EOF;
+    }
+
+    push_char(c);
 
     while (! Accept[state] && ! Error[state]) {
         int t;
@@ -70,11 +95,15 @@ int read_c_comment() {
 
         int new_state = T[state][t];
 
-        assert(Advance[state][t]);
+        printf("State(%d) -> State(%d)\n", state, new_state);
 
-        if (Advance[state][t]) {
+        if (Advance[new_state][t]) {
             c = getchar();
-            putchar(c);
+            if (c == EOF) {
+                return EOF;
+            }
+
+            push_char(c);
         }
 
         state = new_state;
@@ -89,14 +118,18 @@ int read_c_comment() {
 
 int main() {
     while (true) {
+        reset_buffer();
+
         int r = read_c_comment();
 
         if (r == EOF) {
             break;
         } else if (r == OK) {
-            printf("%s\n", " Is a c comment");
+            push_string(" Is a c comment");
+            printf("%s\n", g_output_buffer);
         } else {
-            printf("%s\n", " Is not a c comment");
+            push_string(" Isn't a c comment");
+            printf("%s\n", g_output_buffer);
         }
     }
 
