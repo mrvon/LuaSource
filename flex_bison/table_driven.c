@@ -7,8 +7,9 @@
 #define OK 0
 #define ERR 1
 
-static g_write_point = 0;
-static char g_output_buffer[1024] = {0};
+const int BUF_SIZE = 1024;
+static int g_write_point = 0;
+static char g_output_buffer[BUF_SIZE] = {0};
 
 void reset_buffer() {
     g_write_point = 0;
@@ -16,6 +17,7 @@ void reset_buffer() {
 }
 
 void push_char(char c) {
+    assert(g_write_point < BUF_SIZE);
     g_output_buffer[g_write_point] = c;
     g_write_point++;
 }
