@@ -1,3 +1,10 @@
+/*
+ * RegularExpression -> NFA -> DFA -> Program
+ *
+ * This program show phase of DFA -> Program
+ * here we describe DFA as data structure(Accept, Error, Advance, T)
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
