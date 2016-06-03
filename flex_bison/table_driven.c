@@ -31,7 +31,80 @@ void push_string(const char* str) {
 }
 
 int read_identifier() {
-    return OK;
+    const int LETTER = 0;
+    const int DIGIT = 1;
+    const int OTHER = 2;
+
+    static int Accept[6] = {
+        0,  // no accept
+        0,  // state 1
+        0,  // state 2
+        1,  // state 3
+    };
+
+    static int Error[6] = {
+        1,  // state error
+        0,  // state 1
+        0,  // state 2
+        0,  // state 3
+    };
+
+    static int Advance[6][3] = {
+        {0, 0, 0}, // dummy
+        {1, 0, 0}, // state 1
+        {1, 1, 0}, // state 2
+        {0, 0, 0}, // state 3
+    };
+
+    static int T[6][3] = {
+        {0, 0, 0}, // dummy
+        {2, 0, 0}, // state 1
+        {2, 2, 3}, // state 2
+        {0, 0, 0}, // state 3
+    };
+
+    char c;
+    int state = 1;
+
+    c = getchar();
+    if (c == EOF) {
+        return EOF;
+    }
+
+    push_char(c);
+
+    while (! Accept[state] && ! Error[state]) {
+        int t;
+        if (isalpha(c)) {
+            t = LETTER;
+        } else if (isdigit(c)) {
+            t = DIGIT;
+        } else {
+            t = OTHER;
+        }
+
+        int new_state = T[state][t];
+
+        printf("State(%d) -> State(%d)\n", state, new_state);
+
+        if (Advance[new_state][t]) {
+            c = getchar();
+            if (c == EOF) {
+                return EOF;
+            }
+
+            push_char(c);
+        }
+
+        state = new_state;
+    }
+
+    if (Accept[state]) {
+        return OK;
+    } else {
+        return ERR;
+    }
+
 }
 
 int read_c_comment() {
@@ -118,7 +191,25 @@ int read_c_comment() {
     }
 }
 
-int main() {
+void test_identifier() {
+    while (true) {
+        reset_buffer();
+
+        int r = read_identifier();
+
+        if (r == EOF) {
+            break;
+        } else if (r == OK) {
+            push_string(" Is a Identifier");
+            printf("%s\n", g_output_buffer);
+        } else {
+            push_string(" Isn't a Identifier");
+            printf("%s\n", g_output_buffer);
+        }
+    }
+}
+
+void test_comment() {
     while (true) {
         reset_buffer();
 
@@ -134,7 +225,10 @@ int main() {
             printf("%s\n", g_output_buffer);
         }
     }
-
-    return 0;
 }
 
+int main() {
+    test_identifier();
+    /* test_comment(); */
+    return 0;
+}
