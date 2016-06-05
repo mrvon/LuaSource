@@ -38,14 +38,14 @@ local TokenType = {
 }
 
 local ReserveWords = {
-    ["if"]     = IF,
-    ["then"]   = THEN,
-    ["else"]   = ELSE,
-    ["end"]    = END,
-    ["repeat"] = REPEAT,
-    ["until"]  = UNTIL,
-    ["read"]   = READ,
-    ["write"]  = WRITE,
+    ["if"]     = TokenType.IF,
+    ["then"]   = TokenType.THEN,
+    ["else"]   = TokenType.ELSE,
+    ["end"]    = TokenType.END,
+    ["repeat"] = TokenType.REPEAT,
+    ["until"]  = TokenType.UNTIL,
+    ["read"]   = TokenType.READ,
+    ["write"]  = TokenType.WRITE,
 }
 
 local g_input_buffer = {}
@@ -158,7 +158,7 @@ local function get_next_token()
             end
         elseif state == StateType.INCOMMENT then
             save = false
-            if c == ')' then
+            if c == '}' then
                 state = StateType.START
             end
         elseif state == StateType.INASSIGN then
@@ -214,5 +214,9 @@ end
 
 while true do
     local token, token_string = get_next_token()
+    if token == TokenType.EOF then
+        break
+    end
+
     print(find_token_name(token), token_string)
 end
