@@ -178,11 +178,13 @@ TokenType getToken() {
             }
             break;
             case INID: {
-                /* backup in the input */
-                ungetNextChar();
-                save = FALSE;
-                state = DONE;
-                currentToken = ID;
+                if (! isalpha(c)) {
+                    /* backup in the input */
+                    ungetNextChar();
+                    save = FALSE;
+                    state = DONE;
+                    currentToken = ID;
+                }
             }
             break;
             case DONE:
