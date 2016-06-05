@@ -65,6 +65,10 @@ local function unget_char(c)
 end
 
 local function is_digit(c)
+    if c == nil then
+        return false
+    end
+
     local b = string.byte("0")
     local e = string.byte("9")
     local i = string.byte(c)
@@ -76,6 +80,10 @@ local function is_digit(c)
 end
 
 local function is_letter(c)
+    if c == nil then
+        return false
+    end
+
     local lb = string.byte("a")
     local le = string.byte("z")
     local ub = string.byte("A")
@@ -89,6 +97,10 @@ local function is_letter(c)
 end
 
 local function is_space(c)
+    if c == nil then
+        return false
+    end
+
     if c == ' ' or c == '\t' or c == '\n' then
         return true
     else
