@@ -101,7 +101,7 @@ local function is_space(c)
         return false
     end
 
-    if c == ' ' or c == '\t' or c == '\n' then
+    if c == ' ' or c == '\t' or c == '\n' or c == '\r' then
         return true
     else
         return false
