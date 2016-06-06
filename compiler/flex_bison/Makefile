@@ -2,7 +2,7 @@
 PLATFORM= none
 
 # bundle all
-all: wc calc
+all: wc calc line hex
 
 # unix wc
 wc: wc.l
@@ -15,11 +15,25 @@ calc: calc.l calc.y
 	flex -o calc_lexer.c calc.l
 	cc -o $@ calc_lexer.c calc_parser.c
 
+# line
+line: line.l
+	flex -o line.c line.l
+	cc -o $@ line.c
+
+# hex
+hex: hex.l
+	flex -o hex.c hex.l
+	cc -o $@ hex.c
+
 # clean auto generate file
 clean:
 	rm -f wc.c
 	rm -f calc_lexer.c calc_parser.h calc_parser.c
+	rm -f line.c
+	rm -f hex.c
 
 cleanall: clean
 	rm -f wc
 	rm -f calc
+	rm -f line
+	rm -f hex
