@@ -2,7 +2,7 @@
 PLATFORM= none
 
 # bundle all
-all: wc calc line hex select
+all: wc calc line hex select lowercase
 
 # unix wc
 wc: wc.l
@@ -30,6 +30,11 @@ select: select.l
 	flex -o select.c select.l
 	cc -o $@ select.c
 
+# lowercase
+lowercase: lowercase.l
+	flex -o lowercase.c lowercase.l
+	cc -o $@ lowercase.c
+
 # clean auto generate file
 clean:
 	rm -f wc.c
@@ -37,6 +42,7 @@ clean:
 	rm -f line.c
 	rm -f hex.c
 	rm -f select.c
+	rm -f lowercase.c
 
 cleanall: clean
 	rm -f wc
@@ -44,3 +50,4 @@ cleanall: clean
 	rm -f line
 	rm -f hex
 	rm -f select
+	rm -f lowercase
