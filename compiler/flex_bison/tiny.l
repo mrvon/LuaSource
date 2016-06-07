@@ -59,6 +59,7 @@ whitespace  [ \t]+
 ";"             { return SEMI; }
 {number}        { return NUM; }
 {identifier}    { return ID; }
+{newline}       { /* do nothing */ }
 {whitespace}    { /* skip whitespace */ }
 "{"             {
     char c;
@@ -79,7 +80,7 @@ int main() {
             break;
         }
 
-        fprintf(yyout, "TOKEN (%d)%s ", token, yytext);
+        fprintf(yyout, "TOKEN(%d)\t%s\n", token, yytext);
     }
     return 0;
 }
