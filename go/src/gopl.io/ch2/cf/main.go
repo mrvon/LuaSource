@@ -3,12 +3,21 @@ package main
 
 import (
 	"fmt"
-	"gopl.io/ch2/tempconv"
 	"os"
 	"strconv"
+
+	"gopl.io/ch2/tempconv"
 )
 
 func main() {
+	// fmt.Println(tempconv.AbsoluteZeroC)
+	// fmt.Println(tempconv.FreezingC)
+	// fmt.Println(tempconv.BoilingC)
+
+	// fmt.Println(tempconv.CToF(tempconv.AbsoluteZeroC))
+	// fmt.Println(tempconv.CToF(tempconv.FreezingC))
+	// fmt.Println(tempconv.CToF(tempconv.BoilingC))
+
 	for _, arg := range os.Args[1:] {
 		t, err := strconv.ParseFloat(arg, 64)
 
