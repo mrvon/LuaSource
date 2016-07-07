@@ -32,13 +32,7 @@ func original_main() {
 }
 
 func main() {
-	http_prefix := "http://"
-
 	for _, url := range os.Args[1:] {
-		if !strings.HasPrefix(url, http_prefix) {
-			url = http_prefix + url
-		}
-
 		resp, err := http.Get(url)
 
 		if err != nil {
