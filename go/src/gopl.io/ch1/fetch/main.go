@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 )
 
 func original_main() {
