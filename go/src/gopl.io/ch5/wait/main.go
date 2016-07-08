@@ -30,7 +30,6 @@ func main() {
 
 	if err := WaitForServer(url); err != nil {
 		log.Fatalf("Site is down: %v\n", err)
-		os.Exit(1)
 	}
 
 	fmt.Println("OK")
