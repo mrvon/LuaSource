@@ -40,9 +40,9 @@ func main() {
 	for _, arg := range os.Args[1:] {
 		filename, n, err := fetch(arg)
 		if err != nil {
-			log.Printf("fetch %s : %v\n", arg, err)
+			log.Printf("fetch %s: %v\n", arg, err)
 		} else {
-			log.Printf("fetch %s (file:%s) (size:%d) successful\n", arg, filename, n)
+			log.Printf("fetch %s -> %s (%d bytes) successful\n", arg, filename, n)
 		}
 	}
 }
