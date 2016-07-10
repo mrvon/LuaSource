@@ -1,4 +1,4 @@
-// intsToString is like fmt.Sprintf(values) but adds commas.
+// intsToString is like fmt.Sprint(values) but adds commas.
 package main
 
 import (
