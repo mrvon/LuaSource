@@ -114,6 +114,36 @@ func add_edge(graph *Graph, from_id int, to_id int) {
 	graph.adjancency_list[from_id] = append(graph.adjancency_list[from_id], to_id)
 }
 
+func print_path(graph *Graph, from_id int, to_id int) {
+	from := graph.vertex_list[from_id]
+	if from == nil {
+		return
+	}
+
+	to := graph.vertex_list[to_id]
+	if to == nil {
+		return
+	}
+
+	fmt.Printf("Path from vertex(%d) to vertex(%d)\n", from_id, to_id)
+	fmt.Printf("----------------------------------\n")
+	aux_print_path(graph, from_id, to_id)
+	fmt.Printf("----------------------------------\n")
+}
+
+func aux_print_path(graph *Graph, from_id int, to_id int) {
+	to := graph.vertex_list[to_id]
+
+	if from_id == to_id {
+		fmt.Printf("vertex id(%d)\n", to_id)
+	} else if to.parent == nil {
+		fmt.Printf("No path from %d to %d\n", from_id, to_id)
+	} else {
+		aux_print_path(graph, from_id, to.parent.id)
+		fmt.Printf("vertex id(%d)\n", to_id)
+	}
+}
+
 func main() {
 	graph := Graph{}
 
@@ -152,4 +182,8 @@ func main() {
 			fmt.Printf("parent(%d)\n", vertex.parent.id)
 		}
 	}
+
+	print_path(&graph, 1, 10)
+	print_path(&graph, 2, 9)
+	print_path(&graph, 2, 7)
 }
