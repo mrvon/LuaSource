@@ -5,6 +5,9 @@ import (
 	"fmt"
 )
 
+func diff_bit(c1, c2 [32]byte) {
+}
+
 func main() {
 	c1 := sha256.Sum256([]byte("x"))
 	c2 := sha256.Sum256([]byte("X"))
