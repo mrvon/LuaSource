@@ -24,7 +24,9 @@ BFS(G, s)
 
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 const (
 	WHITE = iota
@@ -36,7 +38,7 @@ type Vertex struct {
 	id       int
 	color    int
 	distance int
-	parent   int
+	parent   *Vertex
 }
 
 type Graph struct {
@@ -70,7 +72,7 @@ func BFS(graph *Graph, source_id int) {
 	source := graph.vertex_list[source_id]
 	source.color = GRAY
 	source.distance = 0
-	source.parent = -1
+	source.parent = nil
 
 	Q := Queue{}
 
@@ -85,7 +87,7 @@ func BFS(graph *Graph, source_id int) {
 			if v_vertex.color == WHITE {
 				v_vertex.color = GRAY
 				v_vertex.distance = u_vertex.distance + 1
-				v_vertex.parent = u
+				v_vertex.parent = u_vertex
 				enqueue(&Q, v)
 			}
 		}
@@ -101,7 +103,7 @@ func add_vertex(graph *Graph, id int) {
 		id:       id,
 		color:    WHITE,
 		distance: -1,
-		parent:   -1,
+		parent:   nil,
 	}
 }
 
@@ -139,7 +141,15 @@ func main() {
 	BFS(&graph, 1)
 
 	for _, vertex := range graph.vertex_list {
-		fmt.Printf("id(%d)\tcolor(%d)\td(%d)\tp(%d)\n",
-			vertex.id, vertex.color, vertex.distance, vertex.parent)
+		fmt.Printf("vertex id(%d)\tcolor(%d)\tdistance(%d)\t",
+			vertex.id,
+			vertex.color,
+			vertex.distance)
+
+		if vertex.parent == nil {
+			fmt.Printf("parent(nil)\n")
+		} else {
+			fmt.Printf("parent(%d)\n", vertex.parent.id)
+		}
 	}
 }
