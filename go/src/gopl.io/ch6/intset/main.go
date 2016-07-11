@@ -126,6 +126,18 @@ func (s *IntSet) SymmetricDifference(t *IntSet) {
 	s.UnionWith(n)
 }
 
+func (s *IntSet) Elems() []int {
+	var elems []int
+	for i, word := range s.words {
+		for j := 0; j < 64; j++ {
+			if word&(1<<uint(j)) != 0 {
+				elems = append(elems, 64*i+j)
+			}
+		}
+	}
+	return elems
+}
+
 func main() {
 	var x IntSet
 	var y IntSet
