@@ -3,6 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
+	"os"
 )
 
 type ByteCounter int
@@ -46,6 +48,25 @@ func (c *LineCounter) Write(p []byte) (int, error) {
 	}
 }
 
+type countingWriter struct {
+	count  *int64
+	writer io.Writer
+}
+
+func (c countingWriter) Write(p []byte) (int, error) {
+	n, err := c.writer.Write(p)
+	if err == nil {
+		*(c.count) += int64(n)
+	}
+	return n, err
+}
+
+func CountingWriter(w io.Writer) (io.Writer, *int64) {
+	var count int64
+	wrapper := countingWriter{&count, w}
+	return wrapper, wrapper.count
+}
+
 func main() {
 	var c ByteCounter
 	c.Write([]byte("hello"))
@@ -63,4 +84,10 @@ func main() {
 	var c3 LineCounter
 	c3.Write([]byte("hello world \ngo go\n go"))
 	fmt.Println(c3)
+
+	stdout, count := CountingWriter(os.Stdout)
+	stdout.Write([]byte("Hello world\n"))
+	fmt.Println(*count)
+	stdout.Write([]byte("Hello world\n"))
+	fmt.Println(*count)
 }
