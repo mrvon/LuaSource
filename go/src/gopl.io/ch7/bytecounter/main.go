@@ -63,7 +63,7 @@ func (c countingWriter) Write(p []byte) (int, error) {
 
 func CountingWriter(w io.Writer) (io.Writer, *int64) {
 	var count int64
-	wrapper := countingWriter{&count, w}
+	wrapper := &countingWriter{&count, w}
 	return wrapper, wrapper.count
 }
 
