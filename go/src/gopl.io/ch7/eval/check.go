@@ -22,8 +22,8 @@ func (u unary) Check(vars map[Var]bool) error {
 }
 
 func (b binary) Check(vars map[Var]bool) error {
-	if !strings.ContainsRune("+-*/", u.op) {
-		return fmt.Errorf("unexprected binary op %q", u.op)
+	if !strings.ContainsRune("+-*/", b.op) {
+		return fmt.Errorf("unexprected binary op %q", b.op)
 	}
 	if err := b.x.Check(vars); err != nil {
 		return err

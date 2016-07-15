@@ -46,7 +46,7 @@ func (c call) Eval(env Env) float64 {
 	case "sin":
 		return math.Sin(c.args[0].Eval(env))
 	case "sqrt":
-		return math.sqrt(c.args[0].Eval(env))
+		return math.Sqrt(c.args[0].Eval(env))
 	}
 	panic(fmt.Sprintf("unsupported function call: %s", c.fn))
 }
