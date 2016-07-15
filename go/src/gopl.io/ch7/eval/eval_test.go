@@ -43,7 +43,6 @@ func TestEval(t *testing.T) {
 	}
 }
 
-/*
 func TestErrors(t *testing.T) {
 	tests := []struct {
 		expr, wantErr string
@@ -51,16 +50,16 @@ func TestErrors(t *testing.T) {
 		{"x % 2", "unexpected '%'"},
 		{"math.Pi", "unexpected '.'"},
 		{"!true", "unexpected '!'"},
-		{"hello", "unexpected '\"'"},
+		{`"hello"`, "unexpected '\"'"},
 		{"log(10)", `unknown function "log"`},
-		{"sqrt{1, 2}", "call to sqrt has 2 args, want 1"},
+		{"sqrt(1, 2)", "call to sqrt has 2 args, want 1"},
 	}
 
 	for _, test := range tests {
 		expr, err := Parse(test.expr)
-		if err != nil {
+		if err == nil {
 			vars := make(map[Var]bool)
-			err := expr.Check(vars)
+			err = expr.Check(vars)
 			if err == nil {
 				t.Errorf("unexpected success: %s", test.expr)
 				continue
@@ -72,4 +71,3 @@ func TestErrors(t *testing.T) {
 		}
 	}
 }
-*/
