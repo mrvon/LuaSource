@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var verbose = flag.Bool("v", false, "show verbose progress message")
+var verbose = flag.Bool("v", false, "show verbose progress messages")
 
 func main() {
 	flag.Parse()
@@ -76,7 +76,7 @@ func walkDir(dir string, fileSizes chan<- int64) {
 func dirents(dir string) []os.FileInfo {
 	entries, err := ioutil.ReadDir(dir)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "du1: %v\n", err)
+		fmt.Fprintf(os.Stderr, "du2: %v\n", err)
 		return nil
 	}
 	return entries
