@@ -62,23 +62,31 @@ func handleConn(conn net.Conn) {
 	messages <- who + " has arrived"
 	entering <- cli
 
-	go clientReader(conn, messages)
+	reset := make(chan struct{})
 
-	// TODO
-	tick := time.Tick(10 * time.Second)
-	select {
-	case <-tick:
-		break
+	go clientReader(conn, messages, reset)
+
+	timeout := time.NewTimer(time.Minute)
+
+loop:
+	for {
+		select {
+		case <-timeout.C:
+			break loop
+		case <-reset:
+			timeout.Reset(time.Minute)
+		}
 	}
 
 	leaving <- cli
 	messages <- who + " has left"
 }
 
-func clientReader(conn net.Conn, ch chan<- string) {
+func clientReader(conn net.Conn, ch chan<- string, reset chan<- struct{}) {
 	input := bufio.NewScanner(conn)
 	who := conn.RemoteAddr().String()
 	for input.Scan() {
+		reset <- struct{}{}
 		ch <- who + ": " + input.Text()
 	}
 	// NOTE: ignoring potential errors from input.Err()
