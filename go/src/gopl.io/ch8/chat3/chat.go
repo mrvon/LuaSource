@@ -1,5 +1,6 @@
 // Chat is a server that lets clients chat with each other.
 // Exercise 8.14
+// Exercise 8.15
 package main
 
 import (
@@ -8,6 +9,10 @@ import (
 	"log"
 	"net"
 	"time"
+)
+
+const (
+	client_send_buff_size = 20
 )
 
 type client struct {
@@ -29,6 +34,11 @@ func broadcaster() {
 			// Broadcast incoming message to all
 			// clients' outgoing message channels.
 			for cli := range clients {
+				if len(cli.channel) == cap(cli.channel) {
+					// Cause we don't want to block here.
+					// when buff is full, we discard this message directly.
+					continue
+				}
 				cli.channel <- msg
 			}
 
@@ -58,7 +68,7 @@ func handleConn(conn net.Conn) {
 	// first line is client's name
 	who := input.Text()
 
-	ch := make(chan string) // outgoing client messages
+	ch := make(chan string, client_send_buff_size) // outgoing client messages
 
 	cli := client{
 		channel: ch,
