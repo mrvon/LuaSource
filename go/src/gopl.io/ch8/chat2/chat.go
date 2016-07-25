@@ -1,4 +1,6 @@
 // Chat is a server that lets clients chat with each other.
+// Exercise 8.12
+// Exercise 8.13
 package main
 
 import (
