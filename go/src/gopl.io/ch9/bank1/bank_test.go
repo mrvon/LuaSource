@@ -20,6 +20,8 @@ func TestBank(t *testing.T) {
 	// Bob
 	go func() {
 		bank.Deposit(100)
+		ok := bank.Withdraw(50)
+		fmt.Printf("Withdraw 50: %v\n", ok)
 		done <- struct{}{}
 	}()
 
@@ -27,7 +29,7 @@ func TestBank(t *testing.T) {
 	<-done
 	<-done
 
-	if got, want := bank.Balance(), 300; got != want {
+	if got, want := bank.Balance(), 250; got != want {
 		t.Errorf("Balance = %d, want %d", got, want)
 	}
 }
