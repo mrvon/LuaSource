@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 )
 
 type client struct {
@@ -61,14 +62,26 @@ func handleConn(conn net.Conn) {
 	messages <- who + " has arrived"
 	entering <- cli
 
-	input := bufio.NewScanner(conn)
-	for input.Scan() {
-		messages <- who + ": " + input.Text()
+	go clientReader(conn, messages)
+
+	// TODO
+	tick := time.Tick(10 * time.Second)
+	select {
+	case <-tick:
+		break
 	}
-	// NOTE: ignoring potential errors from input.Err()
 
 	leaving <- cli
 	messages <- who + " has left"
+}
+
+func clientReader(conn net.Conn, ch chan<- string) {
+	input := bufio.NewScanner(conn)
+	who := conn.RemoteAddr().String()
+	for input.Scan() {
+		ch <- who + ": " + input.Text()
+	}
+	// NOTE: ignoring potential errors from input.Err()
 }
 
 func clientWriter(conn net.Conn, ch <-chan string) {
