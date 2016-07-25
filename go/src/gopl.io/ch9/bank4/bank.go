@@ -8,13 +8,13 @@ var (
 )
 
 func Deposit(amount int) {
-	mu.Lock()
+	mu.Lock() // writer lock
 	balance = balance + amount
 	mu.Unlock()
 }
 
 func Balance() int {
-	mu.RLock()
+	mu.RLock() // readers lock
 	defer mu.RUnlock()
 	return balance
 }
