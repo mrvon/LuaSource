@@ -1,6 +1,5 @@
 // Chat is a server that lets clients chat with each other.
-// Exercise 8.12
-// Exercise 8.13
+// Exercise 8.14
 package main
 
 import (
@@ -49,7 +48,15 @@ func broadcaster() {
 }
 
 func handleConn(conn net.Conn) {
-	who := conn.RemoteAddr().String()
+	input := bufio.NewScanner(conn)
+	ok := input.Scan()
+	if !ok {
+		conn.Close()
+		return
+	}
+
+	// first line is client's name
+	who := input.Text()
 
 	ch := make(chan string) // outgoing client messages
 
@@ -66,7 +73,7 @@ func handleConn(conn net.Conn) {
 
 	reset := make(chan bool)
 
-	go clientReader(conn, messages, reset)
+	go clientReader(conn, who, messages, reset)
 
 	timeout := time.NewTimer(time.Minute)
 
@@ -88,9 +95,8 @@ loop:
 	messages <- who + " has left"
 }
 
-func clientReader(conn net.Conn, ch chan<- string, reset chan<- bool) {
+func clientReader(conn net.Conn, who string, ch chan<- string, reset chan<- bool) {
 	input := bufio.NewScanner(conn)
-	who := conn.RemoteAddr().String()
 	for input.Scan() {
 		reset <- true
 		ch <- who + ": " + input.Text()
