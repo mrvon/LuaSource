@@ -14,6 +14,14 @@ func Test(t *testing.T) {
 	var f float32 = 3.141592653589793238463643383279
 	var lf float64 = 3.141592653589793238463643383279
 	var d time.Duration = 1 * time.Nanosecond
+	var a = [3]int{1, 2, 3}
+	s := struct {
+		i int
+		s string
+	}{
+		1024,
+		"Helloworld",
+	}
 
 	fmt.Println(format.Any(nil))
 	fmt.Println(format.Any(x))
@@ -22,4 +30,6 @@ func Test(t *testing.T) {
 	fmt.Println(format.Any(d))
 	fmt.Println(format.Any([]int64{x}))
 	fmt.Println(format.Any([]time.Duration{d}))
+	fmt.Println(format.Any(a))
+	fmt.Println(format.Any(s))
 }
