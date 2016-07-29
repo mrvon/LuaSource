@@ -23,9 +23,9 @@ func formatAtom(v reflect.Value) string {
 		reflect.Uint32, reflect.Uint64, reflect.Uintptr:
 		return strconv.FormatUint(v.Uint(), 10)
 	case reflect.Float32:
-		return strconv.FormatFloat(v.Float(), 'f', 6, 32)
+		return strconv.FormatFloat(v.Float(), 'f', 7, 32)
 	case reflect.Float64:
-		return strconv.FormatFloat(v.Float(), 'f', 6, 64)
+		return strconv.FormatFloat(v.Float(), 'f', 18, 64)
 	case reflect.Bool:
 		return strconv.FormatBool(v.Bool())
 	case reflect.String:
