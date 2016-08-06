@@ -30,6 +30,12 @@ func main() {
 		}
 
 		fmt.Printf("%s\n", data)
+
+		var origin []Moive
+		json.Unmarshal(data, &origin)
+
+		fmt.Printf("%v\n", origin)
+		fmt.Printf("%v\n", moives)
 	}
 
 	{
