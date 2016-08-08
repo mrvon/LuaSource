@@ -48,21 +48,40 @@ type Graph struct {
 	vertex_list     map[int]*Vertex
 }
 
+func (graph *Graph) add_vertex(id int) {
+	if graph.vertex_list == nil {
+		graph.vertex_list = make(map[int]*Vertex)
+	}
+	graph.vertex_list[id] = &Vertex{
+		id:       id,
+		color:    WHITE,
+		distance: -1,
+		parent:   nil,
+	}
+}
+
+func (graph *Graph) add_edge(from_id int, to_id int) {
+	if graph.adjancency_list == nil {
+		graph.adjancency_list = make(map[int][]int)
+	}
+	graph.adjancency_list[from_id] = append(graph.adjancency_list[from_id], to_id)
+}
+
 type Queue struct {
 	Q []int
 }
 
-func enqueue(Q *Queue, id int) {
+func (Q *Queue) enqueue(id int) {
 	Q.Q = append(Q.Q, id)
 }
 
-func dequeue(Q *Queue) (id int) {
+func (Q *Queue) dequeue() (id int) {
 	id = Q.Q[0]
 	Q.Q = Q.Q[1:]
 	return
 }
 
-func isempty(Q *Queue) bool {
+func (Q *Queue) isempty() bool {
 	if len(Q.Q) == 0 {
 		return true
 	} else {
@@ -78,10 +97,10 @@ func BFS(graph *Graph, source_id int) {
 
 	Q := Queue{}
 
-	enqueue(&Q, source_id)
+	Q.enqueue(source_id)
 
-	for !isempty(&Q) {
-		u := dequeue(&Q)
+	for !Q.isempty() {
+		u := Q.dequeue()
 		u_vertex := graph.vertex_list[u]
 
 		for _, v := range graph.adjancency_list[u] {
@@ -90,30 +109,11 @@ func BFS(graph *Graph, source_id int) {
 				v_vertex.color = GRAY
 				v_vertex.distance = u_vertex.distance + 1
 				v_vertex.parent = u_vertex
-				enqueue(&Q, v)
+				Q.enqueue(v)
 			}
 		}
 		u_vertex.color = BLACK
 	}
-}
-
-func add_vertex(graph *Graph, id int) {
-	if graph.vertex_list == nil {
-		graph.vertex_list = make(map[int]*Vertex)
-	}
-	graph.vertex_list[id] = &Vertex{
-		id:       id,
-		color:    WHITE,
-		distance: -1,
-		parent:   nil,
-	}
-}
-
-func add_edge(graph *Graph, from_id int, to_id int) {
-	if graph.adjancency_list == nil {
-		graph.adjancency_list = make(map[int][]int)
-	}
-	graph.adjancency_list[from_id] = append(graph.adjancency_list[from_id], to_id)
 }
 
 func print_path(graph *Graph, from_id int, to_id int) {
@@ -149,26 +149,26 @@ func aux_print_path(graph *Graph, from_id int, to_id int) {
 func main() {
 	graph := Graph{}
 
-	add_edge(&graph, 1, 2)
-	add_edge(&graph, 1, 3)
-	add_edge(&graph, 1, 4)
-	add_edge(&graph, 2, 5)
-	add_edge(&graph, 2, 6)
-	add_edge(&graph, 3, 7)
-	add_edge(&graph, 4, 8)
-	add_edge(&graph, 6, 9)
-	add_edge(&graph, 9, 10)
+	graph.add_edge(1, 2)
+	graph.add_edge(1, 3)
+	graph.add_edge(1, 4)
+	graph.add_edge(2, 5)
+	graph.add_edge(2, 6)
+	graph.add_edge(3, 7)
+	graph.add_edge(4, 8)
+	graph.add_edge(6, 9)
+	graph.add_edge(9, 10)
 
-	add_vertex(&graph, 1)
-	add_vertex(&graph, 2)
-	add_vertex(&graph, 3)
-	add_vertex(&graph, 4)
-	add_vertex(&graph, 5)
-	add_vertex(&graph, 6)
-	add_vertex(&graph, 7)
-	add_vertex(&graph, 8)
-	add_vertex(&graph, 9)
-	add_vertex(&graph, 10)
+	graph.add_vertex(1)
+	graph.add_vertex(2)
+	graph.add_vertex(3)
+	graph.add_vertex(4)
+	graph.add_vertex(5)
+	graph.add_vertex(6)
+	graph.add_vertex(7)
+	graph.add_vertex(8)
+	graph.add_vertex(9)
+	graph.add_vertex(10)
 
 	BFS(&graph, 1)
 
