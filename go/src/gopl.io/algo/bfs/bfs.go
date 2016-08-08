@@ -1,4 +1,6 @@
 /*
+The algorithm works on both directed and undirected graphs.
+
 BFS(G, s)
 	for each vertex u of G.V - {s}
 		u.color = WHITE
