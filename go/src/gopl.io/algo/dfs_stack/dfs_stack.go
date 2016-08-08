@@ -1,26 +1,5 @@
 /*
 The algorithm works on both directed and undirected graphs.
-
-DFS(G)
-	for each vertex u of G.V
-		u.color = WHITE
-		u.parent = nil
-	time = 0
-	for each vertex u of G.V
-		if u.color == WHITE
-			DFS_VISIT(G, u)
-
-DFS_VISIT(G, u)
-	time = time + 1 			// while vertex u has just been discoverd
-	u.d = time
-	u.color = GRAY
-	for each v of G.Adj[u] 		// explore edge(u, v)
-		if v.color == WHITE
-			v.parent = u
-			DFS_VISIT(G, v)
-	u.color = BLACK				// blacken u: it is finished
-	time = time + 1
-	u.f = time
 */
 
 package main
@@ -81,35 +60,64 @@ func (graph *Graph) new_time() int {
 	return graph.time_counter
 }
 
-func DFS(graph *Graph) {
-	graph.init_time()
+type Stack struct {
+	S []int
+}
 
-	for _, u_vertex := range graph.vertex_list {
-		if u_vertex.color == WHITE {
-			DFS_VISIT(graph, u_vertex)
-		}
+func (S *Stack) push(id int) {
+	S.S = append(S.S, id)
+}
+
+func (S *Stack) pop() (id int) {
+	id = S.S[len(S.S)-1]
+	S.S = S.S[:len(S.S)-1]
+	return
+}
+
+func (S *Stack) isempty() bool {
+	if len(S.S) == 0 {
+		return true
+	} else {
+		return false
 	}
 }
 
-func DFS_VISIT(graph *Graph, u_vertex *Vertex) {
-	u_vertex.time_discover = graph.new_time()
-	u_vertex.color = GRAY
-	u := u_vertex.id
+func DFS(graph *Graph) {
+	graph.init_time()
+	var s Stack
 
-	fmt.Fprintf(&graph.debug_buffer, "(%d ", u)
+	for _, u_vertex := range graph.vertex_list {
+		if u_vertex.color == WHITE {
+			s.push(u_vertex.id)
+		}
 
-	for _, v := range graph.adjancency_list[u] {
-		v_vertex := graph.vertex_list[v]
-		if v_vertex.color == WHITE {
-			v_vertex.parent = u_vertex
-			DFS_VISIT(graph, v_vertex)
+		for !s.isempty() {
+			u := s.pop()
+
+			u_vertex := graph.vertex_list[u]
+
+			if u_vertex.color == WHITE {
+				u_vertex.time_discover = graph.new_time()
+				u_vertex.color = GRAY
+				fmt.Fprintf(&graph.debug_buffer, "(%d ", u)
+
+				s.push(u)
+
+				for _, v := range graph.adjancency_list[u] {
+					v_vertex := graph.vertex_list[v]
+					if v_vertex.color == WHITE {
+						v_vertex.parent = u_vertex
+						s.push(v_vertex.id)
+					}
+				}
+			} else {
+				fmt.Fprintf(&graph.debug_buffer, "%d) ", u)
+
+				u_vertex.color = BLACK
+				u_vertex.time_finish = graph.new_time()
+			}
 		}
 	}
-
-	fmt.Fprintf(&graph.debug_buffer, "%d) ", u)
-
-	u_vertex.color = BLACK
-	u_vertex.time_finish = graph.new_time()
 }
 
 func main() {
