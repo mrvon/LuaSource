@@ -1,33 +1,17 @@
 /*
-The algorithm works on both directed and undirected graphs.
+The algorithm works on directed acyclic graphs.
 
-DFS(G)
-	for each vertex u of G.V
-		u.color = WHITE
-		u.parent = nil
-	time = 0
-	for each vertex u of G.V
-		if u.color == WHITE
-			DFS_VISIT(G, u)
-
-DFS_VISIT(G, u)
-	time = time + 1 			// while vertex u has just been discoverd
-	u.d = time
-	u.color = GRAY
-	for each v of G.Adj[u] 		// explore edge(u, v)
-		if v.color == WHITE
-			v.parent = u
-			DFS_VISIT(G, v)
-	u.color = BLACK				// blacken u: it is finished
-	time = time + 1
-	u.f = time
+TOPOLOGICAL_SORT(G)
+	call DFS(G) to compute finishing times v.f for each vertex v
+	as each vertex is finished, insert it onto the front of a linked list
+	return the linked list of vertices
 */
 
 package main
 
 import (
-	"bytes"
 	"fmt"
+	"sort"
 )
 
 const (
@@ -44,12 +28,16 @@ type Vertex struct {
 	parent        *Vertex
 }
 
+type VertexList []*Vertex
+
+func (v VertexList) Len() int           { return len(v) }
+func (v VertexList) Less(i, j int) bool { return v[i].time_finish > v[j].time_finish }
+func (v VertexList) Swap(i, j int)      { v[i], v[j] = v[j], v[i] }
+
 type Graph struct {
 	adjancency_list map[int][]int
 	vertex_list     map[int]*Vertex
 	time_counter    int
-
-	debug_buffer bytes.Buffer
 }
 
 func (graph *Graph) add_vertex(id int) {
@@ -96,8 +84,6 @@ func DFS_VISIT(graph *Graph, u_vertex *Vertex) {
 	u_vertex.color = GRAY
 	u := u_vertex.id
 
-	fmt.Fprintf(&graph.debug_buffer, "(%d ", u)
-
 	for _, v := range graph.adjancency_list[u] {
 		v_vertex := graph.vertex_list[v]
 		if v_vertex.color == WHITE {
@@ -106,10 +92,21 @@ func DFS_VISIT(graph *Graph, u_vertex *Vertex) {
 		}
 	}
 
-	fmt.Fprintf(&graph.debug_buffer, "%d) ", u)
-
 	u_vertex.color = BLACK
 	u_vertex.time_finish = graph.new_time()
+}
+
+func TOPOLOGICAL_SORT(graph *Graph) VertexList {
+	DFS(graph)
+
+	var list VertexList
+	for _, vertex := range graph.vertex_list {
+		list = append(list, vertex)
+	}
+
+	sort.Sort(list)
+
+	return list
 }
 
 func main() {
@@ -136,11 +133,8 @@ func main() {
 	graph.add_vertex(9)
 	graph.add_vertex(10)
 
-	DFS(graph)
-
-	fmt.Println(graph.debug_buffer.String())
-
-	for _, vertex := range graph.vertex_list {
+	list := TOPOLOGICAL_SORT(graph)
+	for _, vertex := range list {
 		fmt.Printf("vertex id(%d)\tcolor(%d)\tdiscover(%d)\tfinish(%d)\t",
 			vertex.id,
 			vertex.color,
@@ -153,5 +147,4 @@ func main() {
 			fmt.Printf("parent(%d)\n", vertex.parent.id)
 		}
 	}
-
 }

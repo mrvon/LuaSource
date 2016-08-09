@@ -147,7 +147,7 @@ func aux_print_path(graph *Graph, from_id int, to_id int) {
 }
 
 func main() {
-	graph := Graph{}
+	graph := &Graph{}
 
 	graph.add_edge(1, 2)
 	graph.add_edge(1, 3)
@@ -170,7 +170,7 @@ func main() {
 	graph.add_vertex(9)
 	graph.add_vertex(10)
 
-	BFS(&graph, 1)
+	BFS(graph, 1)
 
 	for _, vertex := range graph.vertex_list {
 		fmt.Printf("vertex id(%d)\tcolor(%d)\tdistance(%d)\t",
@@ -185,7 +185,7 @@ func main() {
 		}
 	}
 
-	print_path(&graph, 1, 10)
-	print_path(&graph, 2, 9)
-	print_path(&graph, 2, 7)
+	print_path(graph, 1, 10)
+	print_path(graph, 2, 9)
+	print_path(graph, 2, 7)
 }

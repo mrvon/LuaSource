@@ -121,7 +121,7 @@ func DFS(graph *Graph) {
 }
 
 func main() {
-	graph := Graph{}
+	graph := &Graph{}
 
 	graph.add_edge(1, 2)
 	graph.add_edge(1, 3)
@@ -144,7 +144,7 @@ func main() {
 	graph.add_vertex(9)
 	graph.add_vertex(10)
 
-	DFS(&graph)
+	DFS(graph)
 
 	fmt.Println(graph.debug_buffer.String())
 
