@@ -75,6 +75,9 @@ func DFS(graph *Graph) {
 	for _, u_vertex := range graph.vertex_list {
 		if u_vertex.color == WHITE {
 			DFS_VISIT(graph, u_vertex)
+
+			// As each vertex is finished, insert it onto the front of list.
+			fmt.Println("Debug", u_vertex.id)
 		}
 	}
 }
@@ -89,6 +92,9 @@ func DFS_VISIT(graph *Graph, u_vertex *Vertex) {
 		if v_vertex.color == WHITE {
 			v_vertex.parent = u_vertex
 			DFS_VISIT(graph, v_vertex)
+
+			// As each vertex is finished, insert it onto the front of list.
+			fmt.Println("Debug", v_vertex.id)
 		}
 	}
 
