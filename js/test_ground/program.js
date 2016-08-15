@@ -185,6 +185,22 @@ var foo = function() {
 
     // At this point, a is 21, b is 5
     document.writeln(a, "\t", b, "\t", "not defined")
+
+    var d = 1024;
+
+    // At this point, d is 1024
+
+    {
+        // Unfortunately, JavaScript does not have block scope
+        // even though its block syntax suggests that it does.
+        // This confusion can be a source of errors.
+
+        var d = 1023;
+        // Change the outer d, not declare a new d here.
+        // That's awful.
+    }
+
+    document.writeln(d)
 }
 
 foo();
@@ -418,3 +434,5 @@ var numbers_object = {
     '8': 'eight',
     '9': 'nine',
 };
+
+document.writeln("----------------------------------------------------")
