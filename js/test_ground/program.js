@@ -593,3 +593,304 @@ Array.identity = function(n) {
 myMatrix = Array.identity(4);
 
 document.writeln(myMatrix[3][3]);
+
+document.writeln("identity matrix 4*4:");
+
+for (var i = 0; i < 4; i ++) {
+    for (var j = 0; j < 4; j++) {
+        document.write(myMatrix[i][j], "\t");
+    }
+    document.writeln();
+}
+
+document.writeln("----------------------------------------------------");
+
+// --------------------------- Array method ---------------------------
+
+// array.concat(item...)
+
+var a = ['a', 'b', 'c']; 
+var b = ['x', 'y', 'z'];
+var c = a.concat(b, true);
+document.writeln(c);
+
+document.writeln("----------------------------------------------------");
+
+// array.join(separator)
+
+var a = ['a', 'b', 'c'];
+a.push('d');
+var c = a.join('');
+document.writeln(c);
+
+document.writeln("----------------------------------------------------");
+
+// array.pop()
+
+var a = ['a', 'b', 'c'];
+document.writeln(a);
+document.writeln(a.pop());
+document.writeln(a);
+
+document.writeln("----------------------------------------------------");
+
+// array.push(item...)
+
+var a = ['a', 'b', 'c']; 
+var b = ['x', 'y', 'z'];
+var a_len = a.push(b, true);
+document.writeln(a); // a is ['a', 'b', 'c', ['x', 'y', 'z'], true]
+document.writeln(a_len, a.length);
+
+document.writeln("----------------------------------------------------");
+
+// array.reverse()
+
+var a = ['a', 'b', 'c'];
+var b = a.reverse();
+
+document.writeln(a)
+document.writeln(b)
+
+document.writeln("----------------------------------------------------");
+
+// array.shift()
+
+// The shift method removes the first element from an array
+// and return it. If the array is empty, it returns undefined.
+// shift is usually much slower than pop:
+var a = ['a', 'b', 'c'];
+var c = a.shift();
+
+document.writeln(a);
+document.writeln(c);
+
+document.writeln("----------------------------------------------------");
+
+// array.slice(start, end)
+
+// The slice method makes a shallow copy of a portion of an array.
+// The first element copied will be array[start]. It will stop before
+// copying array[end]. The end parameter is optional, and the default
+// is array.length.
+
+// left-closed right-open interval
+// array[start, end)
+
+var a = ['a', 'b', 'c'];
+var b = a.slice(0, 1);
+var c = a.slice(1);
+var d = a.slice(1, 2);
+
+document.writeln(b);
+document.writeln(c);
+document.writeln(d);
+
+document.writeln("----------------------------------------------------");
+
+// array.sort(comparefn)
+
+var n = [4, 8, 15, 16, 23, 42];
+
+document.writeln(n);
+
+// sort as string
+n.sort();
+
+document.writeln(n);
+
+n.sort(function(a, b) {
+    return a - b;
+});
+
+document.writeln(n);
+
+document.writeln("----------------------------------------------------");
+
+// Function by takes a member name string and returns
+// a comparison function that can be used to sort an
+// array of objects that contain the member.
+
+var by = function(name) { 
+    return function(o, p) {
+        var a, b;
+
+        if (o && p && typeof o === 'object' && typeof p === 'object') {
+            a = o[name];
+            b = p[name];
+
+            if (a === b) {
+                return 0;
+            }
+
+            if (typeof a === typeof b) {
+                return a < b ? -1 : 1;
+            }
+
+            return typeof a < typeof b ? - 1 : 1;
+        } else {
+            throw {
+                name: 'Error',
+                message: 'Expected an object when sorting by ' + name
+            };
+        }
+    }
+};
+
+var s = [
+    {first: 'Joe', last: 'Besser'},
+    {first: 'Moe', last: 'Howard'},
+    {first: 'Joe', last: 'DeRita'},
+    {first: 'Shemp', last: 'Howard'},
+    {first: 'Larry', last: 'Fine'},
+    {first: 'Curly', last: 'Howard'}
+];
+
+s.print = function() {
+    document.writeln("[");
+    for (var i = 0; i < this.length; i++) {
+        var o = s[i];
+        document.writeln(o.first, "\t", o.last);
+    }
+    document.writeln("]");
+};
+
+s.print();
+s.sort(by("first"));
+s.print();
+
+// The sort method is not stable. so:
+s.sort(by("first")).sort(by("last"));
+s.print();
+// is not guaranteed to produce the correct sequence.
+// If you want to sort on multiple keys. you again need
+// to do more work. We can modify function *by* to take
+// a second parameter, another compare method that will
+// be called to break ties when the major key produces a match:
+
+
+// Function by takes a member name string and an
+// optional minor comparison function and returns
+// a comparison function that can be used to sort an
+// array of objects that contain that member. The
+// minor comparion function is used to break ties
+// when the o[name] and p[name] are equal.
+
+var by = function(name, minor) {
+    return function(o, p) {
+        var a, b;
+
+        if (o && p && typeof o === "object" && typeof p === "object") {
+            a = o[name];
+            b = p[name];
+
+            if (a === b) {
+                return typeof minor === "function" ? minor(o, p) : 0;
+            }
+
+            if (typeof a === typeof b) {
+                return a < b ? -1 : 1;
+            }
+
+            return typeof a < typeof b ? - 1 : 1;
+        } else {
+            throw {
+                name: 'Error',
+                message: 'Expected an object when sorting by ' + name
+            };
+        }
+    };
+};
+
+// Here is the right sequence.
+s.sort(by("first", by("last")));
+s.print();
+
+document.writeln("----------------------------------------------------");
+
+// array.splice(start, deleteCount, item...)
+
+// the splice method removes elements from an array, replacing them with
+// new items. The start parameter is the number of a position within the
+// array. The deleteCount parameter is the number of elements to delete
+// starting from that position. If there are additional parameters, those
+// items will be inserted at that position. It returns an array containing
+// the deleted elements.
+
+var a = ['a', 'b', 'c'];
+var r = a.splice(1, 1, 'ache', 'bug');
+document.writeln(a)
+document.writeln(r)
+// a is ['a', 'ache', 'bug', 'c']
+// r is ['b']
+
+document.writeln("----------------------------------------------------");
+
+// array.unshift(item...)
+
+// The unshift method is like the push method except that it shoves the items
+// onto the front of this array instead of at the end. It returns the array's
+// new length.
+
+var a = ['a', 'b', 'c'];
+var r = a.unshift('?', '@');
+// a = ['?', '@', 'a', 'b', 'c']
+// r = 5
+
+document.writeln(a)
+document.writeln(r)
+
+document.writeln("----------------------------------------------------");
+
+// --------------------------- Function method ---------------------------
+
+// The apply method invokes a function, passing in the object that
+// will be bound to this and an optional array of arguments. The
+// apply method is used in the apply invocation pattern.
+
+Function.method('bind', function(that) {
+    // Return a function that will call this function as
+    // though it is a method of that object.
+    
+    var method = this,
+        slice = Array.prototype.slice,
+        args = slice.apply(arguments, [1]);
+
+    return function() {
+        return method.apply(that,
+            args.concat(slice.apply(arguments, [0]))
+        );
+    };
+});
+
+var x = function() {
+    return this.value;
+}.bind({value: 666});
+
+document.writeln(x());
+
+// This example is too difficult for me
+// but never mind, I'll come back.
+
+document.writeln("----------------------------------------------------");
+
+// --------------------------- Number method ---------------------------
+
+// --------------------------- Object method ---------------------------
+
+// object.hasOwnProperty(name)
+
+// The hasOwnProperty method returns true if the object contains a property
+// having the name. The property chain is not examined. This method is useless
+// if the name is hasOwnProperty:
+
+var a = {member: true};
+var b = Object.create(a);
+var t = a.hasOwnProperty("member");
+var u = b.hasOwnProperty("member");
+var v = b.member;
+
+document.writeln(t);
+document.writeln(u);
+document.writeln(v);
+document.writeln(a.hasOwnProperty("hasOwnProperty")); // useless
