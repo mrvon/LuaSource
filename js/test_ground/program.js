@@ -1,5 +1,5 @@
-document.writeln("Hello, World!")
-document.writeln("----------------------------------------------------")
+document.writeln("Hello, World!");
+document.writeln("----------------------------------------------------");
 
 // The Method Invocation Pattern 
 
@@ -25,7 +25,7 @@ document.writeln(myObject.value);
 myObject.increment(2);
 document.writeln(myObject.value);
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 // The Function Invocation Pattern
 var add = function(a, b) {
@@ -34,7 +34,7 @@ var add = function(a, b) {
 
 // When a function is invoked with this pattern,
 // *this* is bound to the global object.
-document.writeln(add(3, 4))
+document.writeln(add(3, 4));
 
 // Augment myObject with a double method
 myObject.double = function() {
@@ -48,9 +48,9 @@ myObject.double = function() {
 }
 
 myObject.double();
-document.writeln(myObject.value)
+document.writeln(myObject.value);
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 // Make a function that adds a lot of stuff.
 
@@ -65,9 +65,9 @@ var sum = function() {
     }
     return sum;
 }
-document.writeln(sum(4, 8, 15, 16, 23, 42))
+document.writeln(sum(4, 8, 15, 16, 23, 42));
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 Function.prototype.method = function(name, func) {
     if (! this.prototype[name]) {
@@ -78,9 +78,9 @@ Function.prototype.method = function(name, func) {
 
 Function.method("fuck", function() {
     return "FUCK you!"
-})
+});
 
-document.writeln(add.fuck())
+document.writeln(add.fuck());
 
 Number.method('integer', function() {
     if (this < 0) {
@@ -88,11 +88,11 @@ Number.method('integer', function() {
     } else {
         return Math.floor(this);
     }
-})
+});
 
-document.writeln((-10 / 3).integer())
+document.writeln((-10 / 3).integer());
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 var hanoi = function hanoi(disc, src, aux, dst) {
     if (disc > 0) {
@@ -102,9 +102,9 @@ var hanoi = function hanoi(disc, src, aux, dst) {
     }
 }
 
-hanoi(3, "Src", "Aux", "Dst")
+hanoi(3, "Src", "Aux", "Dst");
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 // Define a walk_the_DOM function that visits every
 // node of the tree in HTML source order, starting
@@ -118,7 +118,7 @@ var walk_the_DOM = function walk(node, func) {
         walk(node, func);
         node = node.nextSibling;
     }
-}
+};
 
 // Define a getElementsByAttribute function. It
 // takes an attribute name string and an optional
@@ -157,11 +157,11 @@ var factorial = function factorial(i, a) {
         return a;
     }
     return factorial(i - 1, a * i);
-}
+};
 
-document.writeln(factorial(4))
+document.writeln(factorial(4));
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 var foo = function() {
     var a = 3, b = 5;
@@ -201,11 +201,11 @@ var foo = function() {
     }
 
     document.writeln(d)
-}
+};
 
 foo();
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 var myObject = (function() {
     var value = 0;
@@ -220,11 +220,11 @@ var myObject = (function() {
     };
 }());
 
-document.writeln(myObject.getValue())
-myObject.increment()
-document.writeln(myObject.getValue())
+document.writeln(myObject.getValue());
+myObject.increment();
+document.writeln(myObject.getValue());
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 // Create a maker function called quo. It makes an
 // Object with a get_status method and a private
@@ -240,9 +240,9 @@ var quo = function(status) {
 // Make an instance of quo.
 var myQuo = quo("amazed");
 
-document.writeln(myQuo.get_status())
+document.writeln(myQuo.get_status());
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 // Define a function that sets DOM node's color
 // to yellow and then fades it to white.
@@ -262,7 +262,7 @@ var fade = function(node) {
 
 fade(document.body);
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 String.method('deentityify', function() {
     // The entity table. It maps entity names to
@@ -326,7 +326,7 @@ document.writeln(seqer.gensym());
 document.writeln(seqer.gensym());
 document.writeln(seqer.gensym());
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 // Curry
 // TODO a little difficult for me. I am not fimilar with *apply* function.
@@ -340,24 +340,24 @@ Function.method("curry", function() {
 });
 
 var add1 = add.curry(1);
-document.writeln(add1(6))
+document.writeln(add1(6));
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
-var call_time = 0
+var call_time = 0;
 
 var fibonacci = function(n) {
     call_time++
     return n < 2 ? n : fibonacci(n - 1) + fibonacci(n - 2);
-}
+};
 
 for (var i = 0; i <= 10; i += 1) {
     document.writeln('// ' + i + ': ' + fibonacci(i));
 }
 
-document.writeln("function fibonacci have been call " + call_time + " times.")
+document.writeln("function fibonacci have been call " + call_time + " times.");
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 // Memoization
 var fibonacci = (function() {
@@ -377,7 +377,7 @@ for (var i = 0; i <= 10; i += 1) {
     document.writeln('// ' + i + ': ' + fibonacci(i));
 }
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 var memoizer = function(memo, formula) {
     var recur = function(n) {
@@ -399,15 +399,15 @@ for (var i = 0; i <= 10; i += 1) {
     document.writeln('// ' + i + ': ' + fibonacci(i));
 }
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 var factorial = memoizer([1, 1], function(recur, n) {
     return n * recur(n - 1);
-})
+});
 
-document.writeln(factorial(4))
+document.writeln(factorial(4));
 
-document.writeln("----------------------------------------------------")
+document.writeln("----------------------------------------------------");
 
 var empty = [];
 var numbers = [
@@ -415,12 +415,12 @@ var numbers = [
     'five', 'six', 'seven', 'eight', 'nine'
 ];
 
-document.writeln(empty[1])
-document.writeln(numbers[1])
-document.writeln(numbers['1'])
+document.writeln(empty[1]);
+document.writeln(numbers[1]);
+document.writeln(numbers['1']);
 
-document.writeln(empty.length)
-document.writeln(numbers.length)
+document.writeln(empty.length);
+document.writeln(numbers.length);
 
 var numbers_object = {
     '0': 'zero',
@@ -435,4 +435,161 @@ var numbers_object = {
     '9': 'nine',
 };
 
-document.writeln("----------------------------------------------------")
+document.writeln(numbers_object[1]);
+document.writeln(numbers_object["1"]);
+
+var misc = [
+    'string', 98.6, true, false, null, undefined,
+    ['nestd', 'array'], {object: true}, NaN,
+    Infinity
+];
+
+document.writeln(misc.length);
+document.writeln(misc[7].object);
+
+document.writeln("----------------------------------------------------");
+
+var myArray = [];
+document.writeln(myArray.length);
+
+myArray[1000000] = true;
+document.writeln(myArray.length);
+
+// myArray contains one property.
+
+document.writeln(numbers.length);
+document.writeln(numbers);
+numbers.length = 3;
+document.writeln(numbers);
+
+// append a element to the end of the array
+numbers[numbers.length] = 'shi';
+document.writeln(numbers);
+
+numbers.push('go');
+document.writeln(numbers);
+
+delete numbers[2];
+document.writeln(numbers);
+
+numbers.splice(2, 1)
+document.writeln(numbers);
+
+for (var i = 0; i < numbers.length; i++) {
+    document.write(numbers[i], " ");
+}
+document.writeln();
+
+document.writeln("----------------------------------------------------");
+
+Array.method('reduce', function(f, value) {
+    for (var i = 0; i < this.length; i++) {
+        value = f(this[i], value)
+    }
+    return value;
+});
+
+// Create an array of numbers.
+
+var data = [4, 8, 15, 16, 23, 42];
+
+// Define two simple functions. One will add two
+// numbers. The other will multiply two numbers.
+
+var add = function(a, b) {
+    return a + b;
+};
+
+var mult = function(a, b) {
+    return a * b;
+};
+
+// Invoke the data's reduce method, passing in the
+// add function.
+var sum = data.reduce(add, 0);
+
+document.writeln(sum);
+
+// Invoke the reduce method again, this time passing
+// in the multiply funciton.
+var product = data.reduce(mult, 1);
+
+document.writeln(product);
+
+// Because an array is really an object, we can add
+// methods directly on an individual array.
+
+// Give the data array a total function.
+
+data.total = function() {
+    return this.reduce(add, 0);
+};
+
+total = data.total();
+
+document.writeln(total);
+
+document.writeln("----------------------------------------------------");
+
+Array.dim = function(dimension, initial) {
+    var a = [];
+
+    for (var i = 0; i < dimension; i++) {
+        a[i] = initial;
+    }
+
+    return a;
+};
+
+// Make an array containing 10 zeros.
+var myArray = Array.dim(10, 0);
+
+document.writeln(myArray);
+
+// Javascript does not have arrays of more than one dimension,
+// but like most C language, it can have arrays of arrays.
+
+var matrix = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+];
+
+document.writeln(matrix[2][1]);
+
+document.writeln("----------------------------------------------------");
+
+Array.matrix = function(m, n, initial) {
+    var a, i, j;
+    var mat = [];
+
+    for (i = 0; i < m; i++) {
+        a = [];
+        for (j = 0; j < n; j++) {
+            a[j] = initial;
+        }
+        mat[i] = a;
+    }
+
+    return mat;
+};
+
+// Make a 4 * 4 matrix filled with zeros.
+
+var myMatrix = Array.matrix(4, 4, 0);
+
+document.writeln(myMatrix[3][3]);
+
+// Method to make an identity matrix.
+Array.identity = function(n) {
+    var i;
+    var mat = Array.matrix(n, n, 0);
+    for (i = 0; i < n; i++) {
+        mat[i][i] = 1;
+    }
+    return mat;
+}
+
+myMatrix = Array.identity(4);
+
+document.writeln(myMatrix[3][3]);
