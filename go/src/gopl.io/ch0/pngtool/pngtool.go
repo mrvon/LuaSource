@@ -87,10 +87,10 @@ func main() {
 
 		buf := new(bytes.Buffer)
 
-		binary.Write(buf, binary.LittleEndian, int32(len(filename)))
+		binary.Write(buf, binary.LittleEndian, uint32(len(filename)))
 		buf.WriteString(filename)
-		binary.Write(buf, binary.LittleEndian, int32(conf.Height))
-		binary.Write(buf, binary.LittleEndian, int32(conf.Width))
+		binary.Write(buf, binary.LittleEndian, uint32(conf.Height))
+		binary.Write(buf, binary.LittleEndian, uint32(conf.Width))
 
 		hw_list = append(hw_list, buf.Bytes())
 
