@@ -82,6 +82,7 @@ func main() {
 		reader := strings.NewReader(string(data))
 		conf, err := png.DecodeConfig(reader)
 		if err != nil {
+			fmt.Printf("%s is not a png.\n", file_str)
 			return
 		}
 
