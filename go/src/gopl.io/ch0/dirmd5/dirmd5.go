@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"crypto/md5"
+	"encoding/binary"
 	"fmt"
 	"image/png"
 	"io/ioutil"
@@ -59,7 +61,7 @@ func main() {
 	png_file := os.Args[3]
 
 	var md5_map = make(map[string]string)
-	var hw_list = make([]string, 0)
+	var hw_list = make([][]byte, 0)
 
 	walkDir(root_dir, func(filename string) {
 		f, err := os.Open(filename)
@@ -83,7 +85,14 @@ func main() {
 			return
 		}
 
-		hw_list = append(hw_list, fmt.Sprintf("%s %d %d", file_str, conf.Height, conf.Width))
+		buf := new(bytes.Buffer)
+
+		binary.Write(buf, binary.LittleEndian, int32(len(filename)))
+		buf.WriteString(filename)
+		binary.Write(buf, binary.LittleEndian, int32(conf.Height))
+		binary.Write(buf, binary.LittleEndian, int32(conf.Width))
+
+		hw_list = append(hw_list, buf.Bytes())
 
 		f.Close()
 	})
@@ -115,8 +124,8 @@ func main() {
 		return
 	}
 
-	for _, s := range hw_list {
-		fmt.Fprintln(f, s)
+	for _, b := range hw_list {
+		f.Write(b)
 	}
 
 	f.Close()
