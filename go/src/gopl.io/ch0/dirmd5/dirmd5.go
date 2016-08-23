@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -19,8 +20,10 @@ func filterDir(dir string) bool {
 	}
 }
 
+var type_matcher = regexp.MustCompile(`.[pP][nN][gG]$`)
+
 func filterType(file string) bool {
-	return true
+	return type_matcher.MatchString(file)
 }
 
 func walkDir(dir string, callback func(filename string)) {
@@ -34,6 +37,9 @@ func walkDir(dir string, callback func(filename string)) {
 		} else {
 			filename := filepath.Join(dir, entry.Name())
 
+			if !filterType(filename) {
+				continue
+			}
 			callback(filename)
 		}
 	}
@@ -48,9 +54,9 @@ func dirents(dir string) []os.FileInfo {
 }
 
 func main() {
-	root_dir := "/home/dennis/skynet"
-	md5_file := "/home/dennis/md5.lua"
-	png_file := "/home/dennis/map.bin"
+	root_dir := os.Args[1]
+	md5_file := os.Args[2]
+	png_file := os.Args[3]
 
 	var md5_map = make(map[string]string)
 	var hw_list = make([]string, 0)
@@ -109,8 +115,8 @@ func main() {
 		return
 	}
 
-	for i := range hw_list {
-		fmt.Fprintln(f, i)
+	for _, s := range hw_list {
+		fmt.Fprintln(f, s)
 	}
 
 	f.Close()
