@@ -6,12 +6,19 @@
 
 #define MAXLINE 4096
 
+static void sig_int(int); // our signal-catching function
+
 int main() {
     char buf[MAXLINE+1];
     pid_t pid;
     int status;
 
-    printf("%% "); // print prompt (printf requires %% to print %)
+    if (signal(SIGINT, sig_int) == SIG_ERR) {
+        exit(1);
+    }
+
+    fprintf(stdout, "%% "); // print prompt (fprintf requires %% to print %)
+    fflush(stdout);
 
     while (fgets(buf, MAXLINE, stdin) != NULL) {
         buf[strlen(buf) - 1] = 0; // replace newline with null
@@ -45,8 +52,14 @@ int main() {
         // child — the status variable — but in this simple program, we don’t do anything
         // with this value. We could examine it to determine how the child terminated.
 
-        printf("%% ");
+        fprintf(stdout, "%% ");
+        fflush(stdout);
     }
 
     exit(0);
+}
+
+void sig_int(int signo) {
+    fprintf(stdout, "interrupt SIGINT\n%% ");
+    fflush(stdout);
 }
