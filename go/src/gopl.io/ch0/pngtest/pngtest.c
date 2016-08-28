@@ -31,11 +31,14 @@ int main() {
             break;
         }
 
-        if (n >= bfsz) {
+        if (n >= bfsz-1) {
+            // too long
             break;
         }
 
         fread(buff, 1, n, f);
+        // zero terminator
+        ((char*)buff)[n] = '\0';
         printf("%s ", (char*)buff);
 
         fread(&h, sizeof(h), 1, f);
