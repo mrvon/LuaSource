@@ -176,14 +176,12 @@ search(struct skip_list* list, int search_key) {
 
 static void
 insert(struct skip_list* list, int insert_key, int insert_val) {
-    size_t update_size = sizeof(struct list_node*) * MAX_LEVEL;
-    struct list_node** update = (struct list_node**)malloc(update_size);
+    static struct list_node* update[MAX_LEVEL];
     struct list_node* x = list->header;
     int level;
     int i;
 
-    assert(update);
-    memset(update, 0, update_size);
+    memset(update, 0, sizeof(update));
 
     for (i = list->level - 1; i >= 0; --i) {
         while (x->forward[i] && x->forward[i]->key < insert_key) {
@@ -215,19 +213,15 @@ insert(struct skip_list* list, int insert_key, int insert_val) {
             update[i]->forward[i] = x;
         }
     }
-
-    free(update);
 }
 
 static void
 delete(struct skip_list* list, int delete_key) {
-    size_t update_size = sizeof(struct list_node*) * MAX_LEVEL;
-    struct list_node** update = (struct list_node**)malloc(update_size);
+    static struct list_node* update[MAX_LEVEL];
     struct list_node* x = list->header;
     int i;
 
-    assert(update);
-    memset(update, 0, update_size);
+    memset(update, 0, sizeof(update));
 
     for (i = list->level - 1; i >= 0; --i) {
         while (x->forward[i] && x->forward[i]->key < delete_key) {
@@ -253,8 +247,6 @@ delete(struct skip_list* list, int delete_key) {
             --list->level;
         }
     }
-
-    free(update);
 }
 
 static void
