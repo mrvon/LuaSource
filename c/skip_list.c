@@ -137,6 +137,13 @@ new_node(int level) {
     return node;
 }
 
+static void
+del_node(struct list_node* node) {
+    assert(node);
+
+    free((void*)node);
+}
+
 static struct skip_list*
 new_list() {
     struct skip_list* list = (struct skip_list*)malloc(sizeof(*list));
@@ -151,6 +158,18 @@ new_list() {
 static void
 del_list(struct skip_list* list) {
     assert(list);
+
+    struct list_node* node = list->header->forward[0];
+    struct list_node* next;
+
+    del_node(list->header);
+
+    while (node) {
+        next = node->forward[0];
+        del_node(node);
+        node = next;
+    }
+
     free((void*)list);
 }
 
