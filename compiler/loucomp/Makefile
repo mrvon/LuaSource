@@ -1,7 +1,10 @@
 #
-# makefile for TINY
+# Makefile for TINY
 # Borland C Version
-# K. Louden 2/3/98
+# K. Louden 2/3/1998
+#
+# GCC Version
+# Mrvon 	9/21/2016
 #
 
 CC = gcc
