@@ -4,7 +4,7 @@
 # K. Louden 2/3/1998
 #
 # GCC Version
-# Mrvon 	9/21/2016
+# Mrvon 9/21/2016
 #
 
 CC = gcc
