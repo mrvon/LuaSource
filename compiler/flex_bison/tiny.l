@@ -65,6 +65,9 @@ whitespace  [ \t]+
     char c;
     do {
         c = input();
+        if (c == EOF) {
+            break;
+        }
     } while (c != '}');
 }
 .               { return ERROR; }
