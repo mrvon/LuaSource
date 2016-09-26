@@ -20,18 +20,38 @@
     ECHO;
 
     do {
-        while ((c = input()) != '*') {
-            putchar(c);
+        while (true) {
+            c = input();
+
+            if (c == EOF) {
+                goto loop;
+            }
+            if (c != '*') {
+                putchar(c);
+            } else {
+                break;
+            }
         }
         putchar(c);
-        while ((c = input()) == '*') {
-            putchar(c);
+        while (true) {
+            c = input();
+
+            if (c == EOF) {
+                goto loop;
+            }
+            if (c == '*') {
+                putchar(c);
+            } else {
+                break;
+            }
         }
         putchar(c);
         if (c == '/') {
             done = true;
         }
     } while (!done);
+
+    loop:;
 }
 %%
 
