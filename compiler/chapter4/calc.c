@@ -8,7 +8,7 @@
    <factor> -> ( <exp> ) | Number
 
    Inputs a line of text from stdin
-   Outputs "Error" or the result.__amd64
+   Outputs "Error" or the result.
 */
 
 #include <stdio.h>
