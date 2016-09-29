@@ -108,7 +108,7 @@ local function is_space(c)
     end
 end
 
-local function get_next_token()
+local function get_token()
     local token_string_table = {}
     local current_token
     local state = StateType.START
@@ -203,7 +203,7 @@ local function get_next_token()
     return current_token, token_string
 end
 
-local function find_token_name(token)
+local function token_name(token)
     for name, id in pairs(TokenType) do
         if id == token then
             return name
@@ -212,11 +212,8 @@ local function find_token_name(token)
     error("find token name")
 end
 
-while true do
-    local token, token_string = get_next_token()
-    if token == TokenType.EOF then
-        break
-    end
-
-    print(find_token_name(token), token_string)
-end
+return {
+    TokenType = TokenType,
+    get_token = get_token,
+    token_name = token_name,
+}
