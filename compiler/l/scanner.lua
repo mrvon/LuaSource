@@ -108,9 +108,15 @@ local function is_space(c)
     end
 end
 
-local function get_token()
+local global_token = {}
+
+local function curr_token()
+    return global_token
+end
+
+local function next_token()
     local token_string_table = {}
-    local current_token
+    local token_id
     local state = StateType.START
 
     while state ~= StateType.DONE do
@@ -133,27 +139,27 @@ local function get_token()
                 state = StateType.DONE
                 if c == nil then
                     save = false
-                    current_token = TokenType.EOF
+                    token_id = TokenType.EOF
                 elseif c == '=' then
-                    current_token = TokenType.EQ
+                    token_id = TokenType.EQ
                 elseif c == '<' then
-                    current_token = TokenType.LT
+                    token_id = TokenType.LT
                 elseif c == '+' then
-                    current_token = TokenType.PLUS
+                    token_id = TokenType.PLUS
                 elseif c == '-' then
-                    current_token = TokenType.MINUS
+                    token_id = TokenType.MINUS
                 elseif c == '*' then
-                    current_token = TokenType.TIMES
+                    token_id = TokenType.TIMES
                 elseif c == '/' then
-                    current_token = TokenType.OVER
+                    token_id = TokenType.OVER
                 elseif c == '(' then
-                    current_token = TokenType.LPAREN
+                    token_id = TokenType.LPAREN
                 elseif c == ')' then
-                    current_token = TokenType.RPAREN
+                    token_id = TokenType.RPAREN
                 elseif c == ';' then
-                    current_token = TokenType.SEMI
+                    token_id = TokenType.SEMI
                 else
-                    current_token = TokenType.ERROR
+                    token_id = TokenType.ERROR
                 end
             end
         elseif state == StateType.INCOMMENT then
@@ -164,30 +170,30 @@ local function get_token()
         elseif state == StateType.INASSIGN then
             state = StateType.DONE
             if c == '=' then
-                current_token = TokenType.ASSIGN
+                token_id = TokenType.ASSIGN
             else
                 unget_char(c)
                 save = false
-                current_token = TokenType.ERROR
+                token_id = TokenType.ERROR
             end
         elseif state == StateType.INNUM then
             if not is_digit(c) then
                 unget_char(c)
                 save = false
                 state = StateType.DONE
-                current_token = TokenType.NUM
+                token_id = TokenType.NUM
             end
         elseif state == StateType.INID then
             if not is_letter(c) then
                 unget_char(c)
                 save = false
                 state = StateType.DONE
-                current_token = TokenType.ID
+                token_id = TokenType.ID
             end
         else
             print(string.format("Scanner Bug: state= %d", state))
             state = StateType.DONE
-            current_token = TokenType.ERROR
+            token_id = TokenType.ERROR
         end
 
         if save then
@@ -195,12 +201,15 @@ local function get_token()
         end
     end
 
-    local token_string = table.concat(token_string_table)
-    if current_token == TokenType.ID then
-        current_token = ReserveWords[token_string] or current_token
+    local token_str = table.concat(token_string_table)
+    if token_id == TokenType.ID then
+        token_id = ReserveWords[token_str] or token_id
     end
 
-    return current_token, token_string
+    global_token.id = token_id
+    global_token.str = token_str
+
+    return global_token
 end
 
 local function token_name(token)
@@ -214,6 +223,7 @@ end
 
 return {
     TokenType = TokenType,
-    get_token = get_token,
+    curr_token = curr_token,
+    next_token = next_token,
     token_name = token_name,
 }

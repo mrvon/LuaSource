@@ -1,10 +1,12 @@
-local scanner = require "scanner"
+local Scanner = require "scanner"
+local TokenType = Scanner.TokenType
 
 while true do
-    local token, token_string = scanner.get_token()
-    if token == scanner.TokenType.EOF then
+    local token = Scanner.next_token()
+
+    if token.id == TokenType.EOF then
         break
     end
 
-    print(token, scanner.token_name(token), token_string)
+    print(token.id, Scanner.token_name(token.id), token.str)
 end
