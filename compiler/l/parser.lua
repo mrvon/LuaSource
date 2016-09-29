@@ -62,10 +62,11 @@ local function match(expected)
     end
 end
 
-local function new_stmt_node(kind)
+local function new_stmt_node(kind, attr_str)
     return {
         node_kind = NodeKind.STATEMENT,
         kind = kind,
+        attr_str = attr_str,
         child = {},
     }
 end
@@ -169,7 +170,8 @@ function repeat_stmt()
 end
 
 function assign_stmt()
-    local s = new_stmt_node(StatementKind.ASSIGN)
+    local token = curr_token()
+    local s = new_stmt_node(StatementKind.ASSIGN, token.str)
 
     match(TokenType.ID)
     match(TokenType.ASSIGN)
@@ -179,7 +181,8 @@ function assign_stmt()
 end
 
 function read_stmt()
-    local s = new_stmt_node(StatementKind.READ)
+    local token = curr_token()
+    local s = new_stmt_node(StatementKind.READ, token.str)
 
     match(TokenType.READ)
     match(TokenType.ID)
@@ -275,11 +278,62 @@ local function parse()
         syntax_error("Code ends before file")
     end
 
+    trace(node)
     print(Inspect.inspect(node))
 
     return node
 end
 
+local global_indent = -4 
+
+function trace(tree)
+    global_indent = global_indent + 4
+
+    while tree do
+        -- Indent
+        for i = 1, global_indent do
+            io.write(" ")
+        end
+
+        if tree.node_kind == NodeKind.STATEMENT then
+            if tree.kind == StatementKind.IF then
+                print("If")
+            elseif tree.kind == StatementKind.REPEAT then
+                print("Repeat")
+            elseif tree.kind == StatementKind.ASSIGN then
+                print(string.format("Assign to: %s", tree.attr_str))
+            elseif tree.kind == StatementKind.READ then
+                print(string.format("Read: %s", tree.attr_str))
+            elseif tree.kind == StatementKind.WRITE then
+                print("Write")
+            else
+                print("Unknown Statement Node kind")
+            end
+        elseif tree.node_kind == NodeKind.EXP then
+            if tree.kind == ExpKind.OP then
+                print("Op: ", tree.attr_str)
+            elseif tree.kind == ExpKind.CONST then
+                print(string.format("Const: %d", tonumber(tree.attr_str)))
+            elseif tree.kind == ExpKind.ID then
+                print(string.format("Id: %s", tree.attr_str))
+            else
+                print("Unknown Exp Node kind")
+            end
+        else
+            print("Unknown node kind")
+        end
+
+        for i = 1, #tree.child do
+            trace(tree.child[i])
+        end
+
+        tree = tree.sibling
+    end
+
+    global_indent = global_indent - 4
+end
+
 return {
     parse = parse,
+    trace = trace,
 }
