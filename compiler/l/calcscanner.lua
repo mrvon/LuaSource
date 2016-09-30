@@ -1,54 +1,27 @@
--- Scanner for TINY language
+-- Scanner for simple calculator
 
 local StateType = {
     START     = 1,
-    INASSIGN  = 2,
-    INCOMMENT = 3,
-    INNUM     = 4,
-    INID      = 5,
-    DONE      = 6,
+    INNUM     = 2,
+    DONE      = 3,
 }
 
 local TokenType = {
-    -- reserve word
-    IF                 = 1,
-    THEN               = 2,
-    ELSE               = 3,
-    END                = 4,
-    REPEAT             = 5,
-    UNTIL              = 6,
-    READ               = 7,
-    WRITE              = 8,
-
     -- special symbols
-    EOF                = 9,
-    EQ                 = 10,
-    LT                 = 11,
-    PLUS               = 12,
-    MINUS              = 13,
-    TIMES              = 14,
-    OVER               = 15,
-    LPAREN             = 16,
-    RPAREN             = 17,
-    SEMI               = 18,
-    ERROR              = 19,
-    ASSIGN             = 20,
+    EOF                = 1,
+    ERROR              = 2,
+    PLUS               = 3,
+    MINUS              = 4,
+    TIMES              = 5,
+    OVER               = 6,
+    LPAREN             = 7,
+    RPAREN             = 8,
+    SEMI               = 9,
 
     -- other
-    NUM                = 21,
-    ID                 = 22,
+    NUM                = 10,
 }
 
-local ReserveWords = {
-    ["if"]     = TokenType.IF,
-    ["then"]   = TokenType.THEN,
-    ["else"]   = TokenType.ELSE,
-    ["end"]    = TokenType.END,
-    ["repeat"] = TokenType.REPEAT,
-    ["until"]  = TokenType.UNTIL,
-    ["read"]   = TokenType.READ,
-    ["write"]  = TokenType.WRITE,
-}
 
 local g_input_buffer = {}
 
@@ -75,23 +48,6 @@ local function is_digit(c)
     local e = string.byte("9")
     local i = string.byte(c)
     if i >= b and i <= e then
-        return true
-    else
-        return false
-    end
-end
-
-local function is_letter(c)
-    if c == nil then
-        return false
-    end
-
-    local lb = string.byte("a")
-    local le = string.byte("z")
-    local ub = string.byte("A")
-    local ue = string.byte("Z")
-    local i = string.byte(c)
-    if (i >= lb and i <= le) or (i >= ub and i <= ue) then
         return true
     else
         return false
@@ -128,24 +84,13 @@ local function next_token()
         if state == StateType.START then
             if is_digit(c) then
                 state = StateType.INNUM
-            elseif is_letter(c) then
-                state = StateType.INID
-            elseif c == ':' then
-                state = StateType.INASSIGN
             elseif is_space(c) then
                 save = false
-            elseif c == '{' then
-                save = false
-                state = StateType.INCOMMENT
             else
                 state = StateType.DONE
                 if c == nil then
                     save = false
                     token_id = TokenType.EOF
-                elseif c == '=' then
-                    token_id = TokenType.EQ
-                elseif c == '<' then
-                    token_id = TokenType.LT
                 elseif c == '+' then
                     token_id = TokenType.PLUS
                 elseif c == '-' then
@@ -164,33 +109,12 @@ local function next_token()
                     token_id = TokenType.ERROR
                 end
             end
-        elseif state == StateType.INCOMMENT then
-            save = false
-            if c == '}' then
-                state = StateType.START
-            end
-        elseif state == StateType.INASSIGN then
-            state = StateType.DONE
-            if c == '=' then
-                token_id = TokenType.ASSIGN
-            else
-                unget_char(c)
-                save = false
-                token_id = TokenType.ERROR
-            end
         elseif state == StateType.INNUM then
             if not is_digit(c) then
                 unget_char(c)
                 save = false
                 state = StateType.DONE
                 token_id = TokenType.NUM
-            end
-        elseif state == StateType.INID then
-            if not is_letter(c) then
-                unget_char(c)
-                save = false
-                state = StateType.DONE
-                token_id = TokenType.ID
             end
         else
             print(string.format("Scanner Bug: state= %d", state))
@@ -204,9 +128,6 @@ local function next_token()
     end
 
     local token_str = table.concat(token_string_table)
-    if token_id == TokenType.ID then
-        token_id = ReserveWords[token_str] or token_id
-    end
 
     global_token.id = token_id
     global_token.str = token_str
@@ -214,18 +135,8 @@ local function next_token()
     return global_token
 end
 
-local function token_name(token)
-    for name, id in pairs(TokenType) do
-        if id == token then
-            return name
-        end
-    end
-    error("find token name")
-end
-
 return {
     TokenType = TokenType,
     curr_token = curr_token,
     next_token = next_token,
-    token_name = token_name,
 }

@@ -50,6 +50,7 @@ local ExpKind = {
 
 local function syntax_error(...)
     print(...)
+    error("syntax error.")
 end
 
 local function match(expected)
