@@ -1,5 +1,4 @@
 CC 		= gcc
-CPPC  	= g++
 
 # bundle all
 all:                      \
@@ -58,8 +57,8 @@ link_list: link_list.c
 quick_sort: quick_sort.c
 	$(CC) -o $@ quick_sort.c
 
-quick_sort_with_stack: quick_sort_with_stack.cc
-	$(CPPC) -o $@ quick_sort_with_stack.cc
+quick_sort_with_stack: quick_sort_with_stack.c
+	$(CC) -o $@ quick_sort_with_stack.c
 
 rename: rename.c
 	$(CC) -o $@ rename.c
