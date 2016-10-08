@@ -2,26 +2,49 @@ CC 		= gcc
 CPPC  	= g++
 
 # bundle all
-all: \
-	rb_tree \
-	skip_list \
-	quick_sort \
+all:                      \
+	rb_tree               \
+	skip_list             \
+	quick_sort            \
 	quick_sort_with_stack \
-	link_list \
-	rename \
-	dangling_else \
-	alignment \
-	alloc \
-	complement \
-	unsigned_char \
-	setjmp \
-	setjmp_link \
-	strsep \
-	use_readline \
-	offsetof \
-	float \
+	link_list             \
+	rename                \
+	dangling_else         \
+	alignment             \
+	alloc                 \
+	complement            \
+	unsigned_char         \
+	setjmp                \
+	setjmp_link           \
+	strsep                \
+	use_readline          \
+	offsetof              \
+	float                 \
+	use_zlib              \
+	use_zlib_2            \
+	trick_1               \
 
 clean:
+	rm -f rb_tree               
+	rm -f skip_list             
+	rm -f quick_sort            
+	rm -f quick_sort_with_stack 
+	rm -f link_list             
+	rm -f rename                
+	rm -f dangling_else         
+	rm -f alignment             
+	rm -f alloc                 
+	rm -f complement            
+	rm -f unsigned_char         
+	rm -f setjmp                
+	rm -f setjmp_link           
+	rm -f strsep                
+	rm -f use_readline          
+	rm -f offsetof              
+	rm -f float                 
+	rm -f use_zlib              
+	rm -f use_zlib_2            
+	rm -f trick_1               
 
 rb_tree: rb_tree.c
 	$(CC) -o $@ rb_tree.c
@@ -73,3 +96,12 @@ offsetof: offsetof.c
 
 float: float.c
 	$(CC) -o $@ float.c
+
+use_zlib: use_zlib.c
+	$(CC) -o $@ -std=gnu99 use_zlib.c -lz
+
+use_zlib_2: use_zlib_2.c
+	$(CC) -o $@ -std=gnu99 use_zlib_2.c -lz
+
+trick_1: trick_1.c
+	$(CC) -o $@ trick_1.c

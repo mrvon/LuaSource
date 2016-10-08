@@ -20,7 +20,7 @@ typedef union
     String s;
 }Object;
 
-int main(int argc, char const* argv[])
+int main()
 {
     String* s = (String*)malloc(sizeof(String));
     if (s == NULL)
