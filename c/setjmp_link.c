@@ -44,20 +44,6 @@ void hello_world(lua_State* L, void* ud)
     fprintf(stdout, "Leave function(%s)\n", __func__);
 }
 
-void real_call(lua_State* L, void* ud)
-{
-    print_tab(ud);
-    fprintf(stdout, "Enter function(%s)\n", __func__);
-
-    int i = (*(int*)ud) + 1;
-    pcall(L, hello_world, &i);
-
-    /* LUAI_THROW(L, L->error_jump);    // try to comment this line */
-
-    print_tab(ud);
-    fprintf(stdout, "Leave function(%s)\n", __func__);
-}
-
 int pcall(lua_State* L, Pfunc f, void* ud)
 {
 	struct lua_longjmp lj;
@@ -77,6 +63,20 @@ int pcall(lua_State* L, Pfunc f, void* ud)
 
 	L->error_jump = lj.previous;  /* restore old error handler */
 	return lj.status;
+}
+
+void real_call(lua_State* L, void* ud)
+{
+    print_tab(ud);
+    fprintf(stdout, "Enter function(%s)\n", __func__);
+
+    int i = (*(int*)ud) + 1;
+    pcall(L, hello_world, &i);
+
+    /* LUAI_THROW(L, L->error_jump);    // try to comment this line */
+
+    print_tab(ud);
+    fprintf(stdout, "Leave function(%s)\n", __func__);
 }
 
 int main(int argc, char const* argv[])
