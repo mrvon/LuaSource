@@ -1,9 +1,11 @@
 #include <stdio.h>
+#include <assert.h>
 
 int main() {
     char c = -1;
 
     // in mac, type char is signed.
+    assert(c < 0);
 
     printf("%d\n", c);
 

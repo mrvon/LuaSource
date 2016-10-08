@@ -1,4 +1,6 @@
-int complete()
+#include <stdio.h>
+
+int complement()
 {
 	int i = 0;
 	char arr[] = {
@@ -36,4 +38,8 @@ int complete()
         printf("INT(%d) MEMORY(%x)\n", (char)arr[i], (unsigned char)arr[i]);
 	}
 
+}
+
+int main() {
+    complement();
 }

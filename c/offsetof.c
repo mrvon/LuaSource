@@ -8,7 +8,7 @@ struct Foo {
 	int n2;
 };
 
-int main(int argc, char const* argv[])
+int main()
 {
     printf("INT: %lu\n", offsetof(struct Foo, n));
     printf("CHAR: %lu\n", offsetof(struct Foo, c));
