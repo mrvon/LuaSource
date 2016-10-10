@@ -50,7 +50,8 @@ local ExpKind = {
 
 local function syntax_error(...)
     print(...)
-    error("syntax error.")
+    print("syntax error.")
+    print(debug.traceback())
 end
 
 local function match(expected)
@@ -59,7 +60,8 @@ local function match(expected)
     if token.id == expected then
         next_token()
     else
-        syntax_error("unexpected token ->", token_name(token.id), token.str)
+        syntax_error("unexpected token ->", token_name(token.id), token.str, 
+        "expected token ->", token_name(expected))
     end
 end
 

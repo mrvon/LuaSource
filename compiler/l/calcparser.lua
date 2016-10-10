@@ -21,11 +21,12 @@ local TokenType = Scanner.TokenType
 -- *curr_token* always return the same table instance
 local curr_token = Scanner.curr_token
 local next_token = Scanner.next_token
-
+local token_name = Scanner.token_name
 
 local function syntax_error(...)
     print(...)
-    error("syntax error.")
+    print("syntax error.")
+    print(debug.traceback())
 end
 
 local function match(expected)
@@ -34,7 +35,7 @@ local function match(expected)
     if token.id == expected then
         next_token()
     else
-        syntax_error("unexpected token ->", token.id, token.str)
+        syntax_error("unexpected token ->", token_name(token.id), token.str)
     end
 end
 
@@ -95,7 +96,7 @@ function factor()
         match(TokenType.RPAREN)
         return e
     else
-        syntax_error("unexpected token ->", token.id, token.str,
+        syntax_error("unexpected token ->", token_name(token.id), token.str,
         "should be <factor> here.")
     end
 end
@@ -106,7 +107,6 @@ local function parse()
     while token.id ~= TokenType.EOF do
         print("=", exp())
         match(TokenType.SEMI)
-
     end
 end
 
