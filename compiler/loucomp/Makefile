@@ -22,16 +22,18 @@ tm: tm.c
 	$(CC) -o $@ $(CFLAGS) tm.c
 
 clean:
-	rm tiny
-	rm tm
-	rm main.o
-	rm util.o
-	rm scan.o
-	rm parse.o
-	rm symtab.o
-	rm analyze.o
-	rm code.o
-	rm cgen.o
+	rm -f main.o
+	rm -f util.o
+	rm -f scan.o
+	rm -f parse.o
+	rm -f symtab.o
+	rm -f analyze.o
+	rm -f code.o
+	rm -f cgen.o
+
+cleanall: clean
+	rm -f tiny
+	rm -f tm
 
 main.o: main.c globals.h util.h scan.h parse.h analyze.h cgen.h
 	$(CC) $(CFLAGS) -c main.c
