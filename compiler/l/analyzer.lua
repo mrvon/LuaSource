@@ -120,10 +120,11 @@ end
 
 local function analyze()
     local tree = Parser.parse()
-    Parser.trace(tree)
 
     build_symbol_table(tree)
     type_check(tree)
+
+    return tree
 end
 
 return {

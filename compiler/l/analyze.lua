@@ -1,3 +1,6 @@
+local Parser = require "parser"
 local Analyzer = require "analyzer"
 
-Analyzer.analyze()
+local syntax_tree = Analyzer.analyze()
+
+Parser.trace(syntax_tree)
