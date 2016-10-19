@@ -1,3 +1,7 @@
 local Parser = require "parser"
+local Inspect = require "inspect"
 
-Parser.parse()
+local syntax_tree = Parser.parse()
+Parser.trace(syntax_tree)
+
+-- print(Inspect.inspect(syntax_tree))

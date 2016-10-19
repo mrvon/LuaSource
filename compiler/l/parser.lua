@@ -19,7 +19,6 @@ factor         -> ( exp ) | number | identifier
 ]]
 
 local Scanner = require "scanner"
-local Inspect = require "inspect"
 
 local TokenType = Scanner.TokenType
 
@@ -280,9 +279,6 @@ local function parse()
     if token.id ~= TokenType.EOF then
         syntax_error("Code ends before file")
     end
-
-    trace(node)
-    print(Inspect.inspect(node))
 
     return node
 end
