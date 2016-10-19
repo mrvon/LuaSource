@@ -51,6 +51,10 @@ local ReserveWords = {
 }
 
 local g_input_buffer = {}
+local g_token = {
+    lineno = 1
+}
+
 
 local function get_next_char()
     if #g_input_buffer == 0 then
@@ -98,22 +102,42 @@ local function is_letter(c)
     end
 end
 
+local function inc_lineno(c)
+    -- support '\n', '\r', '\n\r', '\r\n'
+    if c == '\n' then
+        local n = get_next_char()
+        if n ~= '\r' then
+            unget_char(n)
+        end
+    elseif c == '\r' then
+        local n = get_next_char()
+        if n ~= '\n' then
+            unget_char(n)
+        end
+    else
+        assert(false)
+    end
+
+    g_token.lineno = g_token.lineno + 1
+end
+
 local function is_space(c)
     if c == nil then
         return false
     end
 
-    if c == ' ' or c == '\t' or c == '\n' or c == '\r' then
+    if c == ' ' or c == '\t' then
+        return true
+    elseif c == '\n' or c == '\r' then
+        inc_lineno(c)
         return true
     else
         return false
     end
 end
 
-local global_token = {}
-
 local function curr_token()
-    return global_token
+    return g_token
 end
 
 local function next_token()
@@ -165,6 +189,9 @@ local function next_token()
                 end
             end
         elseif state == StateType.INCOMMENT then
+            if c == '\n' or c == '\r' then
+                inc_lineno(c)
+            end
             save = false
             if c == '}' then
                 state = StateType.START
@@ -208,10 +235,10 @@ local function next_token()
         token_id = ReserveWords[token_str] or token_id
     end
 
-    global_token.id = token_id
-    global_token.str = token_str
+    g_token.id = token_id
+    g_token.str = token_str
 
-    return global_token
+    return g_token
 end
 
 local function token_name(token)

@@ -8,5 +8,5 @@ while true do
         break
     end
 
-    print(token.id, Scanner.token_name(token.id), token.str)
+    print(token.lineno, token.id, Scanner.token_name(token.id), token.str)
 end

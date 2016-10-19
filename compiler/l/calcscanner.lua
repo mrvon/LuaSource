@@ -24,6 +24,7 @@ local TokenType = {
 
 
 local g_input_buffer = {}
+local g_token = {}
 
 local function get_next_char()
     if #g_input_buffer == 0 then
@@ -66,10 +67,8 @@ local function is_space(c)
     end
 end
 
-local global_token = {}
-
 local function curr_token()
-    return global_token
+    return g_token
 end
 
 local function next_token()
@@ -129,10 +128,10 @@ local function next_token()
 
     local token_str = table.concat(token_string_table)
 
-    global_token.id = token_id
-    global_token.str = token_str
+    g_token.id = token_id
+    g_token.str = token_str
 
-    return global_token
+    return g_token
 end
 
 return {

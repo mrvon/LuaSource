@@ -46,6 +46,12 @@ local ExpKind = {
     ID      = 3,
 }
 
+local ExpType = {
+    VOID    = 1,
+    INTEGER = 2,
+    BOOLEAN = 3,
+}
+
 
 local function syntax_error(...)
     print(...)
@@ -64,24 +70,25 @@ local function match(expected)
     end
 end
 
-local function new_stmt_node(kind, attr_str)
+local function new_stmt_node(kind, attr_str, lineno)
     return {
         node_kind = NodeKind.STATEMENT,
         kind = kind,
         attr_str = attr_str,
         child = {},
+        lineno = lineno,
     }
 end
 
-local function new_exp_node(kind, attr_id, attr_str)
+local function new_exp_node(kind, attr_id, attr_str, lineno)
     return {
         node_kind = NodeKind.EXP,
         kind = kind,
         attr_id = attr_id,
         attr_str = attr_str,
         child = {},
-        -- lineno
-        -- type = Void
+        lineno = lineno,
+        type = ExpType.VOID
     }
 end
 
@@ -142,8 +149,8 @@ function statement()
 end
 
 function if_stmt()
-    local s = new_stmt_node(StatementKind.IF)
     local token = curr_token()
+    local s = new_stmt_node(StatementKind.IF, "", token.lineno)
 
     match(TokenType.IF)
     table.insert(s.child, exp())
@@ -161,7 +168,8 @@ function if_stmt()
 end
 
 function repeat_stmt()
-    local s = new_stmt_node(StatementKind.REPEAT)
+    local token = curr_token()
+    local s = new_stmt_node(StatementKind.REPEAT, "", token.lineno)
 
     match(TokenType.REPEAT)
     table.insert(s.child, stmt_sequence())
@@ -173,7 +181,7 @@ end
 
 function assign_stmt()
     local token = curr_token()
-    local s = new_stmt_node(StatementKind.ASSIGN, token.str)
+    local s = new_stmt_node(StatementKind.ASSIGN, token.str, token.lineno)
 
     match(TokenType.ID)
     match(TokenType.ASSIGN)
@@ -184,16 +192,22 @@ end
 
 function read_stmt()
     local token = curr_token()
-    local s = new_stmt_node(StatementKind.READ, token.str)
+
+    -- read statement lineno
+    local lineno = token.lineno
 
     match(TokenType.READ)
+
+    local s = new_stmt_node(StatementKind.READ, token.str, lineno)
+
     match(TokenType.ID)
 
     return s
 end
 
 function write_stmt()
-    local s = new_stmt_node(StatementKind.WRITE)
+    local token = curr_token()
+    local s = new_stmt_node(StatementKind.WRITE, "", token.lineno)
 
     match(TokenType.WRITE)
     table.insert(s.child, exp())
@@ -207,7 +221,7 @@ function exp()
     local token = curr_token()
 
     if token.id == TokenType.LT or token.id == TokenType.EQ then
-        local exp = new_exp_node(ExpKind.OP, token.id, token.str)
+        local exp = new_exp_node(ExpKind.OP, token.id, token.str, token.lineno)
         table.insert(exp.child, sexp)
         sexp = exp
         match(token.id)
@@ -223,7 +237,7 @@ function simple_exp()
     local token = curr_token()
 
     while token.id == TokenType.PLUS or token.id == TokenType.MINUS do
-        local op = new_exp_node(ExpKind.OP, token.id, token.str)
+        local op = new_exp_node(ExpKind.OP, token.id, token.str, token.lineno)
         table.insert(op.child, t)
         t = op
         match(token.id)
@@ -239,7 +253,7 @@ function term()
     local token = curr_token()
 
     while token.id == TokenType.TIMES or token.id == TokenType.OVER do
-        local exp = new_exp_node(ExpKind.OP, token.id, token.str)
+        local exp = new_exp_node(ExpKind.OP, token.id, token.str, token.lineno)
         table.insert(exp.child, f)
         f = exp
         match(token.id)
@@ -254,10 +268,10 @@ function factor()
     local token = curr_token()
 
     if token.id == TokenType.NUM then
-        node = new_exp_node(ExpKind.CONST, token.id, token.str)
+        node = new_exp_node(ExpKind.CONST, token.id, token.str, token.lineno)
         match(TokenType.NUM)
     elseif token.id == TokenType.ID then
-        node = new_exp_node(ExpKind.ID, token.id, token.str)
+        node = new_exp_node(ExpKind.ID, token.id, token.str, token.lineno)
         match(TokenType.ID)
     elseif token.id == TokenType.LPAREN then
         match(TokenType.LPAREN)
@@ -333,6 +347,10 @@ function trace(tree)
 end
 
 return {
+    NodeKind = NodeKind,
+    StatementKind = StatementKind,
+    ExpKind = ExpKind,
+    ExpType = ExpType,
     parse = parse,
     trace = trace,
 }
