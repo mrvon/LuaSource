@@ -84,5 +84,5 @@ func main() {
 	fmt.Println(uniquePaths(1, 2))
 	fmt.Println(uniquePaths(4, 5))
 	fmt.Println(uniquePaths(6, 7))
-	fmt.Println(uniquePaths(1000, 1000))
+	fmt.Println(uniquePaths(99, 99))
 }
