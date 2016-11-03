@@ -25,9 +25,9 @@ func median_of_three(nums []int, left int, right int) int {
 // Three-way partitioning assumes zero-based array indexing.
 // It uses three indices i, j and k,
 // maintaining the invariant that i ≤ j.
-// k holds the boundary of numbers greater than mid.
+// k holds the boundary of numbers less than mid.
 // j is the position of number under consideration. And
-// i is the boundary for the numbers lesser than the mid.
+// i is the boundary for the numbers greater than the mid.
 func three_way_partition(nums []int, left int, right int, pivot int) (lrange int, rrange int) {
 	i := left
 	j := left
