@@ -55,8 +55,6 @@ func find(node *Trie, s string) *Trie {
 		node = node.children[tonumber(s[i])]
 		if node == nil {
 			return nil
-		} else {
-			return node
 		}
 	}
 	return node
