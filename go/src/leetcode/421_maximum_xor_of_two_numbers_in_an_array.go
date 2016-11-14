@@ -49,14 +49,11 @@ func findMaximumXOR(nums []int) int {
 		for j >= 0 {
 			b := (n >> uint(j)) & 0x1
 			if node.children[0x1^b] != nil {
-				m = m | (0x1 ^ b)
+				m = m | ((0x1 ^ b) << uint(j))
 				node = node.children[0x1^b]
 			} else {
-				m = m | b
+				m = m | (b << uint(j))
 				node = node.children[b]
-			}
-			if j > 0 {
-				m = m << 1
 			}
 			j--
 		}
