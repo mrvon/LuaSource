@@ -4,8 +4,7 @@ local StateType = {
     START     = 1,
     INDIGIT   = 2,
     INSTR     = 3,
-    INLITERAL = 4,
-    DONE      = 5,
+    DONE      = 4,
 }
 
 local TokenType = {
@@ -18,10 +17,7 @@ local TokenType = {
     TRUE      = 7,
     FALSE     = 8,
     NULL      = 9,
-    MINUS     = 10,
     SEMI      = 11,
-    DOT       = 12,
-    LITERAL   = 13,
     EOF       = 14,
 }
 
@@ -129,9 +125,8 @@ local function next_token()
         if state == StateType.START then
             if is_digit(c) then
                 state = StateType.INDIGIT
-            elseif is_letter(c) then
-                state = StateType.INLITERAL
             elseif c == '\"' then
+                save = false
                 state = StateType.INSTR
             elseif is_space(c) then
                 save = false
@@ -162,18 +157,10 @@ local function next_token()
                 token_id = TokenType.DIGIT
             end
         elseif state == StateType.INSTR then
-            if not is_char(c) then
-                unget_char(c)
+            if c == '\"' then
                 save = false
                 state = StateType.DONE
                 token_id = TokenType.STR
-            end
-        elseif state == StateType.INLITERAL then
-            if not is_letter(c) then
-                unget_char(c)
-                save = false
-                state = StateType.DONE
-                token_id = TokenType.LITERAL
             end
         else
             print(string.format("Scanner Bug: state= %d", state))
