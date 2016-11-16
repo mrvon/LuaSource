@@ -9,8 +9,10 @@ local StateType = {
     INNUM4    = 6,
     INNUM5    = 7,
     INSTR     = 8,
-    INRESERVE = 9,
-    DONE      = 10,
+    INESCAPE  = 9,
+    INUNICODE = 10,
+    INRESERVE = 11,
+    DONE      = 12,
 }
 
 local TokenType = {
@@ -132,6 +134,7 @@ local function next_token()
     local token_string_table = {}
     local token_id
     local state = StateType.START
+    local unicode_point
 
     while state ~= StateType.DONE do
         local c = get_next_char()
@@ -231,6 +234,50 @@ local function next_token()
                 save = false
                 state = StateType.DONE
                 token_id = TokenType.STR
+            elseif c == '\\' then
+                save = false
+                state = StateType.INESCAPE
+            end
+        elseif state == StateType.INESCAPE then
+            if c == '\"' or c == '\\' or c == '/' then
+                state = StateType.INSTR
+            elseif c == 'b' then
+                c = '\b'
+                state = StateType.INSTR
+            elseif c == 'f' then
+                c = '\f'
+                state = StateType.INSTR
+            elseif c == 'n' then
+                c = '\n'
+                state = StateType.INSTR
+            elseif c == 'r' then
+                c = '\r'
+                state = StateType.INSTR
+            elseif c == 't' then
+                c = '\t'
+                state = StateType.INSTR
+            elseif c == 'u' then
+                save = false
+                state = StateType.INUNICODE
+                unicode_point = {
+                    "0x"
+                }
+            else
+                unget_char(c)
+                save = false
+                state = StateType.DONE
+                token_id = TokenType.ERROR
+            end
+        elseif state == StateType.INUNICODE then
+            -- unicode \uFFFF
+            table.insert(unicode_point, c)
+
+            if #unicode_point >= 5 then
+                -- 0xFFFF
+                c = utf8.char(tonumber(table.concat(unicode_point, "")))
+                state = StateType.INSTR
+            else
+                save = false
             end
         elseif state == StateType.INRESERVE then
             if not is_letter(c) then

@@ -16,7 +16,7 @@
     },
     "website": null,
     "test" : {
-        "name" : "dennis",
+        "name" : "\u20ACdennis\tvon\n\n\n\n\"'\\/\/Hello",
         "exp" : [
             18e1,
             0.1e2,
@@ -31,7 +31,8 @@
         "false" : false,
         "null" : null,
         "address" : {
-            "name" : "hello"
+            "location_1" : "\u4E16\u754c",
+            "location_2" : "你好, 世界"
         }
     }
 }
