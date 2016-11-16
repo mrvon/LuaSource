@@ -14,19 +14,21 @@ local StateType = {
 }
 
 local TokenType = {
-    LBRACE    = 1,
-    RBRACE    = 2,
-    LBRACKET  = 3,
-    RBRACKET  = 4,
-    STR       = 5,
-    STR2      = 6,
-    NUM       = 7,
-    TRUE      = 8,
-    FALSE     = 9,
-    NULL      = 10,
-    SEMI      = 11,
-    ERROR     = 12,
-    EOF       = 13,
+    LBRACE   = 1,
+    RBRACE   = 2,
+    LBRACKET = 3,
+    RBRACKET = 4,
+    STR      = 5,
+    STR2     = 6,
+    NUM      = 7,
+    TRUE     = 8,
+    FALSE    = 9,
+    NULL     = 10,
+    COMMA    = 11,
+    SEMI     = 12,
+    COLON    = 13,
+    ERROR    = 14,
+    EOF      = 15,
 }
 
 local g_input_buffer = {}
@@ -162,8 +164,12 @@ local function next_token()
                     token_id = TokenType.LBRACKET
                 elseif c == ']' then
                     token_id = TokenType.RBRACKET
+                elseif c == ',' then
+                    token_id = TokenType.COMMA
                 elseif c == ';' then
                     token_id = TokenType.SEMI
+                elseif c == ':' then
+                    token_id = TokenType.COLON
                 else
                     token_id = TokenType.ERROR
                 end
@@ -263,8 +269,18 @@ local function next_token()
     return g_token
 end
 
+local function token_name(token)
+    for name, id in pairs(TokenType) do
+        if id == token then
+            return name
+        end
+    end
+    error("find token name")
+end
+
 return {
     TokenType = TokenType,
     curr_token = curr_token,
     next_token = next_token,
+    token_name = token_name,
 }
