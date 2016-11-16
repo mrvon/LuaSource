@@ -1,16 +1,16 @@
 -- Scanner for JSON
 
 local StateType = {
-    START   = 1,
-    INNUM1  = 2,
-    INNUM2  = 3,
-    INNUM2B = 4,
-    INNUM3  = 5,
-    INNUM4  = 6,
-    INNUM5  = 7,
-    INSTR1  = 8,
-    INSTR2  = 9,
-    DONE    = 10,
+    START     = 1,
+    INNUM1    = 2,
+    INNUM2    = 3,
+    INNUM2B   = 4,
+    INNUM3    = 5,
+    INNUM4    = 6,
+    INNUM5    = 7,
+    INSTR     = 8,
+    INRESERVE = 9,
+    DONE      = 10,
 }
 
 local TokenType = {
@@ -19,7 +19,7 @@ local TokenType = {
     LBRACKET = 3,
     RBRACKET = 4,
     STR      = 5,
-    STR2     = 6,
+    RESERVE  = 6,
     NUM      = 7,
     TRUE     = 8,
     FALSE    = 9,
@@ -146,9 +146,9 @@ local function next_token()
                 state = StateType.INNUM2B
             elseif c == '\"' then
                 save = false
-                state = StateType.INSTR1
+                state = StateType.INSTR
             elseif is_letter(c) then
-                state = StateType.INSTR2
+                state = StateType.INRESERVE
             elseif is_space(c) then
                 save = false
             else
@@ -188,6 +188,8 @@ local function next_token()
         elseif state == StateType.INNUM2 then
             if c == '.' then
                 state = StateType.INNUM3
+            elseif c == 'e' or c == 'E' then
+                state = StateType.INNUM4
             else
                 unget_char(c)
                 save = false
@@ -224,18 +226,18 @@ local function next_token()
                 state = StateType.DONE
                 token_id = TokenType.NUM
             end
-        elseif state == StateType.INSTR1 then
+        elseif state == StateType.INSTR then
             if c == '\"' then
                 save = false
                 state = StateType.DONE
                 token_id = TokenType.STR
             end
-        elseif state == StateType.INSTR2 then
+        elseif state == StateType.INRESERVE then
             if not is_letter(c) then
                 unget_char(c)
                 save = false
                 state = StateType.DONE
-                token_id = TokenType.STR2
+                token_id = TokenType.RESERVE
             end
         else
             print(string.format("Scanner Bug: state= %d", state))
@@ -250,7 +252,7 @@ local function next_token()
 
     local token_str = table.concat(token_string_table)
 
-    if token_id == TokenType.STR2 then
+    if token_id == TokenType.RESERVE then
         if token_str == "true" then
             g_token.id = TokenType.TRUE
         elseif token_str == "false" then
@@ -258,7 +260,7 @@ local function next_token()
         elseif token_str == "null" then
             g_token.id = TokenType.NULL
         else
-            g_token.id = TokenType.STR
+            g_token.id = TokenType.ERROR
         end
         g_token.str = token_str
     else

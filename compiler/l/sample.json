@@ -14,5 +14,24 @@
         "Company": "Pearson Education",
         "Country": "India"
     },
-    "website": null
+    "website": null,
+    "test" : {
+        "name" : "dennis",
+        "exp" : [
+            18e1,
+            0.1e2,
+            1.0e2,
+            1.0e+2,
+            1.0e-2,
+            1.0E-2
+        ],
+        "sex" : "male",
+        "carrer" : "programmer",
+        "true" : true,
+        "false" : false,
+        "null" : null,
+        "address" : {
+            "name" : "hello"
+        }
+    }
 }

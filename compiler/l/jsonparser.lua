@@ -96,13 +96,17 @@ local function match(expected)
     end
 end
 
+local function convert_number(str)
+    f = assert(load("return " .. str), "number format error")
+    return f()
+end
 
 local object
 local members
 local pair
 local value
-local array
 local elements
+local array
 
 object = function()
     local token = curr_token()
@@ -143,8 +147,7 @@ value = function()
         match(TokenType.STR)
         return val
     elseif token.id == TokenType.NUM then
-        -- FIXME
-        local num = tonumber(token.str)
+        local num = convert_number(token.str)
         match(TokenType.NUM)
         return num
     elseif token.id == TokenType.LBRACE then
