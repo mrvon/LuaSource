@@ -4,7 +4,7 @@ import "fmt"
 
 func median_of_three(nums []int, left int, right int) int {
 	if right-left <= 1 {
-		return left
+		return nums[left]
 	}
 
 	mid := left + (right-left)/2
@@ -13,11 +13,11 @@ func median_of_three(nums []int, left int, right int) int {
 	z := nums[right]
 
 	if x >= y && x <= z {
-		return left
+		return x
 	} else if y >= x && y <= z {
-		return mid
+		return y
 	} else {
-		return right
+		return z
 	}
 }
 
@@ -49,8 +49,7 @@ func __quick_sort(nums []int, left int, right int) {
 		return
 	}
 
-	mid := median_of_three(nums, left, right)
-	pivot := nums[mid]
+	pivot := median_of_three(nums, left, right)
 
 	lrange, rrange := three_way_partition(nums, left, right, pivot)
 	__quick_sort(nums, left, lrange-1)
