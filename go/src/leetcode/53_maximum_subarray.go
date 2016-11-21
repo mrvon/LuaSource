@@ -14,15 +14,14 @@ func __max(n1 int, n2 int, n3 int) int {
 
 func __maxSubArray(nums []int, l int, r int) int {
 	if l > r {
-		fmt.Println("debug", l, r)
-		return 0
+		return math.MinInt32
 	} else if l == r {
 		return nums[l]
 	} else {
 		// l < r
 		m := l + (r-l)/2
 		return __max(
-			__maxSubArray(nums, l, m),
+			__maxSubArray(nums, l, m-1),
 			__maxSubArray(nums, m+1, r),
 			__crossArray(nums, l, m, r))
 	}
