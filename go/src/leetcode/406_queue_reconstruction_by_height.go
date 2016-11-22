@@ -36,11 +36,8 @@ func reconstructQueue(people [][]int) [][]int {
 
 	for i := 0; i < len(l); i++ {
 		j := l[i][1]
-		// INSERT into index j
 		temp := l[i]
-		for k := i - 1; k >= j; k-- {
-			l[k+1] = l[k]
-		}
+		copy(l[j+1:i+1], l[j:i])
 		l[j] = temp
 	}
 
