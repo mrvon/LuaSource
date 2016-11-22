@@ -1,3 +1,5 @@
+// Inspire by
+// https://discuss.leetcode.com/topic/60981/explanation-of-the-neat-sort-insert-solution
 package main
 
 import (
