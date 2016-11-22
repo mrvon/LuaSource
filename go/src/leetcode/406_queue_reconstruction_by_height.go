@@ -4,8 +4,9 @@ https://discuss.leetcode.com/topic/60981/explanation-of-the-neat-sort-insert-sol
 
 Key point is:
 
-1. Shorter people's in the front of taller people or in the back of it is irrelevant.
-	So, We can sort by taller people first, and k value smaller first.
+1. For taller people, shorter people is in the front or in the back of it is irrelevant.
+	it's never effect taller people's k value. So, We can sort by rule: taller
+	people first, and k value smaller first.
 
 2. Insert people from begin to end. k value is the index this people want to standing.
     (Because every people in front of index k is taller than it) and
