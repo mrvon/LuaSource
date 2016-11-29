@@ -3,8 +3,26 @@
 #include <stdbool.h>
 #include <assert.h>
 
+struct Item {
+    int val;
+    int priority;
+};
+
+struct Item* new_item(int val, int priority) {
+    struct Item* i = malloc(sizeof(struct Item));
+    assert(i);
+    i->val = val;
+    i->priority = priority;
+    return i;
+}
+
+void del_item(struct Item* item) {
+    assert(item);
+    free(item);
+}
+
 struct Heap {
-    int* inner_array;
+    struct Item** inner_array;
     int size;
     int curr;
 };
@@ -12,24 +30,29 @@ struct Heap {
 void __new_inner_array(struct Heap* h, int size) {
     h->size = size;
     h->curr = 0;
-    h->inner_array = malloc(sizeof(int) * size);
+    h->inner_array = malloc(sizeof(struct Item*) * size);
     assert(h->inner_array);
 }
 
 void __del_inner_array(struct Heap* h) {
+    assert(h);
+    int i = 0;
+    for (i = 0; i < h->curr; i++) {
+        del_item(h->inner_array[i]);
+    }
     free(h->inner_array);
 }
 
-void __append_inner_array(struct Heap* h, int val) {
+void __append_inner_array(struct Heap* h, struct Item* item) {
     if (h->curr >= h->size) {
         h->size *= 2;
         h->inner_array = realloc(h->inner_array, h->size);
         assert(h->inner_array);
     }
-    h->inner_array[h->curr++] = val;
+    h->inner_array[h->curr++] = item;
 }
 
-int __pop_back_inner_array(struct Heap* h) {
+struct Item* __pop_back_inner_array(struct Heap* h) {
     assert(h->curr > 0);
     h->curr--;
     return h->inner_array[h->curr];
@@ -44,6 +67,7 @@ struct Heap* new_heap() {
 
 void del_heap(struct Heap* h) {
     __del_inner_array(h);
+    assert(h);
     free(h);
 }
 
@@ -56,7 +80,7 @@ bool less(struct Heap* h, int i, int j) {
 }
 
 void swap(struct Heap* h, int i, int j) {
-    int tmp = h->inner_array[i];
+    struct Item* tmp = h->inner_array[i];
     h->inner_array[i] = h->inner_array[j];
     h->inner_array[j] = tmp;
 }
@@ -91,12 +115,33 @@ void __down(struct Heap* h, int i, int n) {
     }
 }
 
-void push(struct Heap* h, int val) {
-    __append_inner_array(h, val);
+struct Item* pop(struct Heap* h);
+
+struct Item* __remove(struct Heap* h, int i) {
+    int n = len(h) - 1;
+    if (n != i) {
+        swap(h, i, n);
+        __down(h, i, n);
+        __up(h, i);
+    }
+    return pop(h);
+}
+
+// Fix re-establishes the heap ordering after the element at index i has changed its value.
+// Changing the value of the element at index i and then calling Fix is equivalent to,
+// but less expensive than, calling Remove(h, i) followed by a Push of the new value.
+// The complexity is O(log(n)) where n = h.Len().
+void __fix(struct Heap* h, int i) {
+    __down(h, i, len(h));
+    __up(h, i);
+}
+
+void push(struct Heap* h, struct Item* item) {
+    __append_inner_array(h, item);
     __up(h, len(h)-1);
 }
 
-int pop(struct Heap* h) {
+struct Item* pop(struct Heap* h) {
     int n = len(h) - 1;
     swap(h, 0, n);
     __down(h, 0, n);
@@ -106,13 +151,18 @@ int pop(struct Heap* h) {
 int main() {
     struct Heap* h = new_heap();
 
-    push(h, 1000);
-    push(h, 1001);
-    push(h, 1002);
+    push(h, new_item(1, 101));
+    push(h, new_item(2, 102));
+    push(h, new_item(3, 103));
 
-    printf("%d\n", pop(h));
-    printf("%d\n", pop(h));
-    printf("%d\n", pop(h));
+    struct Item* i = pop(h);
+    printf("Val:%d Priority:%d\n", i->val, i->priority);
+
+    i = pop(h);
+    printf("Val:%d Priority:%d\n", i->val, i->priority);
+
+    i = pop(h);
+    printf("Val:%d Priority:%d\n", i->val, i->priority);
 
     del_heap(h);
 }
