@@ -90,10 +90,17 @@ func (this *LFUCache) Get(key int) int {
 }
 
 func (this *LFUCache) Set(key int, value int) {
+	if this.capacity == 0 {
+		return
+	}
+
 	// try set
 	item := this.hash[key]
 	if item != nil {
+		this.timestamp++
+		item.time = this.timestamp
 		item.value = value
+		(&this.heap).update(item, item.priority+1)
 		return
 	}
 
@@ -124,7 +131,7 @@ func assert(b bool) {
 	}
 }
 
-func main() {
+func test_1() {
 	capacity := 2
 	obj := Constructor(capacity)
 	obj.Set(1, 1)
@@ -139,4 +146,28 @@ func main() {
 	assert(obj.Get(4) == 4)
 	obj.Set(3, 1)
 	assert(obj.Get(3) == 1)
+}
+
+func test_2() {
+	capacity := 2
+	obj := Constructor(capacity)
+	obj.Set(2, 1)
+	obj.Set(1, 1)
+	obj.Set(2, 3)
+	obj.Set(4, 1)
+	assert(obj.Get(1) == -1)
+	assert(obj.Get(2) == 3)
+}
+
+func test_3() {
+	capacity := 0
+	obj := Constructor(capacity)
+	obj.Set(0, 0)
+	assert(obj.Get(0) == -1)
+}
+
+func main() {
+	test_1()
+	test_2()
+	test_3()
 }
