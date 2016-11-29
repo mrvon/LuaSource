@@ -1,5 +1,7 @@
 package main
 
+import "container/heap"
+
 // An Item is something we manage in a priority queue.
 type Item struct {
 	key      int // The key of the item.
@@ -10,107 +12,54 @@ type Item struct {
 	index int // The index of the item in the heap.
 }
 
-type Heap []*Item
+// A PriorityQueue implements heap.Interface and holds Items.
+type PriorityQueue []*Item
 
-func (h Heap) Len() int {
-	return len(h)
+func (pq PriorityQueue) Len() int {
+	return len(pq)
 }
 
-func (h Heap) Less(i, j int) bool {
-	if h[i].priority < h[j].priority {
+func (pq PriorityQueue) Less(i, j int) bool {
+	if pq[i].priority < pq[j].priority {
 		return true
-	} else if h[i].priority == h[j].priority {
-		return h[i].time <= h[j].time
+	} else if pq[i].priority == pq[j].priority {
+		return pq[i].time <= pq[j].time
 	} else {
 		return false
 	}
 }
 
-func (h Heap) Swap(i, j int) {
-	h[i], h[j] = h[j], h[i]
-	h[i].index = i
-	h[j].index = j
+func (pq PriorityQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+	pq[i].index = i
+	pq[j].index = j
 }
 
-func (h *Heap) Up(j int) {
-	for {
-		i := (j - 1) / 2 // parent
-		if i == j || !h.Less(j, i) {
-			break
-		}
-		h.Swap(i, j)
-		j = i
-	}
-}
-
-func (h *Heap) Down(i int, n int) {
-	for {
-		j1 := 2*i + 1
-		if j1 >= n || j1 < 0 {
-			break
-		}
-		j := j1 // left child
-		j2 := j1 + 1
-		if j2 < n && !h.Less(j1, j2) {
-			j = j2 // = 2*i + 2 // right child
-		}
-		if !h.Less(j, i) {
-			break
-		}
-		h.Swap(i, j)
-		i = j
-	}
-}
-
-func (h *Heap) Push(x interface{}) {
-	n := h.Len()
+func (pq *PriorityQueue) Push(x interface{}) {
+	n := len(*pq)
 	item := x.(*Item)
 	item.index = n
-	*h = append(*h, item)
-
-	h.Up(h.Len() - 1)
+	*pq = append(*pq, item)
 }
 
-func (h *Heap) Pop() interface{} {
-	n := h.Len() - 1
-
-	h.Swap(0, n)
-	h.Down(0, n)
-
-	item := (*h)[n]
+func (pq *PriorityQueue) Pop() interface{} {
+	old := *pq
+	n := len(old)
+	item := old[n-1]
 	item.index = -1 // for safety
-	*h = (*h)[0:n]
-
+	*pq = old[0 : n-1]
 	return item
 }
 
-func (h *Heap) Remove(i int) *Item {
-	n := h.Len() - 1
-	if n != i {
-		h.Swap(i, n)
-		h.Down(i, n)
-		h.Up(i)
-	}
-	return h.Pop().(*Item)
-}
-
-// Fix re-establishes the heap ordering after the element at index i has changed its value.
-// Changing the value of the element at index i and then calling Fix is equivalent to,
-// but less expensive than, calling Remove(h, i) followed by a Push of the new value.
-// The complexity is O(log(n)) where n = h.Len().
-func (h *Heap) Fix(i int) {
-	h.Down(i, h.Len())
-	h.Up(i)
-}
-
 // update modifies the priority and value of an Item in the queue.
-func (h *Heap) Update(item *Item) {
-	h.Fix(item.index)
+func (pq *PriorityQueue) update(item *Item, priority int) {
+	item.priority = priority
+	heap.Fix(pq, item.index)
 }
 
 type LFUCache struct {
 	hash      map[int]*Item
-	heap      Heap
+	heap      PriorityQueue
 	capacity  int
 	current   int
 	timestamp int
@@ -119,7 +68,7 @@ type LFUCache struct {
 func Constructor(capacity int) LFUCache {
 	return LFUCache{
 		hash:      make(map[int]*Item),
-		heap:      Heap{},
+		heap:      PriorityQueue{},
 		capacity:  capacity,
 		current:   0,
 		timestamp: 0,
@@ -135,14 +84,13 @@ func (this *LFUCache) Get(key int) int {
 	this.timestamp++
 
 	item.time = this.timestamp
-	item.priority = item.priority + 1
-	this.heap.Update(item)
+	(&this.heap).update(item, item.priority+1)
 
 	return item.value
 }
 
 func (this *LFUCache) Set(key int, value int) {
-	if this.capacity <= 0 {
+	if this.capacity == 0 {
 		return
 	}
 
@@ -151,15 +99,14 @@ func (this *LFUCache) Set(key int, value int) {
 	if item != nil {
 		this.timestamp++
 		item.time = this.timestamp
-		item.priority = item.priority + 1
 		item.value = value
-		this.heap.Update(item)
+		(&this.heap).update(item, item.priority+1)
 		return
 	}
 
 	// just insert
 	if this.current >= this.capacity {
-		i := this.heap.Pop().(*Item)
+		i := heap.Pop(&this.heap).(*Item)
 		delete(this.hash, i.key)
 	} else {
 		this.current++
@@ -175,7 +122,7 @@ func (this *LFUCache) Set(key int, value int) {
 	}
 
 	this.hash[key] = item
-	this.heap.Push(item)
+	heap.Push(&this.heap, item)
 }
 
 func assert(b bool) {

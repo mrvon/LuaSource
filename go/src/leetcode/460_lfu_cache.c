@@ -247,11 +247,18 @@ int lFUCacheGet(LFUCache* obj, int key) {
 }
 
 void lFUCacheSet(LFUCache* obj, int key, int value) {
+    if (obj->capacity <= 0) {
+        return;
+    }
+
     // try set
     struct HItem* hi = hash_find(obj->hash, key);
-    if (hi) {
+    if (hi != NULL) {
         struct Item* i = hi->val;
+        i->time = obj->timestamp++;
+        i->priority++;
         i->val = value;
+        update(obj->heap, i);
         return;
     }
 
@@ -275,7 +282,7 @@ void lFUCacheFree(LFUCache* obj) {
     free(obj);
 }
 
-int main() {
+void test_1() {
     const int capacity = 2;
     LFUCache* obj = lFUCacheCreate(capacity);
 
@@ -291,4 +298,30 @@ int main() {
     assert(lFUCacheGet(obj, 4) == 4);  // returns 4
     lFUCacheSet(obj, 3, 1);
     assert(lFUCacheGet(obj, 3) == 1);  // returns 1 (overlap)
+}
+
+void test_2() {
+    const int capacity = 2;
+    LFUCache* obj = lFUCacheCreate(capacity);
+
+    lFUCacheSet(obj, 2, 1);
+    lFUCacheSet(obj, 1, 1);
+    lFUCacheSet(obj, 2, 3);
+    lFUCacheSet(obj, 4, 1);
+    assert(lFUCacheGet(obj, 1) == -1);
+    assert(lFUCacheGet(obj, 2) == 3);
+}
+
+void test_3() {
+    const int capacity = 0;
+    LFUCache* obj = lFUCacheCreate(capacity);
+
+    lFUCacheSet(obj, 0, 0);
+    assert(lFUCacheGet(obj, 0) == -1);
+}
+
+int main() {
+    test_1();
+    test_2();
+    test_3();
 }
