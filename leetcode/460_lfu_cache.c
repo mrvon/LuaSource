@@ -247,6 +247,15 @@ int lFUCacheGet(LFUCache* obj, int key) {
 }
 
 void lFUCacheSet(LFUCache* obj, int key, int value) {
+    // try set
+    struct HItem* hi = hash_find(obj->hash, key);
+    if (hi) {
+        struct Item* i = hi->val;
+        i->val = value;
+        return;
+    }
+
+    // just insert
     if (obj->current >= obj->capacity) {
         struct Item* i = pop(obj->heap);
         // remove from hash
@@ -280,4 +289,6 @@ int main() {
     assert(lFUCacheGet(obj, 1) == -1); // returns -1 (not found)
     assert(lFUCacheGet(obj, 3) == 3);  // returns 3
     assert(lFUCacheGet(obj, 4) == 4);  // returns 4
+    lFUCacheSet(obj, 3, 1);
+    assert(lFUCacheGet(obj, 3) == 1);  // returns 1 (overlap)
 }
