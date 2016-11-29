@@ -2,18 +2,24 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
+#include "uthash.h"
 
+//------------------------------------------------------------------------------
 struct Item {
+    int key;        // The key of the item.
     int val;        // The value of the item.
+    int time;       // The access time of the item.
     int priority;   // The priority of the item in the queue.
     // The index is needed by update and is maintained by the heap.
     int index;      // The index of the item in the heap.
 };
 
-struct Item* new_item(int val, int priority) {
+struct Item* new_item(int key, int val, int time, int priority) {
     struct Item* i = malloc(sizeof(struct Item));
     assert(i);
+    i->key = key;
     i->val = val;
+    i->time = time;
     i->priority = priority;
     return i;
 }
@@ -81,7 +87,13 @@ int len(struct Heap* h) {
 }
 
 bool less(struct Heap* h, int i, int j) {
-    return h->inner_array[i]->priority < h->inner_array[j]->priority;
+    if (h->inner_array[i]->priority < h->inner_array[j]->priority) {
+        return true;
+    } else if (h->inner_array[i]->priority == h->inner_array[j]->priority) {
+        return h->inner_array[i]->time <= h->inner_array[j]->time;
+    } else {
+        return false;
+    }
 }
 
 void swap(struct Heap* h, int i, int j) {
@@ -158,40 +170,114 @@ struct Item* pop(struct Heap* h) {
 void update(struct Heap* h, struct Item* item) {
     __fix(h, item->index);
 }
+//------------------------------------------------------------------------------
+
+struct HItem {
+    int id; // key
+    struct Item* val; // value
+    UT_hash_handle hh;  // makes this structure hashable
+};
+
+void hash_add(struct HItem** hash, int id, struct Item* item) {
+    struct HItem* s;
+
+    // id already in the hash?
+    HASH_FIND_INT(*hash, &id, s);
+    if (s == NULL) {
+        s = malloc(sizeof(struct HItem));
+        s->id = id;
+        s->val = item;
+        HASH_ADD_INT(*hash, id, s); // id: name of key field
+    }
+}
+
+struct HItem* hash_find(struct HItem** hash, int id) {
+    struct HItem* s;
+    HASH_FIND_INT(*hash, &id, s); // s: output pointer
+    return s;
+}
+
+void hash_del(struct HItem** hash, struct HItem* item) {
+    HASH_DEL(*hash, item); // pointer to deletee
+    free(item);
+}
+
+void hash_delall(struct HItem** hash) {
+    struct HItem* curr_item;
+    struct HItem* tmp;
+
+    HASH_ITER(hh, *hash, curr_item, tmp) {
+        HASH_DEL(*hash, curr_item); // delete it
+        free(curr_item); // free it
+    }
+}
+//------------------------------------------------------------------------------
+
+typedef struct {
+    struct HItem** hash;
+    struct Heap* heap;
+    int capacity;
+    int current;
+    int timestamp;
+} LFUCache;
+
+LFUCache* lFUCacheCreate(int capacity) {
+    LFUCache* obj = malloc(sizeof(LFUCache));
+    obj->hash = malloc(sizeof(struct HItem*));
+    *(obj->hash) = NULL;
+    obj->heap = new_heap();
+    obj->capacity = capacity;
+    obj->current = 0;
+    obj->timestamp = 0;
+    return obj;
+}
+
+int lFUCacheGet(LFUCache* obj, int key) {
+    struct HItem* hi = hash_find(obj->hash, key);
+    if (hi == NULL) {
+        return -1;
+    }
+
+    struct Item* i = hi->val;
+    i->time = obj->timestamp++;
+    i->priority++;
+    update(obj->heap, i);
+
+    return i->val;
+}
+
+void lFUCacheSet(LFUCache* obj, int key, int value) {
+    if (obj->current >= obj->capacity) {
+        struct Item* i = pop(obj->heap);
+        // remove from hash
+        struct HItem* hi = hash_find(obj->hash, i->key);
+        hash_del(obj->hash, hi);
+        del_item(i);
+    } else {
+        obj->current++;
+    }
+    struct Item* item = new_item(key, value, obj->timestamp++, 0);
+    hash_add(obj->hash, key, item);
+    push(obj->heap, item);
+}
+
+void lFUCacheFree(LFUCache* obj) {
+    del_heap(obj->heap);
+    free(obj);
+}
 
 int main() {
-    struct Heap* h = new_heap();
+    const int capacity = 2;
+    LFUCache* obj = lFUCacheCreate(capacity);
 
-    push(h, new_item(3, 103));
-    push(h, new_item(1, 101));
-    push(h, new_item(2, 102));
-
-    struct Item* i = pop(h);
-    printf("Val:%d Priority:%d\n", i->val, i->priority);
-    del_item(i);
-
-    i = pop(h);
-    printf("Val:%d Priority:%d\n", i->val, i->priority);
-    del_item(i);
-
-    i = pop(h);
-    printf("Val:%d Priority:%d\n", i->val, i->priority);
-    del_item(i);
-
-    push(h, new_item(1, 999));
-    push(h, new_item(2, 101));
-    push(h, new_item(3, 888));
-    push(h, new_item(4, 777));
-
-    i = new_item(5, 666);
-    push(h, i);
-
-    i->priority = 100;
-    update(h, i);
-
-    i = pop(h);
-    printf("Val:%d Priority:%d\n", i->val, i->priority);
-    del_item(i);
-
-    del_heap(h);
+    lFUCacheSet(obj, 1, 1);
+    lFUCacheSet(obj, 2, 2);
+    assert(lFUCacheGet(obj, 1) == 1);  // returns 1
+    lFUCacheSet(obj, 3, 3);            // evicts key 2
+    assert(lFUCacheGet(obj, 2) == -1); // returns -1 (not found)
+    assert(lFUCacheGet(obj, 3) == 3);  // returns 3.
+    lFUCacheSet(obj, 4, 4);            // evicts key 1.
+    assert(lFUCacheGet(obj, 1) == -1); // returns -1 (not found)
+    assert(lFUCacheGet(obj, 3) == 3);  // returns 3
+    assert(lFUCacheGet(obj, 4) == 4);  // returns 4
 }
