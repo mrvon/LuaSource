@@ -4,8 +4,10 @@
 #include <assert.h>
 
 struct Item {
-    int val;
-    int priority;
+    int val;        // The value of the item.
+    int priority;   // The priority of the item in the queue.
+    // The index is needed by update and is maintained by the heap.
+    int index;      // The index of the item in the heap.
 };
 
 struct Item* new_item(int val, int priority) {
@@ -49,13 +51,16 @@ void __append_inner_array(struct Heap* h, struct Item* item) {
         h->inner_array = realloc(h->inner_array, h->size);
         assert(h->inner_array);
     }
+    item->index = h->curr;
     h->inner_array[h->curr++] = item;
 }
 
 struct Item* __pop_back_inner_array(struct Heap* h) {
     assert(h->curr > 0);
     h->curr--;
-    return h->inner_array[h->curr];
+    struct Item* item = h->inner_array[h->curr];
+    item->index = -1; // for safety
+    return item;
 }
 
 struct Heap* new_heap() {
@@ -76,13 +81,15 @@ int len(struct Heap* h) {
 }
 
 bool less(struct Heap* h, int i, int j) {
-    return h->inner_array[i] < h->inner_array[j];
+    return h->inner_array[i]->priority < h->inner_array[j]->priority;
 }
 
 void swap(struct Heap* h, int i, int j) {
     struct Item* tmp = h->inner_array[i];
     h->inner_array[i] = h->inner_array[j];
     h->inner_array[j] = tmp;
+    h->inner_array[i]->index = i;
+    h->inner_array[j]->index = j;
 }
 
 void __up(struct Heap* h, int j) {
@@ -148,18 +155,36 @@ struct Item* pop(struct Heap* h) {
     return __pop_back_inner_array(h);
 }
 
+void update(struct Heap* h, struct Item* item) {
+    __fix(h, item->index);
+}
+
 int main() {
     struct Heap* h = new_heap();
 
+    push(h, new_item(3, 103));
     push(h, new_item(1, 101));
     push(h, new_item(2, 102));
-    push(h, new_item(3, 103));
 
     struct Item* i = pop(h);
     printf("Val:%d Priority:%d\n", i->val, i->priority);
 
     i = pop(h);
     printf("Val:%d Priority:%d\n", i->val, i->priority);
+
+    i = pop(h);
+    printf("Val:%d Priority:%d\n", i->val, i->priority);
+
+    push(h, new_item(1, 999));
+    push(h, new_item(2, 101));
+    push(h, new_item(3, 888));
+    push(h, new_item(4, 777));
+
+    i = new_item(5, 666);
+    push(h, i);
+
+    i->priority = 100;
+    update(h, i);
 
     i = pop(h);
     printf("Val:%d Priority:%d\n", i->val, i->priority);
