@@ -20,10 +20,10 @@ func (pq PriorityQueue) Len() int {
 }
 
 func (pq PriorityQueue) Less(i, j int) bool {
-	if pq[i].priority > pq[j].priority {
+	if pq[i].priority < pq[j].priority {
 		return true
 	} else if pq[i].priority == pq[j].priority {
-		return pq[i].time >= pq[j].time
+		return pq[i].time <= pq[j].time
 	} else {
 		return false
 	}
@@ -52,7 +52,7 @@ func (pq *PriorityQueue) Pop() interface{} {
 }
 
 // update modifies the priority and value of an Item in the queue.
-func (pq *PriorityQueue) Update(item *Item, priority int) {
+func (pq *PriorityQueue) update(item *Item, priority int) {
 	item.priority = priority
 	heap.Fix(pq, item.index)
 }
@@ -84,7 +84,7 @@ func (this *LFUCache) Get(key int) int {
 	this.timestamp++
 
 	item.time = this.timestamp
-	this.heap.Update(item, item.priority+1)
+	(&this.heap).update(item, item.priority+1)
 
 	return item.value
 }
@@ -99,7 +99,7 @@ func (this *LFUCache) Set(key int, value int) {
 
 	// just insert
 	if this.current >= this.capacity {
-		i := this.heap.Pop().(*Item)
+		i := heap.Pop(&this.heap).(*Item)
 		delete(this.hash, i.key)
 	} else {
 		this.current++
@@ -115,7 +115,7 @@ func (this *LFUCache) Set(key int, value int) {
 	}
 
 	this.hash[key] = item
-	this.heap.Push(item)
+	heap.Push(&this.heap, item)
 }
 
 func assert(b bool) {
