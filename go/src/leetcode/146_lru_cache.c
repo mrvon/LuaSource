@@ -12,18 +12,16 @@ struct Item {
     int key;        // The key of the item.
     int val;        // The value of the item.
     int time;       // The access time of the item.
-    int priority;   // The priority of the item in the queue.
     // The index is needed by update and is maintained by the heap.
     int index;      // The index of the item in the heap.
 };
 
-struct Item* new_item(int key, int val, int time, int priority) {
+struct Item* new_item(int key, int val, int time) {
     struct Item* i = malloc(sizeof(struct Item));
     __assert(i);
     i->key = key;
     i->val = val;
     i->time = time;
-    i->priority = priority;
     return i;
 }
 
@@ -90,13 +88,8 @@ int len(struct Heap* h) {
 }
 
 bool less(struct Heap* h, int i, int j) {
-    if (h->inner_array[i]->priority < h->inner_array[j]->priority) {
-        return true;
-    } else if (h->inner_array[i]->priority == h->inner_array[j]->priority) {
-        return h->inner_array[i]->time <= h->inner_array[j]->time;
-    } else {
-        return false;
-    }
+    // It won't be equal.
+    return h->inner_array[i]->time < h->inner_array[j]->time;
 }
 
 void swap(struct Heap* h, int i, int j) {
@@ -244,7 +237,6 @@ int lruCacheGet(int key) {
 
     struct Item* i = hi->val;
     i->time = g_obj->timestamp++;
-    i->priority++;
     update(g_obj->heap, i);
 
     return i->val;
@@ -260,7 +252,6 @@ void lruCacheSet(int key, int value) {
     if (hi != NULL) {
         struct Item* i = hi->val;
         i->time = g_obj->timestamp++;
-        i->priority++;
         i->val = value;
         update(g_obj->heap, i);
         return;
@@ -276,7 +267,7 @@ void lruCacheSet(int key, int value) {
     } else {
         g_obj->current++;
     }
-    struct Item* item = new_item(key, value, g_obj->timestamp++, 0);
+    struct Item* item = new_item(key, value, g_obj->timestamp++);
     hash_add(g_obj->hash, key, item);
     push(g_obj->heap, item);
 }
