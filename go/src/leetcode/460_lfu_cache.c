@@ -54,7 +54,7 @@ void __del_inner_array(struct Heap* h) {
 void __append_inner_array(struct Heap* h, struct Item* item) {
     if (h->curr >= h->size) {
         h->size *= 2;
-        h->inner_array = realloc(h->inner_array, h->size);
+        h->inner_array = realloc(h->inner_array, sizeof(struct Item*) * h->size);
         assert(h->inner_array);
     }
     item->index = h->curr;
@@ -72,7 +72,7 @@ struct Item* __pop_back_inner_array(struct Heap* h) {
 struct Heap* new_heap() {
     struct Heap* h = malloc(sizeof(struct Heap));
     assert(h);
-    __new_inner_array(h, 100);
+    __new_inner_array(h, 64);
     return h;
 }
 
@@ -320,8 +320,19 @@ void test_3() {
     assert(lFUCacheGet(obj, 0) == -1);
 }
 
+void test_4() {
+    const int capacity = 0;
+    LFUCache* obj = lFUCacheCreate(10241);
+
+    int i;
+    for (i = 0; i < 1000; i++) {
+        lFUCacheSet(obj, i, i);
+    }
+}
+
 int main() {
     test_1();
     test_2();
     test_3();
+    test_4();
 }
