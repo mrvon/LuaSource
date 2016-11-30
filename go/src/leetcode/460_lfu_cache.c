@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <assert.h>
 #include "uthash.h"
+
+void __assert(bool b) {
+    return;
+}
 
 //------------------------------------------------------------------------------
 struct Item {
@@ -16,7 +19,7 @@ struct Item {
 
 struct Item* new_item(int key, int val, int time, int priority) {
     struct Item* i = malloc(sizeof(struct Item));
-    assert(i);
+    __assert(i);
     i->key = key;
     i->val = val;
     i->time = time;
@@ -25,7 +28,7 @@ struct Item* new_item(int key, int val, int time, int priority) {
 }
 
 void del_item(struct Item* item) {
-    assert(item);
+    __assert(item);
     free(item);
 }
 
@@ -39,11 +42,11 @@ void __new_inner_array(struct Heap* h, int size) {
     h->size = size;
     h->curr = 0;
     h->inner_array = malloc(sizeof(struct Item*) * size);
-    assert(h->inner_array);
+    __assert(h->inner_array);
 }
 
 void __del_inner_array(struct Heap* h) {
-    assert(h);
+    __assert(h);
     int i = 0;
     for (i = 0; i < h->curr; i++) {
         del_item(h->inner_array[i]);
@@ -55,14 +58,14 @@ void __append_inner_array(struct Heap* h, struct Item* item) {
     if (h->curr >= h->size) {
         h->size *= 2;
         h->inner_array = realloc(h->inner_array, sizeof(struct Item*) * h->size);
-        assert(h->inner_array);
+        __assert(h->inner_array);
     }
     item->index = h->curr;
     h->inner_array[h->curr++] = item;
 }
 
 struct Item* __pop_back_inner_array(struct Heap* h) {
-    assert(h->curr > 0);
+    __assert(h->curr > 0);
     h->curr--;
     struct Item* item = h->inner_array[h->curr];
     item->index = -1; // for safety
@@ -71,14 +74,14 @@ struct Item* __pop_back_inner_array(struct Heap* h) {
 
 struct Heap* new_heap() {
     struct Heap* h = malloc(sizeof(struct Heap));
-    assert(h);
+    __assert(h);
     __new_inner_array(h, 64);
     return h;
 }
 
 void del_heap(struct Heap* h) {
     __del_inner_array(h);
-    assert(h);
+    __assert(h);
     free(h);
 }
 
@@ -282,57 +285,4 @@ void lFUCacheFree(LFUCache* obj) {
     free(obj);
 }
 
-void test_1() {
-    const int capacity = 2;
-    LFUCache* obj = lFUCacheCreate(capacity);
-
-    lFUCacheSet(obj, 1, 1);
-    lFUCacheSet(obj, 2, 2);
-    assert(lFUCacheGet(obj, 1) == 1);  // returns 1
-    lFUCacheSet(obj, 3, 3);            // evicts key 2
-    assert(lFUCacheGet(obj, 2) == -1); // returns -1 (not found)
-    assert(lFUCacheGet(obj, 3) == 3);  // returns 3.
-    lFUCacheSet(obj, 4, 4);            // evicts key 1.
-    assert(lFUCacheGet(obj, 1) == -1); // returns -1 (not found)
-    assert(lFUCacheGet(obj, 3) == 3);  // returns 3
-    assert(lFUCacheGet(obj, 4) == 4);  // returns 4
-    lFUCacheSet(obj, 3, 1);
-    assert(lFUCacheGet(obj, 3) == 1);  // returns 1 (overlap)
-}
-
-void test_2() {
-    const int capacity = 2;
-    LFUCache* obj = lFUCacheCreate(capacity);
-
-    lFUCacheSet(obj, 2, 1);
-    lFUCacheSet(obj, 1, 1);
-    lFUCacheSet(obj, 2, 3);
-    lFUCacheSet(obj, 4, 1);
-    assert(lFUCacheGet(obj, 1) == -1);
-    assert(lFUCacheGet(obj, 2) == 3);
-}
-
-void test_3() {
-    const int capacity = 0;
-    LFUCache* obj = lFUCacheCreate(capacity);
-
-    lFUCacheSet(obj, 0, 0);
-    assert(lFUCacheGet(obj, 0) == -1);
-}
-
-void test_4() {
-    const int capacity = 0;
-    LFUCache* obj = lFUCacheCreate(10241);
-
-    int i;
-    for (i = 0; i < 1000; i++) {
-        lFUCacheSet(obj, i, i);
-    }
-}
-
-int main() {
-    test_1();
-    test_2();
-    test_3();
-    test_4();
-}
+#include "460_lfu_cache_test.h"

@@ -1,3 +1,7 @@
+--[[
+$ cat 460_lfu_cache_testcase | lua 460_lfu_cache_testcase.lua > 460_lfu_cache_test.h
+]]
+
 local function cmd_reader(cmd_line)
     local pattern = "\"[^\"]+\""
     return function()
@@ -25,23 +29,35 @@ local function arg_reader(arg_line)
         arg_line = string.sub(arg_line, e+1, -1)
 
         if cmd == "get" then
-            return string.match(arg, "(.+),(.+)")
-        elseif cmd == "set" then
             return arg
+        elseif cmd == "set" then
+            return string.match(arg, "(.+),(.+)")
         else
             return arg
         end
     end
 end
 
-local function generate(cmd_line, arg_line)
-    local c = cmd_reader(cmd_line)
-    local a = arg_reader(arg_line)
-    print(a(""))
-    print(a("get"))
-    print(a("get"))
-    print(a("get"))
-    print(a("set"))
+local function generate(cmd_line, arg_line, test_case)
+    local cr = cmd_reader(cmd_line)
+    local ar = arg_reader(arg_line)
+
+    print(string.format("void test_%d() {", test_case))
+    while true do
+        local cmd = cr()
+        if cmd == nil then
+            break
+        end
+
+        if cmd == "get" then
+            print(string.format("lFUCacheGet(obj, %s);", ar(cmd)))
+        elseif cmd == "set" then
+            print(string.format("lFUCacheSet(obj, %s, %s);", ar(cmd)))
+        else
+            print(string.format("const int capacity = %d;\nLFUCache* obj = lFUCacheCreate(capacity);", ar(cmd)))
+        end
+    end
+    print("}")
 end
 
 local case = {
@@ -51,6 +67,8 @@ for line in io.lines() do
     table.insert(case, line)
 end
 
+local test_case = 1
+
 while true do
     if #case >= 2 then
         -- RUN TEST
@@ -59,8 +77,15 @@ while true do
         table.remove(case, #case)
         table.remove(case, #case)
 
-        generate(cmd_line, arg_line)
+        generate(cmd_line, arg_line, test_case)
+        test_case = test_case + 1
     else
         break
     end
 end
+
+print("int main() {")
+for i = 1, test_case-1 do
+    print(string.format("test_%d();", i))
+end
+print("}")
