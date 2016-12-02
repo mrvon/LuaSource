@@ -43,7 +43,26 @@ func query(tree []int, low int, high int, i int, j int, tree_index int) int {
 	left_query := query(tree, low, mid, i, mid, 2*tree_index+1)
 	right_query := query(tree, mid+1, high, mid+1, j, 2*tree_index+2)
 
+	// merge query results
 	return merge(left_query, right_query)
+}
+
+func update(tree []int, tree_index int, low int, high int, arr_index int, val int) {
+	if low == high { // leaf node, update element
+		tree[tree_index] = val
+		return
+	}
+
+	mid := low + (high-low)/2
+
+	if arr_index <= mid {
+		update(tree, 2*tree_index+1, low, mid, arr_index, val)
+	} else if arr_index > mid {
+		update(tree, 2*tree_index+2, mid+1, high, arr_index, val)
+	}
+
+	// merge updates
+	tree[tree_index] = merge(tree[2*tree_index+1], tree[2*tree_index+2])
 }
 
 // Build a segment tree from arr
@@ -57,6 +76,11 @@ func build_segtree(arr []int) []int {
 // This method relies on "null" nodes being equivalent to storing zero.
 func query_segtree(arr []int, tree []int, i int, j int) int {
 	return query(tree, 0, len(arr)-1, i, j, 0)
+}
+
+func update_segtree(arr []int, tree []int, arr_index int, val int) {
+	arr[arr_index] = val
+	update(tree, 0, 0, len(arr)-1, arr_index, val)
 }
 
 func assert(expect int, result int) {
@@ -89,4 +113,10 @@ func main() {
 	assert(sum(arr, 2, 8), query_segtree(arr, tree, 2, 8))
 	assert(sum(arr, 4, 6), query_segtree(arr, tree, 4, 6))
 	assert(sum(arr, 3, 7), query_segtree(arr, tree, 3, 7))
+
+	update_segtree(arr, tree, 0, 1024)
+	fmt.Println("ARR", arr)
+
+	assert(1024, query_segtree(arr, tree, 0, 0))
+	assert(1024+17, query_segtree(arr, tree, 0, 1))
 }
