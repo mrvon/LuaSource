@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // An Item is something we manage in a priority queue.
 type Item struct {
 	key      int // The key of the item.
@@ -178,9 +180,9 @@ func (this *LFUCache) Set(key int, value int) {
 	this.heap.Push(item)
 }
 
-func assert(b bool) {
-	if !b {
-		panic("Assert failed!")
+func assert(expect int, result int) {
+	if result != expect {
+		panic(fmt.Sprintf("Assert failed!, Expect %d, Get %d", expect, result))
 	}
 }
 
@@ -189,16 +191,16 @@ func test_1() {
 	obj := Constructor(capacity)
 	obj.Set(1, 1)
 	obj.Set(2, 2)
-	assert(obj.Get(1) == 1)
+	assert(1, obj.Get(1))
 	obj.Set(3, 3)
-	assert(obj.Get(2) == -1)
-	assert(obj.Get(3) == 3)
+	assert(-1, obj.Get(2))
+	assert(3, obj.Get(3))
 	obj.Set(4, 4)
-	assert(obj.Get(1) == -1)
-	assert(obj.Get(3) == 3)
-	assert(obj.Get(4) == 4)
+	assert(-1, obj.Get(1))
+	assert(3, obj.Get(3))
+	assert(4, obj.Get(4))
 	obj.Set(3, 1)
-	assert(obj.Get(3) == 1)
+	assert(1, obj.Get(3))
 }
 
 func test_2() {
@@ -208,15 +210,15 @@ func test_2() {
 	obj.Set(1, 1)
 	obj.Set(2, 3)
 	obj.Set(4, 1)
-	assert(obj.Get(1) == -1)
-	assert(obj.Get(2) == 3)
+	assert(-1, obj.Get(1))
+	assert(3, obj.Get(2))
 }
 
 func test_3() {
 	capacity := 0
 	obj := Constructor(capacity)
 	obj.Set(0, 0)
-	assert(obj.Get(0) == -1)
+	assert(-1, obj.Get(0))
 }
 
 func main() {
