@@ -53,13 +53,16 @@ func next_permutation(arr []int) bool {
 	return true
 }
 
-func main() {
-	a1 := []int{1, 2, 3, 4}
+func test(arr []int) {
+	sort.Ints(arr)
+	fmt.Println(arr)
 
-	sort.Ints(a1)
-	fmt.Println(a1)
-
-	for next_permutation(a1) {
-		fmt.Println(a1)
+	for next_permutation(arr) {
+		fmt.Println(arr)
 	}
+}
+
+func main() {
+	test([]int{3, 3, 3, 3})
+	test([]int{1, 2, 3, 4})
 }
