@@ -8,8 +8,7 @@ type Item struct {
 	value    int // The value of the item.
 	priority int // The priority of the item in the queue.
 	time     int // The timestamp of the item to be used.
-	// The index is needed by update and is maintained by the heap.Interface methods.
-	index int // The index of the item in the heap.
+	index    int // The index of the item in the heap.
 }
 
 type Heap []*Item
@@ -64,16 +63,15 @@ func (h *Heap) Down(i int, n int) {
 	}
 }
 
-func (h *Heap) Push(x interface{}) {
+func (h *Heap) Push(item *Item) {
 	n := h.Len()
-	item := x.(*Item)
 	item.index = n
 	*h = append(*h, item)
 
 	h.Up(h.Len() - 1)
 }
 
-func (h *Heap) Pop() interface{} {
+func (h *Heap) Pop() *Item {
 	n := h.Len() - 1
 
 	h.Swap(0, n)
@@ -86,20 +84,6 @@ func (h *Heap) Pop() interface{} {
 	return item
 }
 
-func (h *Heap) Remove(i int) *Item {
-	n := h.Len() - 1
-	if n != i {
-		h.Swap(i, n)
-		h.Down(i, n)
-		h.Up(i)
-	}
-	return h.Pop().(*Item)
-}
-
-// Fix re-establishes the heap ordering after the element at index i has changed its value.
-// Changing the value of the element at index i and then calling Fix is equivalent to,
-// but less expensive than, calling Remove(h, i) followed by a Push of the new value.
-// The complexity is O(log(n)) where n = h.Len().
 func (h *Heap) Fix(i int) {
 	h.Down(i, h.Len())
 	h.Up(i)
@@ -161,7 +145,7 @@ func (this *LFUCache) Set(key int, value int) {
 
 	// just insert
 	if this.current >= this.capacity {
-		i := this.heap.Pop().(*Item)
+		i := this.heap.Pop()
 		delete(this.hash, i.key)
 	} else {
 		this.current++
