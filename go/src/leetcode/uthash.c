@@ -3,83 +3,102 @@
 #include <string.h>
 #include "uthash.h"
 
-struct my_struct {
+struct item {
     int id;             // key
     char name[10];
     UT_hash_handle hh;  // makes this structure hashable
 };
 
-struct my_struct *users = NULL;
-
-void add_user(int user_id, char* name) {
-    struct my_struct *s;
+void set(struct item **hash, int id, char* name) {
+    struct item *s;
 
     // id already in the hash?
-    HASH_FIND_INT(users, &user_id, s);
+    HASH_FIND_INT(*hash, &id, s);
     if (s == NULL) {
-        s = malloc(sizeof(struct my_struct));
-        s->id = user_id;
-        HASH_ADD_INT(users, id, s); // id: name of key field
+        s = malloc(sizeof(struct item));
+        s->id = id;
+        HASH_ADD_INT(*hash, id, s); // id: name of key field
     }
     strcpy(s->name, name);
 }
 
-struct my_struct* find_user(int user_id) {
-    struct my_struct *s;
-    HASH_FIND_INT(users, &user_id, s); // s: output pointer
+struct item* get(struct item **hash, int id) {
+    struct item *s;
+    HASH_FIND_INT(*hash, &id, s); // s: output pointer
     return s;
 }
 
-void delete_user(struct my_struct* user) {
-    HASH_DEL(users, user); // user: pointer to deletee
+void del(struct item **hash, struct item* user) {
+    HASH_DEL(*hash, user); // user: pointer to deletee
     free(user);
 }
 
-void delete_all() {
-    struct my_struct* current_user;
-    struct my_struct* tmp;
+void delall(struct item **hash) {
+    struct item* current_user;
+    struct item* tmp;
 
-    HASH_ITER(hh, users, current_user, tmp) {
-        HASH_DEL(users, current_user); // delete it (users advances to next)
+    HASH_ITER(hh, *hash, current_user, tmp) {
+        HASH_DEL(*hash, current_user); // delete it (hash advances to next)
         free(current_user); // free it
     }
 }
 
-void print_users() {
-    struct my_struct* s;
+void print(struct item **hash) {
+    struct item* s;
 
-    for (s = users; s != NULL; s = (struct my_struct*)(s->hh.next)) {
+    for (s = *hash; s != NULL; s = (struct item*)(s->hh.next)) {
         printf("user id %d: name %s\n", s->id, s->name);
     }
 }
 
-int name_sort(struct my_struct* a, struct my_struct* b) {
+int name_sort(struct item* a, struct item* b) {
     return strcmp(a->name, b->name);
 }
 
-int id_sort(struct my_struct* a, struct my_struct* b) {
+int id_sort(struct item* a, struct item* b) {
     return (a->id - b->id);
 }
 
-void sort_by_name() {
-    HASH_SORT(users, name_sort);
+void sort_by_name(struct item **hash) {
+    HASH_SORT(*hash, name_sort);
 }
 
-void sort_by_id() {
-    HASH_SORT(users, id_sort);
+void sort_by_id(struct item **hash) {
+    HASH_SORT(*hash, id_sort);
 }
 
 int main() {
+    struct item** hash  = malloc(sizeof(struct item*));
+
     int id = 0;
 
-    add_user(id++, "dennis");
-    add_user(id++, "tom");
-    add_user(id++, "jerry");
-    add_user(id++, "ada");
+    set(hash, id++, "dennis");
+    set(hash, id++, "tom");
+    set(hash, id++, "jerry");
+    set(hash, id++, "ada");
 
-    sort_by_name();
-    print_users();
+    struct item* d = get(hash, 0);
+    if (d) {
+        printf("get %d %s\n", d->id, d->name);
+    } else {
+        printf("not found!\n");
+    }
 
-    delete_all();  // free any structures
+    del(hash, d);
+
+    d = get(hash, 0);
+    if (d) {
+        printf("get %d %s\n", d->id, d->name);
+    } else {
+        printf("%d not found!\n", 0);
+    }
+
+    sort_by_name(hash);
+    print(hash);
+
+    sort_by_id(hash);
+    print(hash);
+
+    delall(hash);  // free any structures
     return 0;
 }
