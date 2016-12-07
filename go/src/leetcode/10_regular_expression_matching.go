@@ -16,6 +16,7 @@ func assert(expect bool, result bool) {
 		panic(fmt.Sprintf("Assert failed!, Expect %b, Get %b", expect, result))
 	}
 }
+
 func main() {
 	assert(false, isMatch("aa", "a"))
 	assert(true, isMatch("aa", "aa"))
