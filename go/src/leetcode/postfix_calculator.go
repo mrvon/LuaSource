@@ -12,7 +12,7 @@ const (
 
 type Token struct {
 	t   int
-	val float64
+	val int
 }
 
 type Stack struct {
@@ -33,7 +33,7 @@ func (S *Stack) pop() (t Token) {
 	return
 }
 
-func eval(token_list []Token) float64 {
+func eval(token_list []Token) int {
 	var s Stack
 	for i := 0; i < len(token_list); i++ {
 		token := token_list[i]
@@ -89,7 +89,7 @@ func build_expression(s string) []Token {
 		var token Token
 		if s[i] >= '0' && s[i] <= '9' {
 			token.t = NUMBER
-			token.val = float64(s[i] - '0')
+			token.val = int(s[i] - '0')
 		} else {
 			if s[i] == '+' {
 				token.t = PLUS
