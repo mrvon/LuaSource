@@ -1,30 +1,27 @@
+// brute force
 package main
 
-import (
-	"fmt"
-	"math"
-)
+import "fmt"
 
-func maxProfit(prices []int) int {
-	if len(prices) == 0 {
-		return 0
+func auxMax(prices []int, j int, k int, m int) int {
+	v := prices[k] - prices[j]
+	if v > m {
+		return v
 	}
 
-	min_price := math.MaxInt32
-	max_profit := 0
+	return m
+}
+
+func maxProfit(prices []int) int {
+	m := 0
 
 	for i := 0; i < len(prices); i++ {
-		if prices[i] < min_price {
-			min_price = prices[i]
-		} else {
-			profix := prices[i] - min_price
-			if profix > max_profit {
-				max_profit = profix
-			}
+		for j := i + 1; j < len(prices); j++ {
+			m = auxMax(prices, i, j, m)
 		}
 	}
 
-	return max_profit
+	return m
 }
 
 func assert(expect int, result int) {
