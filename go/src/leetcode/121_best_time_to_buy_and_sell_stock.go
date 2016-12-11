@@ -1,3 +1,10 @@
+/*
+In the traveral, we maintain the min_price and max_profit we can get.
+
+Consider at i-th day we sold out the stock. so in the i-th day, max_profit we
+can get is prices[i] - min_price. After we traversal every day. we can get the
+max_profit of the all.
+*/
 package main
 
 import (
