@@ -25,19 +25,19 @@ func threeSum(nums []int) [][]int {
 				break
 			}
 
-			k := j + 1 // left range
-			l := n - 1 // right range
+			l := j + 1 // left range
+			r := n - 1 // right range
 			// binary search
 			target := -nums[i] - nums[j]
-			for k <= l {
-				m := k + (l-k)/2
+			for l <= r {
+				m := l + (r-l)/2
 				if target == nums[m] {
 					result = append(result, []int{nums[i], nums[j], nums[m]})
 					break
 				} else if target < nums[m] {
-					l = m - 1
+					r = m - 1
 				} else {
-					k = m + 1
+					l = m + 1
 				}
 			}
 			// next j
