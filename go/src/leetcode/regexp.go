@@ -133,14 +133,14 @@ type State struct {
 	out_2 *State
 }
 
-var MatchState = State{
+var MatchState = &State{
 	c: MATCH,
 }
 
 // A Partially built NFA without the matching state filled in.
 type Fragment struct {
 	start   *State
-	outlist []*State
+	outlist []**State
 }
 
 type Stack struct {
@@ -180,10 +180,9 @@ func post2nfa(postfix string) *State {
 			// concatenation
 			e2 := s.pop()
 			e1 := s.pop()
+			// patch
 			for i := 0; i < len(e1.outlist); i++ {
-				state := e1.outlist[i]
-				state.out_1 = e2.start
-				state.out_2 = e2.start
+				(*e1.outlist[i]) = e2.start
 			}
 			f := Fragment{
 				start: e1.start,
@@ -225,13 +224,11 @@ func post2nfa(postfix string) *State {
 				out_1: e.start,
 			}
 			for i := 0; i < len(e.outlist); i++ {
-				state := e.outlist[i]
-				state.out_1 = state
-				state.out_2 = state
+				(*e.outlist[i]) = state
 			}
 			s.push(Fragment{
 				start:   state,
-				outlist: []*State{state.out_1},
+				outlist: []**State{&state.out_1},
 			})
 		} else if c == '+' {
 			// one or more
@@ -241,20 +238,19 @@ func post2nfa(postfix string) *State {
 				out_1: e.start,
 			}
 			for i := 0; i < len(e.outlist); i++ {
-				state := e.outlist[i]
-				state.out_1 = state
-				state.out_2 = state
+				(*e.outlist[i]) = state
 			}
 			s.push(Fragment{
 				start:   e.start,
-				outlist: []*State{state.out_1},
+				outlist: []**State{&state.out_1},
 			})
 		} else {
 			state := &State{
 				c: int(c),
 			}
 			s.push(Fragment{
-				start: state,
+				start:   state,
+				outlist: []**State{&state.out_1},
 			})
 		}
 	}
@@ -265,17 +261,56 @@ func post2nfa(postfix string) *State {
 		return nil
 	}
 
+	// Patch
 	for i := 0; i < len(e.outlist); i++ {
-		state := e.outlist[i]
-		state.out_1 = &MatchState
-		state.out_2 = &MatchState
+		// (*e.outlist[i]) = MatchState
 	}
 
 	return e.start
 }
 
+func test_1() {
+	s := post2nfa(re2post("ab"))
+	fmt.Println(*s)
+	fmt.Println(*s.out_1)
+}
+
+func test_2() {
+	s := post2nfa(re2post("a|b"))
+	fmt.Println(*s)
+	fmt.Println(*s.out_1)
+	fmt.Println(*s.out_2)
+}
+
+func test_3() {
+	s := post2nfa(re2post("(ab)*"))
+	fmt.Println(*s)
+	fmt.Println(*s.out_1)
+	fmt.Println(*s.out_1.out_1)
+}
+
+func test_4() {
+	s := post2nfa(re2post("(ab)+"))
+	fmt.Println(*s)
+	fmt.Println(*s.out_1)
+	fmt.Println(*s.out_1.out_1)
+	fmt.Println(*s.out_1.out_1.out_1)
+	fmt.Println(*s.out_1.out_1.out_1.out_1)
+}
+
+func test_5() {
+	s := post2nfa(re2post("a?"))
+	fmt.Println(*s)
+	fmt.Println(*s.out_1)
+	fmt.Println(s.out_2)
+}
+
 func main() {
 	test_re2post()
 
-	fmt.Println(post2nfa(re2post("a")))
+	test_1()
+	test_2()
+	test_3()
+	test_4()
+	test_5()
 }
