@@ -10,6 +10,8 @@ func __re2post(re string, i int, postfix []byte) ([]byte, int) {
 		c := re[i]
 
 		if c == '(' {
+			// into sub regexp
+
 			if atom >= 2 {
 				atom--
 				postfix = append(postfix, '$')
@@ -20,9 +22,10 @@ func __re2post(re string, i int, postfix []byte) ([]byte, int) {
 				postfix = append(postfix, '|')
 			}
 
-			// sub regexp
 			postfix, i = __re2post(re, i+1, postfix)
 		} else if c == ')' {
+			// exit sub regexp
+
 			if atom >= 2 {
 				atom--
 				postfix = append(postfix, '$')
@@ -34,6 +37,8 @@ func __re2post(re string, i int, postfix []byte) ([]byte, int) {
 
 			return postfix, i
 		} else {
+			// operator or literal
+
 			if c == '+' || c == '*' {
 				postfix = append(postfix, c)
 			} else if c == '|' {
@@ -80,7 +85,7 @@ func assert(result string, expect string) {
 	}
 }
 
-func main() {
+func test_re2post() {
 	assert(re2post("abba"), "ab$b$a$")
 	assert(re2post("abba(ab)"), "ab$b$a$ab$$")
 	assert(re2post("a(bb)+a"), "abb$+$a$")
@@ -97,4 +102,14 @@ func main() {
 
 	assert(re2post("a(bb|c)+a"), "abb$c|+$a$")
 	assert(re2post("a(bb|c*)+a"), "abb$c*|+$a$")
+
+	assert(re2post("a(b*)c"), "ab*$c$")
+	assert(re2post("a*(b*)c+"), "a*b*$c+$")
+	assert(re2post("a*(b*)(c+)"), "a*b*$c+$")
+	assert(re2post("(a*)(b*)+(c+)"), "a*b*+$c+$")
+	assert(re2post("a*b*|c+"), "a*b*$c+|")
+}
+
+func main() {
+	test_re2post()
 }
