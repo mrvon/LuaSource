@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func __re2post(re string, i int, postfix []byte) ([]byte, int) {
-	atom := 0  // for concatation
+	atom := 0  // for concatenation
 	alter := 0 // for alternation
 
 	for i < len(re) {
@@ -121,6 +121,161 @@ func test_re2post() {
 	assert(re2post("(a+b?)*"), "a+b?$*")
 }
 
+const (
+	MATCH = 256
+	SPLIT = 257
+)
+
+// Basic NFA element
+type State struct {
+	c     int // character
+	out_1 *State
+	out_2 *State
+}
+
+var MatchState = State{
+	c: MATCH,
+}
+
+// A Partially built NFA without the matching state filled in.
+type Fragment struct {
+	start   *State
+	outlist []*State
+}
+
+type Stack struct {
+	S []Fragment
+}
+
+func (S *Stack) len() int {
+	return len(S.S)
+}
+
+func (S *Stack) push(t Fragment) {
+	S.S = append(S.S, t)
+}
+
+func (S *Stack) pop() (t Fragment) {
+	t = S.S[len(S.S)-1]
+	S.S = S.S[:len(S.S)-1]
+	return
+}
+
+func (S *Stack) peak() (t Fragment) {
+	t = S.S[len(S.S)-1]
+	return
+}
+
+func post2nfa(postfix string) *State {
+	if len(postfix) == 0 {
+		return nil
+	}
+
+	var s Stack
+
+	for i := 0; i < len(postfix); i++ {
+		c := postfix[i]
+
+		if c == '$' {
+			// concatenation
+			e2 := s.pop()
+			e1 := s.pop()
+			for i := 0; i < len(e1.outlist); i++ {
+				state := e1.outlist[i]
+				state.out_1 = e2.start
+				state.out_2 = e2.start
+			}
+			f := Fragment{
+				start: e1.start,
+			}
+			f.outlist = append(f.outlist, e2.outlist...)
+			s.push(f)
+		} else if c == '|' {
+			// alternation
+			e2 := s.pop()
+			e1 := s.pop()
+			state := &State{
+				c:     SPLIT,
+				out_1: e1.start,
+				out_2: e2.start,
+			}
+			f := Fragment{
+				start: state,
+			}
+			f.outlist = append(f.outlist, e1.outlist...)
+			f.outlist = append(f.outlist, e2.outlist...)
+			s.push(f)
+		} else if c == '?' {
+			// zero or one
+			e := s.pop()
+			state := &State{
+				c:     SPLIT,
+				out_1: e.start,
+			}
+			f := Fragment{
+				start: state,
+			}
+			f.outlist = append(f.outlist, e.outlist...)
+			s.push(f)
+		} else if c == '*' {
+			// zero or more
+			e := s.pop()
+			state := &State{
+				c:     SPLIT,
+				out_1: e.start,
+			}
+			for i := 0; i < len(e.outlist); i++ {
+				state := e.outlist[i]
+				state.out_1 = state
+				state.out_2 = state
+			}
+			s.push(Fragment{
+				start:   state,
+				outlist: []*State{state.out_1},
+			})
+		} else if c == '+' {
+			// one or more
+			e := s.pop()
+			state := &State{
+				c:     SPLIT,
+				out_1: e.start,
+			}
+			for i := 0; i < len(e.outlist); i++ {
+				state := e.outlist[i]
+				state.out_1 = state
+				state.out_2 = state
+			}
+			s.push(Fragment{
+				start:   e.start,
+				outlist: []*State{state.out_1},
+			})
+		} else {
+			state := &State{
+				c: int(c),
+			}
+			s.push(Fragment{
+				start: state,
+			})
+		}
+	}
+
+	e := s.pop()
+	if s.len() != 0 {
+		// invalid regexp
+		return nil
+	}
+
+	for i := 0; i < len(e.outlist); i++ {
+		state := e.outlist[i]
+		state.out_1 = &MatchState
+		state.out_2 = &MatchState
+	}
+
+	return e.start
+}
+
 func main() {
 	test_re2post()
+
+	fmt.Println(post2nfa(re2post("a")))
 }
