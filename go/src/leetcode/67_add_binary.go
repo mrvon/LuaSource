@@ -5,7 +5,7 @@ import "fmt"
 func addBinary(a string, b string) string {
 	var s []byte
 
-	c := 0
+	c := 0 // carry
 	i := len(a) - 1
 	j := len(b) - 1
 
@@ -22,6 +22,7 @@ func addBinary(a string, b string) string {
 		c /= 2
 	}
 
+	// reverse
 	l := 0
 	r := len(s) - 1
 	for l < r {
