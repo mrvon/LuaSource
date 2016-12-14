@@ -39,7 +39,7 @@ func __re2post(re string, i int, postfix []byte) ([]byte, int) {
 		} else {
 			// operator or literal
 
-			if c == '+' || c == '*' {
+			if c == '+' || c == '*' || c == '?' {
 				postfix = append(postfix, c)
 			} else if c == '|' {
 				if atom >= 2 {
@@ -108,6 +108,17 @@ func test_re2post() {
 	assert(re2post("a*(b*)(c+)"), "a*b*$c+$")
 	assert(re2post("(a*)(b*)+(c+)"), "a*b*+$c+$")
 	assert(re2post("a*b*|c+"), "a*b*$c+|")
+
+	assert(re2post("."), ".")
+	assert(re2post(".+"), ".+")
+	assert(re2post(".*"), ".*")
+	assert(re2post("he.*llo"), "he$.*$l$l$o$")
+
+	assert(re2post(".?"), ".?")
+	assert(re2post("a?"), "a?")
+	assert(re2post("ab?"), "ab?$")
+	assert(re2post("a+b?"), "a+b?$")
+	assert(re2post("(a+b?)*"), "a+b?$*")
 }
 
 func main() {
