@@ -1,3 +1,4 @@
+// beats 100%, 9ms
 package main
 
 import (
@@ -7,39 +8,124 @@ import (
 
 func fourSum(nums []int, target int) [][]int {
 	var result [][]int
+
 	n := len(nums)
+
+	if n < 4 {
+		return result
+	}
+
 	sort.Ints(nums)
 
-	i := 0
+	max := nums[n-1]
 
-	for i < n-3 {
-		j := i + 1
-		for j < n-2 {
-			k := j + 1
-			for k < n-1 {
-				l := k + 1
-				for l < n {
-					if nums[i]+nums[j]+nums[k]+nums[l] == target {
-						result = append(result, []int{nums[i], nums[j], nums[k], nums[l]})
-					}
-					l++
-					for l < n && nums[l-1] == nums[l] {
-						l++
-					}
-				}
-				k++
-				for k < n-1 && nums[k-1] == nums[k] {
-					k++
-				}
-			}
-			j++
-			for j < n-2 && nums[j-1] == nums[j] {
-				j++
-			}
+	if 4*nums[0] > target || 4*max < target {
+		// too large or too small
+		return result
+	}
+
+	for i := 0; i < n; i++ {
+		if i > 0 && nums[i] == nums[i-1] {
+			// skip duplicate
+			continue
 		}
-		i++
-		for i < n-3 && nums[i-1] == nums[i] {
-			i++
+
+		if nums[i]+3*max < target {
+			// too small
+			continue
+		}
+
+		if 4*nums[i] > target {
+			// too large
+			break
+		}
+
+		result = threeSum(nums[i+1:], target-nums[i], result, nums[i])
+	}
+
+	return result
+}
+
+func threeSum(nums []int, target int, result [][]int, first int) [][]int {
+	n := len(nums)
+
+	if n < 3 {
+		return result
+	}
+
+	max := nums[n-1]
+
+	if 3*nums[0] > target || 3*max < target {
+		// too large or too small
+		return result
+	}
+
+	for i := 0; i < n; i++ {
+		if i > 0 && nums[i] == nums[i-1] {
+			// skip duplicate
+			continue
+		}
+
+		if nums[i]+2*max < target {
+			// too small
+			continue
+		}
+
+		if 3*nums[i] > target {
+			// too large
+			break
+		}
+
+		result = twoSum(nums[i+1:], target-nums[i], result, first, nums[i])
+	}
+
+	return result
+}
+
+func twoSum(nums []int, target int, result [][]int, first int, second int) [][]int {
+	n := len(nums)
+
+	if n < 2 {
+		return result
+	}
+
+	max := nums[n-1]
+
+	if 2*nums[0] > target || 2*max < target {
+		// too large or too small
+		return result
+	}
+
+	for i := 0; i < n; i++ {
+		if i > 0 && nums[i] == nums[i-1] {
+			// skip duplicate
+			continue
+		}
+
+		if nums[i]+max < target {
+			// too small
+			continue
+		}
+
+		if 2*nums[i] > target {
+			// too large
+			break
+		}
+
+		l := i + 1 // left range
+		r := n - 1 // right range
+		// binary search
+		t := target - nums[i]
+		for l <= r {
+			m := l + (r-l)/2
+			if t == nums[m] {
+				result = append(result, []int{first, second, nums[i], nums[m]})
+				break
+			} else if t < nums[m] {
+				r = m - 1
+			} else {
+				l = m + 1
+			}
 		}
 	}
 
@@ -48,4 +134,5 @@ func fourSum(nums []int, target int) [][]int {
 
 func main() {
 	fmt.Println(fourSum([]int{1, 0, -1, 0, -2, 2}, 0))
+	fmt.Println(fourSum([]int{-4, -3, -2, -1, 0, 0, 1, 2, 3, 4}, 0))
 }
