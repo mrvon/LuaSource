@@ -180,7 +180,6 @@ func post2nfa(postfix string) *State {
 			// concatenation
 			e2 := s.pop()
 			e1 := s.pop()
-			// patch
 			for i := 0; i < len(e1.outlist); i++ {
 				(*e1.outlist[i]) = e2.start
 			}
@@ -212,7 +211,8 @@ func post2nfa(postfix string) *State {
 				out_1: e.start,
 			}
 			f := Fragment{
-				start: state,
+				start:   state,
+				outlist: []**State{&state.out_2},
 			}
 			f.outlist = append(f.outlist, e.outlist...)
 			s.push(f)
@@ -228,7 +228,7 @@ func post2nfa(postfix string) *State {
 			}
 			s.push(Fragment{
 				start:   state,
-				outlist: []**State{&state.out_1},
+				outlist: []**State{&state.out_2},
 			})
 		} else if c == '+' {
 			// one or more
@@ -242,7 +242,7 @@ func post2nfa(postfix string) *State {
 			}
 			s.push(Fragment{
 				start:   e.start,
-				outlist: []**State{&state.out_1},
+				outlist: []**State{&state.out_2},
 			})
 		} else {
 			state := &State{
@@ -261,9 +261,8 @@ func post2nfa(postfix string) *State {
 		return nil
 	}
 
-	// Patch
 	for i := 0; i < len(e.outlist); i++ {
-		// (*e.outlist[i]) = MatchState
+		(*e.outlist[i]) = MatchState
 	}
 
 	return e.start
@@ -273,6 +272,8 @@ func test_1() {
 	s := post2nfa(re2post("ab"))
 	fmt.Println(*s)
 	fmt.Println(*s.out_1)
+	fmt.Println(*s.out_1.out_1)
+	fmt.Println(s.out_2)
 }
 
 func test_2() {
@@ -280,6 +281,8 @@ func test_2() {
 	fmt.Println(*s)
 	fmt.Println(*s.out_1)
 	fmt.Println(*s.out_2)
+	fmt.Println(*s.out_1.out_1)
+	fmt.Println(*s.out_2.out_1)
 }
 
 func test_3() {
@@ -287,6 +290,11 @@ func test_3() {
 	fmt.Println(*s)
 	fmt.Println(*s.out_1)
 	fmt.Println(*s.out_1.out_1)
+	fmt.Println(*s.out_1.out_1.out_1)
+	fmt.Println(*s.out_1.out_1.out_1.out_1)
+	fmt.Println(*s.out_1.out_1.out_1.out_1.out_1)
+
+	fmt.Println(*s.out_2)
 }
 
 func test_4() {
@@ -296,21 +304,25 @@ func test_4() {
 	fmt.Println(*s.out_1.out_1)
 	fmt.Println(*s.out_1.out_1.out_1)
 	fmt.Println(*s.out_1.out_1.out_1.out_1)
+	fmt.Println(*s.out_1.out_1.out_1.out_1.out_1)
+
+	fmt.Println(*s.out_1.out_1.out_2)
 }
 
 func test_5() {
 	s := post2nfa(re2post("a?"))
 	fmt.Println(*s)
 	fmt.Println(*s.out_1)
-	fmt.Println(s.out_2)
+	fmt.Println(*s.out_1.out_1)
+	fmt.Println(*s.out_2)
 }
 
 func main() {
 	test_re2post()
 
-	test_1()
-	test_2()
-	test_3()
-	test_4()
+	// test_1()
+	// test_2()
+	// test_3()
+	// test_4()
 	test_5()
 }
