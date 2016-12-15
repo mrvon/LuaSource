@@ -266,7 +266,7 @@ func match(start *State, s string) bool {
 		c := int(s[i])
 
 		for state := range state_list {
-			if state.c == c {
+			if state.c == '.' || state.c == c {
 				follow_unlabeled_arrow(new_list, state.out_1)
 			}
 		}
@@ -376,6 +376,9 @@ func test_post2nfa_5() {
 
 func test_match() {
 	assert_b(match(post2nfa(re2post("a")), "a") == true)
+	assert_b(match(post2nfa(re2post("a")), "aa") == false)
+	assert_b(match(post2nfa(re2post("aa")), "aa") == true)
+	assert_b(match(post2nfa(re2post("aa")), "aaa") == false)
 	assert_b(match(post2nfa(re2post("a")), "b") == false)
 	assert_b(match(post2nfa(re2post("a?")), "") == true)
 	assert_b(match(post2nfa(re2post("a?")), "a") == true)
@@ -408,6 +411,15 @@ func test_match() {
 	assert_b(match(post2nfa(re2post("(aa)+")), "aa") == true)
 	assert_b(match(post2nfa(re2post("(abb)+a")), "abbabba") == true)
 	assert_b(match(post2nfa(re2post("a(bb(ccc)*)+a")), "abba") == true)
+	assert_b(match(post2nfa(re2post(".*")), "") == true)
+	assert_b(match(post2nfa(re2post(".*")), "a") == true)
+	assert_b(match(post2nfa(re2post(".*")), "aa") == true)
+	assert_b(match(post2nfa(re2post(".+")), "") == false)
+	assert_b(match(post2nfa(re2post(".+")), "a") == true)
+	assert_b(match(post2nfa(re2post(".+")), "aa") == true)
+	assert_b(match(post2nfa(re2post(".?")), "") == true)
+	assert_b(match(post2nfa(re2post(".?")), "a") == true)
+	assert_b(match(post2nfa(re2post(".?")), "aa") == false)
 }
 
 func main() {
