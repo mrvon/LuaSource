@@ -85,6 +85,18 @@ func assert(result string, expect string) {
 	}
 }
 
+func assert_i(result int, expect int) {
+	if result != expect {
+		panic(fmt.Sprintf("Assert failed!, Expect %d, Get %d", expect, result))
+	}
+}
+
+func assert_b(result bool) {
+	if !result {
+		panic(fmt.Sprintf("Assert failed!"))
+	}
+}
+
 func test_re2post() {
 	assert(re2post("abba"), "ab$b$a$")
 	assert(re2post("abba(ab)"), "ab$b$a$ab$$")
@@ -268,61 +280,59 @@ func post2nfa(postfix string) *State {
 	return e.start
 }
 
-func test_1() {
+func test_post2nfa_1() {
 	s := post2nfa(re2post("ab"))
-	fmt.Println(*s)
-	fmt.Println(*s.out_1)
-	fmt.Println(*s.out_1.out_1)
-	fmt.Println(s.out_2)
+	assert_i(s.c, 'a')
+	assert_i(s.out_1.c, 'b')
+	assert_i(s.out_1.out_1.c, MATCH)
+	assert_b(s.out_2 == nil)
 }
 
-func test_2() {
+func test_post2nfa_2() {
 	s := post2nfa(re2post("a|b"))
-	fmt.Println(*s)
-	fmt.Println(*s.out_1)
-	fmt.Println(*s.out_2)
-	fmt.Println(*s.out_1.out_1)
-	fmt.Println(*s.out_2.out_1)
+	assert_i(s.c, SPLIT)
+	assert_i(s.out_1.c, 'a')
+	assert_i(s.out_2.c, 'b')
+	assert_i(s.out_1.out_1.c, MATCH)
+	assert_i(s.out_2.out_1.c, MATCH)
 }
 
-func test_3() {
+func test_post2nfa_3() {
 	s := post2nfa(re2post("(ab)*"))
-	fmt.Println(*s)
-	fmt.Println(*s.out_1)
-	fmt.Println(*s.out_1.out_1)
-	fmt.Println(*s.out_1.out_1.out_1)
-	fmt.Println(*s.out_1.out_1.out_1.out_1)
-	fmt.Println(*s.out_1.out_1.out_1.out_1.out_1)
+	assert_i(s.c, SPLIT)
+	assert_i(s.out_1.c, 'a')
+	assert_i(s.out_2.c, MATCH)
+	assert_i(s.out_1.out_1.c, 'b')
+	assert_i(s.out_1.out_1.out_1.c, SPLIT)
+	assert_i(s.out_1.out_1.out_1.out_1.c, 'a')
+	assert_i(s.out_1.out_1.out_1.out_1.out_1.c, 'b')
 
-	fmt.Println(*s.out_2)
 }
 
-func test_4() {
+func test_post2nfa_4() {
 	s := post2nfa(re2post("(ab)+"))
-	fmt.Println(*s)
-	fmt.Println(*s.out_1)
-	fmt.Println(*s.out_1.out_1)
-	fmt.Println(*s.out_1.out_1.out_1)
-	fmt.Println(*s.out_1.out_1.out_1.out_1)
-	fmt.Println(*s.out_1.out_1.out_1.out_1.out_1)
-
-	fmt.Println(*s.out_1.out_1.out_2)
+	assert_i(s.c, 'a')
+	assert_i(s.out_1.c, 'b')
+	assert_i(s.out_1.out_1.c, SPLIT)
+	assert_i(s.out_1.out_1.out_1.c, 'a')
+	assert_i(s.out_1.out_1.out_2.c, MATCH)
+	assert_i(s.out_1.out_1.out_1.out_1.c, 'b')
+	assert_i(s.out_1.out_1.out_1.out_1.out_1.c, SPLIT)
 }
 
-func test_5() {
+func test_post2nfa_5() {
 	s := post2nfa(re2post("a?"))
-	fmt.Println(*s)
-	fmt.Println(*s.out_1)
-	fmt.Println(*s.out_1.out_1)
-	fmt.Println(*s.out_2)
+	assert_i(s.c, SPLIT)
+	assert_i(s.out_1.c, 'a')
+	assert_i(s.out_2.c, MATCH)
+	assert_b(s.out_1.out_1.c == MATCH)
 }
 
 func main() {
 	test_re2post()
-
-	// test_1()
-	// test_2()
-	// test_3()
-	// test_4()
-	test_5()
+	test_post2nfa_1()
+	test_post2nfa_2()
+	test_post2nfa_3()
+	test_post2nfa_4()
+	test_post2nfa_5()
 }
