@@ -422,7 +422,7 @@ func test_match() {
 	assert_b(match(post2nfa(re2post(".?")), "aa") == false)
 }
 
-func main() {
+func test() {
 	test_re2post()
 	test_post2nfa_1()
 	test_post2nfa_2()
@@ -430,4 +430,8 @@ func main() {
 	test_post2nfa_4()
 	test_post2nfa_5()
 	test_match()
+}
+
+func main() {
+	test()
 }
