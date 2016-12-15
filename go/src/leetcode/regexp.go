@@ -97,42 +97,6 @@ func assert_b(result bool) {
 	}
 }
 
-func test_re2post() {
-	assert(re2post("abba"), "ab$b$a$")
-	assert(re2post("abba(ab)"), "ab$b$a$ab$$")
-	assert(re2post("a(bb)+a"), "abb$+$a$")
-	assert(re2post("(abb)+a"), "ab$b$+a$")
-	assert(re2post("a(bb)+a"), "abb$+$a$")
-	assert(re2post("a(bb(ccc)*)+a"), "abb$cc$c$*$+$a$")
-
-	assert(re2post("a*"), "a*")
-	assert(re2post("ab*"), "ab*$")
-	assert(re2post("a|b"), "ab|")
-	assert(re2post("ab|b"), "ab$b|")
-	assert(re2post("abc|b"), "ab$c$b|")
-	assert(re2post("abc|bcd"), "ab$c$bc$d$|")
-
-	assert(re2post("a(bb|c)+a"), "abb$c|+$a$")
-	assert(re2post("a(bb|c*)+a"), "abb$c*|+$a$")
-
-	assert(re2post("a(b*)c"), "ab*$c$")
-	assert(re2post("a*(b*)c+"), "a*b*$c+$")
-	assert(re2post("a*(b*)(c+)"), "a*b*$c+$")
-	assert(re2post("(a*)(b*)+(c+)"), "a*b*+$c+$")
-	assert(re2post("a*b*|c+"), "a*b*$c+|")
-
-	assert(re2post("."), ".")
-	assert(re2post(".+"), ".+")
-	assert(re2post(".*"), ".*")
-	assert(re2post("he.*llo"), "he$.*$l$l$o$")
-
-	assert(re2post(".?"), ".?")
-	assert(re2post("a?"), "a?")
-	assert(re2post("ab?"), "ab?$")
-	assert(re2post("a+b?"), "a+b?$")
-	assert(re2post("(a+b?)*"), "a+b?$*")
-}
-
 const (
 	MATCH = 256
 	SPLIT = 257
@@ -280,6 +244,88 @@ func post2nfa(postfix string) *State {
 	return e.start
 }
 
+func is_match(state_list map[*State]bool) bool {
+	for state := range state_list {
+		if state == MatchState {
+			return true
+		}
+	}
+	return false
+}
+
+func match(state *State, s string) bool {
+	if state == nil {
+		return false
+	}
+
+	state_list := make(map[*State]bool)
+	follow_unlabeled_arrow(state_list, state)
+
+	for i := 0; i < len(s); i++ {
+		new_list := make(map[*State]bool)
+		c := int(s[i])
+
+		for state := range state_list {
+			if state.c == c {
+				follow_unlabeled_arrow(new_list, state.out_1)
+			}
+		}
+
+		state_list = new_list
+	}
+
+	return is_match(state_list)
+}
+
+func follow_unlabeled_arrow(state_list map[*State]bool, state *State) {
+	if state == nil {
+		return
+	}
+
+	if state.c == SPLIT {
+		follow_unlabeled_arrow(state_list, state.out_1)
+		follow_unlabeled_arrow(state_list, state.out_2)
+	} else {
+		state_list[state] = true
+	}
+}
+
+func test_re2post() {
+	assert(re2post("abba"), "ab$b$a$")
+	assert(re2post("abba(ab)"), "ab$b$a$ab$$")
+	assert(re2post("a(bb)+a"), "abb$+$a$")
+	assert(re2post("(abb)+a"), "ab$b$+a$")
+	assert(re2post("a(bb)+a"), "abb$+$a$")
+	assert(re2post("a(bb(ccc)*)+a"), "abb$cc$c$*$+$a$")
+
+	assert(re2post("a*"), "a*")
+	assert(re2post("ab*"), "ab*$")
+	assert(re2post("a|b"), "ab|")
+	assert(re2post("ab|b"), "ab$b|")
+	assert(re2post("abc|b"), "ab$c$b|")
+	assert(re2post("abc|bcd"), "ab$c$bc$d$|")
+
+	assert(re2post("a(bb|c)+a"), "abb$c|+$a$")
+	assert(re2post("a(bb|c*)+a"), "abb$c*|+$a$")
+
+	assert(re2post("a(b*)c"), "ab*$c$")
+	assert(re2post("a*(b*)c+"), "a*b*$c+$")
+	assert(re2post("a*(b*)(c+)"), "a*b*$c+$")
+	assert(re2post("(a*)(b*)+(c+)"), "a*b*+$c+$")
+	assert(re2post("a*b*|c+"), "a*b*$c+|")
+
+	assert(re2post("."), ".")
+	assert(re2post(".+"), ".+")
+	assert(re2post(".*"), ".*")
+	assert(re2post("he.*llo"), "he$.*$l$l$o$")
+
+	assert(re2post(".?"), ".?")
+	assert(re2post("a?"), "a?")
+	assert(re2post("ab?"), "ab?$")
+	assert(re2post("a+b?"), "a+b?$")
+	assert(re2post("(a+b?)*"), "a+b?$*")
+}
+
 func test_post2nfa_1() {
 	s := post2nfa(re2post("ab"))
 	assert_i(s.c, 'a')
@@ -328,6 +374,42 @@ func test_post2nfa_5() {
 	assert_b(s.out_1.out_1.c == MATCH)
 }
 
+func test_match() {
+	assert_b(match(post2nfa(re2post("a")), "a") == true)
+	assert_b(match(post2nfa(re2post("a")), "b") == false)
+	assert_b(match(post2nfa(re2post("a?")), "") == true)
+	assert_b(match(post2nfa(re2post("a?")), "a") == true)
+	assert_b(match(post2nfa(re2post("a*")), "") == true)
+	assert_b(match(post2nfa(re2post("a*")), "a") == true)
+	assert_b(match(post2nfa(re2post("a*")), "aa") == true)
+	assert_b(match(post2nfa(re2post("a*")), "aaa") == true)
+	assert_b(match(post2nfa(re2post("ba*")), "aaa") == false)
+	assert_b(match(post2nfa(re2post("ba*")), "baaa") == true)
+	assert_b(match(post2nfa(re2post("abba")), "abbc") == false)
+	assert_b(match(post2nfa(re2post("abba")), "abba") == true)
+	assert_b(match(post2nfa(re2post("abba(ab)")), "abbab") == false)
+	assert_b(match(post2nfa(re2post("abba(ab)")), "abbaab") == true)
+	assert_b(match(post2nfa(re2post("a(bb)+a")), "abbbbb") == false)
+	assert_b(match(post2nfa(re2post("a(bb)+a")), "abbbba") == true)
+	assert_b(match(post2nfa(re2post("(abb)+a")), "abbbbba") == false)
+	assert_b(match(post2nfa(re2post("(abb)+a")), "abba") == true)
+	assert_b(match(post2nfa(re2post("(abb)+a")), "abbabba") == true)
+	assert_b(match(post2nfa(re2post("a+")), "") == false)
+	assert_b(match(post2nfa(re2post("a+")), "a") == true)
+	assert_b(match(post2nfa(re2post("a+")), "aa") == true)
+	assert_b(match(post2nfa(re2post("a+")), "aaa") == true)
+	assert_b(match(post2nfa(re2post("ba+")), "aaa") == false)
+	assert_b(match(post2nfa(re2post("ba+")), "baaa") == true)
+	assert_b(match(post2nfa(re2post("(a)+")), "") == false)
+	assert_b(match(post2nfa(re2post("(aa)+")), "") == false)
+	assert_b(match(post2nfa(re2post("(aa)+")), "aa") == true)
+	assert_b(match(post2nfa(re2post("(aa)+")), "aaa") == false)
+	assert_b(match(post2nfa(re2post("(aa)+")), "aaaa") == true)
+	assert_b(match(post2nfa(re2post("(aa)+")), "aa") == true)
+	assert_b(match(post2nfa(re2post("(abb)+a")), "abbabba") == true)
+	assert_b(match(post2nfa(re2post("a(bb(ccc)*)+a")), "abba") == true)
+}
+
 func main() {
 	test_re2post()
 	test_post2nfa_1()
@@ -335,4 +417,5 @@ func main() {
 	test_post2nfa_3()
 	test_post2nfa_4()
 	test_post2nfa_5()
+	test_match()
 }
