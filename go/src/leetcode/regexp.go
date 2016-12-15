@@ -253,13 +253,13 @@ func is_match(state_list map[*State]bool) bool {
 	return false
 }
 
-func match(state *State, s string) bool {
-	if state == nil {
+func match(start *State, s string) bool {
+	if start == nil {
 		return false
 	}
 
 	state_list := make(map[*State]bool)
-	follow_unlabeled_arrow(state_list, state)
+	follow_unlabeled_arrow(state_list, start)
 
 	for i := 0; i < len(s); i++ {
 		new_list := make(map[*State]bool)
