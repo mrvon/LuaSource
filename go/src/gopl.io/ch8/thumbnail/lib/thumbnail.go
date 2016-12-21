@@ -1,5 +1,5 @@
 // The thumbnail package thumbnail-size images from
-// larger images. Only JPEG iamges are currently supported.
+// larger images. Only JPEG images are currently supported.
 package thumbnail
 
 import (
