@@ -1,3 +1,4 @@
+// Quick find implementation (Slow union)
 package main
 
 import "fmt"
@@ -27,7 +28,7 @@ func (uf *UF) find(p int) int {
 }
 
 func (uf *UF) union(p int, q int) {
-	// Put p and q  into the same component.
+	// Put p and q into the same component.
 	p_id := uf.find(p)
 	q_id := uf.find(q)
 
