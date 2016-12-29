@@ -32,11 +32,11 @@ func counting_sort(a []int, r int) {
 func main() {
 	// key in an int in [0, R)
 	list := []int{
-		8, 1, 1, 1, 3, 4, 5, 6, 7, 3, 4, 5, 9, 10,
+		8, 1, 1, 1, 3, 4, 5, 6, 7, 3, 4, 5, 9, 0,
 	}
 
-	// here r is 11
-	r := 11
+	// here r is 10
+	r := 10
 
 	fmt.Println(list)
 	counting_sort(list, r)
