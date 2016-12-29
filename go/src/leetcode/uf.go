@@ -1,7 +1,10 @@
 // weighted quick union implementation
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type UF struct {
 	id    []int // parent link (site indexed)
@@ -63,7 +66,7 @@ func main() {
 		return
 	}
 
-	uf := new_uf(n)
+	var pair []int
 	p := 0
 	q := 0
 	for {
@@ -71,11 +74,23 @@ func main() {
 		if err != nil {
 			break
 		}
+		pair = append(pair, p)
+		pair = append(pair, q)
+	}
+
+	start := time.Now()
+
+	uf := new_uf(n)
+	for i := 0; i < len(pair); i += 2 {
+		p := pair[i]
+		q := pair[i+1]
+
 		if uf.connected(p, q) {
 			continue
 		}
 		uf.union(p, q)
-		fmt.Println(p, q)
 	}
+
 	fmt.Println(uf.count, "components")
+	fmt.Printf("use time(%s)\n", time.Since(start))
 }
