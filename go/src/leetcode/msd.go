@@ -8,14 +8,15 @@ const (
 )
 
 func msd(a []string) {
-	aux := make([]string, len(a)-1)
+	aux := make([]string, len(a))
 	__msd(a, aux, 0, len(a)-1, 0)
 }
 
 func __msd(a []string, aux []string, left int, right int, d int) {
 	// sort from a[left] to a[right], starting at the dth character.
-	if left < right+M {
+	if right <= left+M {
 		__insert_sort(a, left, right, d)
+		return
 	}
 
 	count := make([]int, R+2)
@@ -51,7 +52,7 @@ func __insert_sort(a []string, left int, right int, d int) {
 			}
 		}
 		s := a[i]
-		for k := j; k < i; k++ {
+		for k := i - 1; k >= j; k-- {
 			a[k+1] = a[k]
 		}
 		a[j] = s
@@ -59,12 +60,23 @@ func __insert_sort(a []string, left int, right int, d int) {
 }
 
 func main() {
-	a := []string{
-		"hello",
+	list := []string{
+		"go",
+		"flash",
+		"to",
+		"the",
+		"zoo",
+		"the",
+		"game",
+		"of",
 		"world",
-		"goodd",
+		"or",
+		"and",
+		"not",
+		"bee",
+		"box",
+		"color",
 	}
-	fmt.Println(a)
-	__insert_sort(a, 0, len(a)-1, 0)
-	fmt.Println(a)
+	msd(list)
+	fmt.Println(list)
 }
