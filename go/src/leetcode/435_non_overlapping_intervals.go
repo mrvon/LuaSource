@@ -7,6 +7,13 @@ The following greedy algorithm does find the optimal solution:
 1. Select the interval, x, with the earliest finishing time.
 2. Remove x, and all intervals intersecting x, from the set of candidate intervals.
 3. Continue until the set of candidate intervals is empty.
+
+Whenever we select an interval at step 1, we may have to remove many intervals
+in step 2. However, all these intervals necessarily cross the finishing time of
+x, and thus they all cross each other (see figure). Hence, at most 1 of these
+intervals can be in the optimal solution. Hence, for every interval in the
+optimal solution, there is an interval in the greedy solution. This proves that
+the greedy algorithm indeed finds an optimal solution.
 */
 package main
 
