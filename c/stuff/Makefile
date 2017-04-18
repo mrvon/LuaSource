@@ -1,9 +1,7 @@
-CC 		= gcc
+CC = gcc
 
 # bundle all
 all:                      \
-	rb_tree               \
-	skip_list             \
 	quick_sort            \
 	quick_sort_with_stack \
 	link_list             \
@@ -24,8 +22,6 @@ all:                      \
 	trick_1               \
 
 clean:
-	rm -f rb_tree               
-	rm -f skip_list             
 	rm -f quick_sort            
 	rm -f quick_sort_with_stack 
 	rm -f link_list             
@@ -44,12 +40,6 @@ clean:
 	rm -f use_zlib              
 	rm -f use_zlib_2            
 	rm -f trick_1               
-
-rb_tree: rb_tree.c
-	$(CC) -o $@ rb_tree.c
-
-skip_list: skip_list.c
-	$(CC) -o $@ skip_list.c
 
 link_list: link_list.c
 	$(CC) -o $@ link_list.c

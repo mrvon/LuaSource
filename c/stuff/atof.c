@@ -1,5 +1,4 @@
 #include <ctype.h>
-#include "calc.h"
 
 double kr_atof(char s[])
 {
