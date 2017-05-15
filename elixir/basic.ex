@@ -424,3 +424,56 @@ defmodule ListHelper2 do
 end
 
 IO.puts(ListHelper2.sum([1, 2, 3]))
+
+defmodule Practice do
+  def list_len([]) do
+    0
+  end
+
+  def list_len([_ | tail]) do
+    1 + list_len(tail)
+  end
+
+  defp list_len_t(l, []) do
+    l
+  end
+
+  defp list_len_t(l, [_ | tail]) do
+    list_len_t(l+1, tail)
+  end
+
+  # tail-recursive version
+  def list_len_tr(list) do
+    list_len_t(0, list)
+  end
+
+  def range(from, to) when from > to do
+  end
+
+  # tail-recursive version
+  def range(from, to) do
+    IO.puts(from)
+    range(from+1, to)
+  end
+
+  defp positive_t(list, []) do
+    Enum.reverse(list)
+  end
+
+  defp positive_t(list, [head | tail]) when head > 0 do
+    positive_t([head | list], tail)
+  end
+
+  defp positive_t(list, [head | tail]) when head <= 0 do
+    positive_t(list, tail)
+  end
+
+  def positive(list) do
+    positive_t([], list)
+  end
+end
+
+IO.puts(Practice.list_len([1, 2, 3, 4]))
+IO.puts(Practice.list_len_tr([1, 2, 3, 4]))
+Practice.range(-5, -1)
+Practice.positive([-1, 2, -3, 4, 5, 9])
