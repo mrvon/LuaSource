@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "calc.h"
 
 #define HASHSIZE 1001
 
