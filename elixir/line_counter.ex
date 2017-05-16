@@ -15,6 +15,5 @@ defmodule LinesCounter do
   end
 end
 
-IO.puts(LinesCounter.count("basic.ex"))
-# IO.puts(LinesCounter.count("non-existing file"))
-
+IO.inspect(LinesCounter.count("basic.ex"))
+IO.inspect(LinesCounter.count("non-existing file"))

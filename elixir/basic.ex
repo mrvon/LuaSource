@@ -2,7 +2,7 @@
 -5
 |> abs
 |> Integer.to_string
-|> IO.puts
+|> IO.inspect
 
 # function arity
 defmodule Calculator do
@@ -20,8 +20,8 @@ defmodule Calculator do
   end
 end
 
-IO.puts(Calculator.sum(1, 1))
-IO.puts(Calculator.sum(10))
+IO.inspect(Calculator.sum(1, 1))
+IO.inspect(Calculator.sum(10))
 
 # function visibility
 # exported function and private function
@@ -44,7 +44,7 @@ defmodule TestPrivate do
 end
 
 # OK
-IO.puts(TestPrivate.double(3))
+IO.inspect(TestPrivate.double(3))
 # Failed
 # TestPrivate.sum(3, 4)
 
@@ -88,21 +88,21 @@ defmodule Circle do
   end
 end
 
-IO.puts(Circle.area(1))
-IO.puts(Circle.circumference(1))
+IO.inspect(Circle.area(1))
+IO.inspect(Circle.circumference(1))
 
 # Tuple
 person = {"Bob", 25}
 IO.puts(elem(person, 0))
 IO.puts(elem(person, 1))
-# put_elem doesn't  modify the tuple. It returns the new version, keeping the
-# old one intact.
+# put_elem doesn't modify the tuple. It returns the new version, keeping the old
+# one intact.
 older_person = put_elem(person, 1, 26)
-IO.puts(elem(person, 1))
-IO.puts(elem(older_person, 1))
+IO.inspect(person)
+IO.inspect(older_person)
 # rebound
 person = put_elem(person, 1, 26)
-IO.puts(elem(person, 1))
+IO.inspect(person)
 
 # List
 # List in erlang are used to manage dynamic, variable-sized collections of data.
@@ -123,8 +123,10 @@ IO.puts(Enum.at(prime_numbers, 0))
 prime_numbers = List.insert_at(prime_numbers, 4, 1)
 # to append to the end
 prime_numbers = List.insert_at(prime_numbers, -1, 1)
+IO.inspect(prime_numbers)
 # concatenates two list
 new_list = [1, 2, 3] ++ [4, 5]
+IO.inspect(new_list)
 
 # recursive list definition
 # a list can be represented by a pair(head, tail),
@@ -142,15 +144,26 @@ list_3 = [1 | [2]]
 list_4 = [1 | [2, 3, 4]]
 list_5 = [1 | [2 | [3 | [4 | []]]]]
 
+IO.inspect("list_1")
+IO.inspect(list_1)
+IO.inspect("list_2")
+IO.inspect(list_2)
+IO.inspect("list_3")
+IO.inspect(list_3)
+IO.inspect("list_4")
+IO.inspect(list_4)
+IO.inspect("list_5")
+IO.inspect(list_5)
 # to get the head of the list
-hd(list_5)
+IO.inspect(hd(list_5))
 # to get the tail of the list
-tl(list_5)
+IO.inspect(tl(list_5))
 
 # knowing the recursive nature of the list, it's simple and efficient to push
 # a new element to the top of the list.
 a_list = [5, :value, true]
 new_list = [:new_element | a_list]
+IO.inspect(new_list)
 # construction of the new_list is an O(1) operation, and no memory copying
 # occurs, the tail of the new_list is the a_list!
 
@@ -164,24 +177,21 @@ IO.puts(bob.works_at)
 
 # modify value
 next_years_bob = %{bob | age: 26, works_at: "Initrode"}
-IO.puts(next_years_bob.age)
-IO.puts(next_years_bob.works_at)
+IO.inspect(bob)
+IO.inspect(next_years_bob)
 # but you can only modify values that already exist in the map.
 
 # to insert a new key-value pair (or modify the existing one), you can use
 # the Map.put/3 function
 bob_2 = Map.put(bob, :salary, 50000)
-IO.puts(bob_2.salary)
-
-bob_2 = Dict.put(bob, :salary, 50001)
-IO.puts(bob_2.salary)
+IO.inspect(bob_2)
 
 # first-class function, a function is a first-class citizen in Elixir.
 square = fn(x) ->
   x * x
 end
-# The motivation behond the dot operator is to make the code more explict.
-IO.puts(square.(16))
+# The motivation behind the dot operator is to make the code more explicit.
+IO.inspect(square.(16))
 # lambda
 print_element = 
 Enum.each(
@@ -221,6 +231,8 @@ IO.puts(iolist)
 # Here, you append to an IO list by creating a new list with two elements: a
 # previous version of the IO list and the suffix that is appended. Each such
 # operation is O(1), so this is performant.
+
+# ------------------------------------------------------------------------------
 
 # Pattern matching
 person = {"Bob", 25}
@@ -309,10 +321,10 @@ end
 # the source code. If the area(unknown) clause was defined first, you would
 # always get the error result.
 
-IO.puts(Geometry.area({:rectangle, 4, 5}))
-IO.puts(Geometry.area({:square, 5}))
-IO.puts(Geometry.area({:circle, 4}))
-Geometry.area({:triangle, 1, 2, 3})
+IO.inspect(Geometry.area({:rectangle, 4, 5}))
+IO.inspect(Geometry.area({:square, 5}))
+IO.inspect(Geometry.area({:circle, 4}))
+IO.inspect(Geometry.area({:triangle, 1, 2, 3}))
 
 # Multiclause lambda
 
@@ -325,11 +337,11 @@ test_num = fn
     :positive
 end
 
-IO.puts(test_num.(-1))
-IO.puts(test_num.(0))
-IO.puts(test_num.(1))
+IO.inspect(test_num.(-1))
+IO.inspect(test_num.(0))
+IO.inspect(test_num.(1))
 
-# Conditionals
+# # Conditionals
 
 # Branching with multiclause functions
 defmodule TestNum do
@@ -376,17 +388,62 @@ IO.puts(ListHelper.sum([]))
 IO.puts(ListHelper.sum([1, 2, 3]))
 
 # Classical branching constructs
+# IF and UNLESS
 defmodule TestIf do
   def max(a, b) do
     if a >= b, do: a, else: b
   end
 end
 
+IO.inspect(TestIf.max(1024, 1025))
+
 defmodule TestUnless do
   def min(a, b) do
     unless a >= b, do: a, else: b
   end
 end
+
+IO.inspect(TestUnless.min(1024, 1025))
+
+# COND
+# The COND marco can be thought of as equivalent to an if-else-if pattern
+# cond do
+#   expression_1 ->
+#     ...
+#   expression_2 ->
+#     ...
+#   ...
+# end 
+defmodule TestCond do
+  def max(a, b) do
+    cond do
+      a >= b ->a
+      true -> b
+    end
+  end
+end
+
+IO.inspect(TestCond.max(1025, 1026))
+
+# CASE
+# case expression do
+#   pattern_1 ->
+#     ...
+#   pattern_2 ->
+#     ...
+#   ...
+# end
+
+defmodule TestCase do
+  def max(a, b) do
+    case a >= b do
+      true -> a
+      false -> b
+    end
+  end
+end
+
+IO.inspect(TestCase.max(1026, 1027))
 
 defmodule NaturalNums do
   def print(n) when is_float(n) or n <= 0 do
@@ -473,7 +530,81 @@ defmodule Practice do
   end
 end
 
-IO.puts(Practice.list_len([1, 2, 3, 4]))
-IO.puts(Practice.list_len_tr([1, 2, 3, 4]))
+IO.inspect(Practice.list_len([1, 2, 3, 4]))
+IO.inspect(Practice.list_len_tr([1, 2, 3, 4]))
 Practice.range(-5, -1)
-Practice.positive([-1, 2, -3, 4, 5, 9])
+IO.inspect(Practice.positive([-1, 2, -3, 4, 5, 9]))
+
+# High order functions
+# A higher-order function is a fancy name for a function that takes functions
+# as its input and/or returns functions.
+
+Enum.each(
+  [1, 2, 3],
+  fn(x) -> IO.puts(x) end
+)
+
+Enum.map(
+  [1, 2, 3],
+  fn(x) -> 2 * x end
+)
+
+Enum.filter(
+  [1, 2, 3],
+  fn(x) -> rem(x, 2) == 1 end
+)
+
+Enum.filter(
+  [1, 2, 3],
+  &(rem(&1, 2) == 1)
+)
+
+Enum.reduce(
+  [1, 2, 3],
+  0,
+  fn(element, sum) -> element + sum end
+)
+
+# Multiclause lambda
+Enum.reduce(
+  [1, "not a number", 2, :x, 3],
+  0,
+  fn
+    element, sum when is_number(element) ->
+      sum + element
+    _, sum -> sum
+  end
+)
+
+defmodule NumHelper do
+  def sum_nums(enumerable) do
+    Enum.reduce(enumerable, 0, &add_num/2)
+  end
+
+  defp add_num(num, sum) when is_number(num) do
+    sum + num
+  end
+
+  defp add_num(_, sum) do
+    sum
+  end
+end
+
+IO.inspect(NumHelper.sum_nums([1, 2, 3]))
+
+# Immutable hierarchical updates
+todo_list = [
+  {1, %{date: {2013, 12, 19}, title: "Dentist"}},
+  {2, %{date: {2013, 12, 20}, title: "Shopping"}},
+  {3, %{date: {2013, 12, 19}, title: "Movies"}},
+]
+|> Enum.into(Map.new)
+
+IO.inspect(todo_list)
+
+# Hierarchical update
+todo_list = put_in(todo_list[3][:title], "Theater")
+
+IO.inspect(todo_list)
+
+# Iterative updates
