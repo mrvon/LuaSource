@@ -48,7 +48,7 @@ defmodule TodoList do
   ) do
     case entries[entry_id] do
       nil -> todo_list
-      old_entry ->
+      _ ->
         new_entries = Map.delete(entries, entry_id)
         %TodoList{todo_list | entries: new_entries}
     end
