@@ -548,22 +548,26 @@ Enum.map(
   [1, 2, 3],
   fn(x) -> 2 * x end
 )
+|> IO.inspect
 
 Enum.filter(
   [1, 2, 3],
   fn(x) -> rem(x, 2) == 1 end
 )
+|> IO.inspect
 
 Enum.filter(
   [1, 2, 3],
   &(rem(&1, 2) == 1)
 )
+|> IO.inspect
 
 Enum.reduce(
   [1, 2, 3],
   0,
   fn(element, sum) -> element + sum end
 )
+|> IO.inspect
 
 # Multiclause lambda
 Enum.reduce(
