@@ -69,61 +69,51 @@ defmodule TodoList do
 end
 
 defmodule TodoServer do
+  use GenServer
+
+  def init(_) do
+    {:ok, TodoList.new()}
+  end
+
+  def handle_cast({:add_entry, new_entry}, todo_list) do
+    {:noreply, TodoList.add_entry(todo_list, new_entry)}
+  end
+
+  def handle_cast({:update_entry, entry_id, updater_fun}, todo_list) do
+    {:noreply, TodoList.update_entry(todo_list, entry_id, updater_fun)}
+  end
+
+  def handle_cast({:delete_entry, entry_id}, todo_list) do
+    {:noreply, TodoList.delete_entry(todo_list, entry_id)}
+  end
+
+  def handle_call({:entries, date}, _, todo_list) do
+    {:reply, TodoList.entries(todo_list, date), todo_list}
+  end
+
   def start() do
-    spawn(fn() ->
-      loop(TodoList.new())
-    end)
+    GenServer.start(TodoServer, nil)
   end
 
-  defp loop(todo_list) do
-    new_todo_list = receive do
-      message ->
-        process_message(todo_list, message)
-    end
-    loop(new_todo_list)
+  def add_entry(pid, new_entry) do
+    GenServer.cast(pid, {:add_entry, new_entry})
   end
 
-  defp process_message(todo_list, {:add_entry, new_entry}) do
-    TodoList.add_entry(todo_list, new_entry)
+  def entries(pid, date) do
+    GenServer.call(pid, {:entries, date})
   end
 
-  defp process_message(todo_list, {:entries, caller, date}) do
-    send(caller, {:todo_entries, TodoList.entries(todo_list, date)})
-    todo_list
+  def update_entry(pid, entry_id, updater_fun) do
+    GenServer.cast(pid, {:update_entry, entry_id, updater_fun})
   end
 
-  defp process_message(todo_list, {:update_entry, entry_id, updater_fun}) do
-    TodoList.update_entry(todo_list, entry_id, updater_fun)
-  end
-
-  defp process_message(todo_list, {:delete_entry, entry_id}) do
-    TodoList.delete_entry(todo_list, entry_id)
-  end
-
-  def add_entry(todo_server, new_entry) do
-    send(todo_server, {:add_entry, new_entry})
-  end
-
-  def entries(todo_server, date) do
-    send(todo_server, {:entries, self(), date})
-    receive do
-      {:todo_entries, entries} -> entries
-    after 5000 ->
-      {:error, :timeout}
-    end
-  end
-
-  def update_entry(todo_server, entry_id, updater_fun) do
-    send(todo_server, {:update_entry, entry_id, updater_fun})
-  end
-
-  def delete_entry(todo_server, entry_id) do
-    send(todo_server, {:delete_entry, entry_id})
+  def delete_entry(pid, entry_id) do
+    GenServer.cast(pid, {:delete_entry, entry_id})
   end
 end
 
 # Test code
-todo_server = TodoServer.start()
+{:ok, todo_server} = TodoServer.start()
 
 TodoServer.add_entry(
   todo_server,
