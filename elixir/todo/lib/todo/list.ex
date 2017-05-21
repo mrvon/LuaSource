@@ -1,4 +1,3 @@
-
 defmodule Todo.List do
   defstruct auto_id: 1, entries: Map.new
 
