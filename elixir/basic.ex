@@ -246,12 +246,20 @@ IO.puts(age)
 {year, month, day} = date
 {hour, minute, second} = time
 
-IO.puts(year)
+IO.inspect(date)
+IO.inspect(time)
+IO.inspect(year)
+IO.inspect(month)
+IO.inspect(day)
+IO.inspect(hour)
+IO.inspect(minute)
+IO.inspect(second)
 
 person_2 = {:person, "Dennis", 25}
 {:person, name, age} = person_2
 
-IO.puts(name)
+IO.inspect(name)
+IO.inspect(age)
 
 # anonymous variable
 {_, time} = :calendar.local_time
@@ -595,6 +603,33 @@ defmodule NumHelper do
 end
 
 IO.inspect(NumHelper.sum_nums([1, 2, 3]))
+
+# Comprehensions
+for x <- [1, 2, 3] do
+  x*x
+end
+|> IO.inspect
+
+for x <- [1, 2, 3], y <- [1, 2, 3] do
+  {x, y, x*y}
+end
+|> IO.inspect
+
+for x <- 1..9, y <- 1..9 do
+  {x, y, x*y}
+end
+|> IO.inspect
+
+multiplication_table = 
+  for x <- 1..9, y <- 1..9, into: %{} do
+    {{x, y}, x*y}
+  end
+
+multiplication_table[{7, 6}]
+|> IO.inspect
+
+multiplication_table
+|> IO.inspect
 
 # Immutable hierarchical updates
 todo_list = [
