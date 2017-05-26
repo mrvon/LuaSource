@@ -11,7 +11,6 @@ defmodule Todo.Cache do
       {:ok, todo_server} ->
         {:reply, todo_server, todo_servers}
       :error ->
-        Todo.Server.start(todo_list_name)
         {:ok, new_server} = Todo.Server.start(todo_list_name)
         {
           :reply,
