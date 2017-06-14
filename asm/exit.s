@@ -1,23 +1,21 @@
-# PURPOSE: Simple program that exits and returns a
-# 		status code back to the Linux kernel
+# PURPOSE: 
 #
+# Simple program that exits and returns a status code back to the Linux kernel
 
-# INPUT: none
+# INPUT:
 #
+# none
 
-# OUTPUT: returns a status code. This can be viewed
-#		by typing
+# OUTPUT:
 #
-# 		echo $?
-#
-
-# after running the program
-#
+# returns a status code. This can be viewed by typing echo $? after running
+# the program
 
 # VARIABLES:
-# 		%eax holds the system call number
-# 		%ebx holds the return status
 #
+# %eax holds the system call number
+# %ebx holds the return status
+
 .section .data
 
 .section .text
