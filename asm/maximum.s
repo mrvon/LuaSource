@@ -1,3 +1,4 @@
+.code32
 # PURPOSE
 #
 # This program finds the maximum number of a set of data items.
