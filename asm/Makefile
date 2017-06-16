@@ -2,7 +2,7 @@ AS = as --32
 LD = ld -m elf_i386
 
 # bundle all
-all: exit maximum power factorial factorial2 square toupper
+all: exit maximum power factorial factorial2 square toupper toupper2 heynow
 
 exit: exit.s
 	$(AS) exit.s -o exit.o
@@ -32,6 +32,14 @@ toupper: toupper.s
 	$(AS) toupper.s -o toupper.o
 	$(LD) toupper.o -o toupper
 
+toupper2: toupper2.s
+	$(AS) toupper2.s -o toupper2.o
+	$(LD) toupper2.o -o toupper2
+
+heynow: heynow.s
+	$(AS) heynow.s -o heynow.o
+	$(LD) heynow.o -o heynow
+
 # clean auto generate file
 clean:
 	rm -f exit.o
@@ -48,3 +56,7 @@ clean:
 	rm -f square
 	rm -f toupper.o
 	rm -f toupper
+	rm -f toupper2.o
+	rm -f toupper2
+	rm -f heynow.o
+	rm -f heynow
