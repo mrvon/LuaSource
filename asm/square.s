@@ -11,7 +11,7 @@
 
 _start:
 # The square takes one argument
-push $5
+pushl $5
 call square
 add $4, %esp
 movl %eax, %ebx
