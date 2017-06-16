@@ -2,7 +2,8 @@ AS = as --32
 LD = ld -m elf_i386
 
 # bundle all
-all: exit maximum power factorial factorial2 square toupper toupper2 heynow
+all: exit maximum power factorial factorial2 square toupper toupper2 heynow \
+	write_records
 
 exit: exit.s
 	$(AS) exit.s -o exit.o
@@ -40,6 +41,11 @@ heynow: heynow.s
 	$(AS) heynow.s -o heynow.o
 	$(LD) heynow.o -o heynow
 
+write_records: write_records.s
+	$(AS) write_record.s -o write_record.o
+	$(AS) write_records.s -o write_records.o
+	$(LD) write_record.o write_records.o -o write_records
+
 # clean auto generate file
 clean:
 	rm -f exit.o
@@ -60,3 +66,5 @@ clean:
 	rm -f toupper2
 	rm -f heynow.o
 	rm -f heynow
+	rm -f write_records.o
+	rm -f write_records
