@@ -58,7 +58,7 @@ int $LINUX_SYSCALL
 
 # error occured
 cmpl $0, %eax
-jl error_end
+jl loop_end
 
 # write back
 pushl ST_FD(%ebp)
@@ -71,9 +71,4 @@ jmp loop_begin
 loop_end:
 movl $SYS_EXIT, %eax
 movl $0, %ebx
-int $LINUX_SYSCALL
-
-error_end:
-movl $SYS_EXIT, %eax
-movl $1, %ebx
 int $LINUX_SYSCALL
