@@ -34,7 +34,7 @@ movl %esp, %ebp
 # counter starts at zero
 movl $0, %ecx
 
-# start address of data
+# starting address of data
 movl ST_STRING_START_ADDRESS(%ebp), %edx
 
 count_loop_begin:

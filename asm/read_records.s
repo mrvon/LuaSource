@@ -4,7 +4,7 @@
 
 .section .data
 file_name:
-.ascii "test.dat\0"
+.ascii "records.bin\0"
 
 .section .bss
 .lcomm record_buffer, RECORD_SIZE
@@ -33,7 +33,7 @@ movl $0, %ecx # this says to open read-only
 movl $0666, %edx
 int $LINUX_SYSCALL
 
-#save file descriptor
+# save file descriptor
 movl %eax, ST_IN_FD(%ebp)
 
 # even though it's a constant, we are saving the output file descriptor in a
@@ -53,14 +53,14 @@ cmpl $RECORD_SIZE, %eax
 jne finished_reading
 
 # otherwise, print out the first name but first, we must know it's size
-pushl $RECORD_FIRSTNAME + record_buffer
+pushl $record_buffer + RECORD_FIRSTNAME
 call count_chars
 addl $4, %esp
 
 movl %eax, %edx
 movl $SYS_WRITE, %eax
 movl ST_OUT_FD(%ebp), %ebx
-movl $RECORD_FIRSTNAME + record_buffer, %ecx
+movl $record_buffer + RECORD_FIRSTNAME, %ecx
 int $LINUX_SYSCALL
 
 pushl ST_OUT_FD(%ebp)

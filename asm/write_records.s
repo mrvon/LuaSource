@@ -69,7 +69,7 @@ record3:
 # This is the name of the file we will write to
 
 file_name:
-.ascii "test.dat\0"
+.ascii "records.bin\0"
 
 .equ ST_FD, -4
 

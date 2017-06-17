@@ -3,7 +3,7 @@ LD = ld -m elf_i386
 
 # bundle all
 all: exit maximum power factorial factorial2 square toupper toupper2 heynow \
-	write_records read_records
+	write_records read_records add_year add_year_inplace
 
 exit: exit.s
 	$(AS) exit.s -o exit.o
@@ -41,17 +41,33 @@ heynow: heynow.s
 	$(AS) heynow.s -o heynow.o
 	$(LD) heynow.o -o heynow
 
-write_records: write_records.s
+write_record: write_record.s
 	$(AS) write_record.s -o write_record.o
+
+read_record: read_record.s
+	$(AS) read_record.s -o read_record.o
+
+write_records: write_record write_records.s
 	$(AS) write_records.s -o write_records.o
 	$(LD) write_record.o write_records.o -o write_records
 
-read_records: read_records.s
+write_newline: write_newline.s
 	$(AS) write_newline.s -o write_newline.o
+
+count_chars: count_chars.s
 	$(AS) count_chars.s -o count_chars.o
-	$(AS) read_record.s -o read_record.o
+
+read_records: write_newline count_chars read_record read_records.s
 	$(AS) read_records.s -o read_records.o
 	$(LD) write_newline.o count_chars.o read_record.o read_records.o -o read_records
+
+add_year: read_record write_record add_year.s
+	$(AS) add_year.s -o add_year.o
+	$(LD) read_record.o write_record.o add_year.o -o add_year
+
+add_year_inplace: read_record write_record add_year_inplace.s
+	$(AS) add_year_inplace.s -o add_year_inplace.o
+	$(LD) read_record.o write_record.o add_year_inplace.o -o add_year_inplace
 
 # clean auto generate file
 clean:
@@ -73,7 +89,15 @@ clean:
 	rm -f toupper2
 	rm -f heynow.o
 	rm -f heynow
+	rm -f write_record.o
 	rm -f write_records.o
 	rm -f write_records
+	rm -f write_newline.o
+	rm -f count_chars.o
+	rm -f read_record.o
 	rm -f read_records.o
 	rm -f read_records
+	rm -f add_year.o
+	rm -f add_year
+	rm -f add_year_inplace.o
+	rm -f add_year_inplace
