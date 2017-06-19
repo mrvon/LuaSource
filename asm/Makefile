@@ -61,9 +61,12 @@ read_records: write_newline count_chars read_record read_records.s
 	$(AS) read_records.s -o read_records.o
 	$(LD) write_newline.o count_chars.o read_record.o read_records.o -o read_records
 
-add_year: read_record write_record add_year.s
+error_exit: error_exit.s
+	$(AS) error_exit.s -o error_exit.o
+
+add_year: read_record write_record error_exit count_chars write_newline add_year.s
 	$(AS) add_year.s -o add_year.o
-	$(LD) read_record.o write_record.o add_year.o -o add_year
+	$(LD) read_record.o write_record.o error_exit.o count_chars.o write_newline.o add_year.o -o add_year
 
 add_year_inplace: read_record write_record add_year_inplace.s
 	$(AS) add_year_inplace.s -o add_year_inplace.o

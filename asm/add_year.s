@@ -9,6 +9,12 @@ in_file_name:
 out_file_name:
 .ascii "records2.bin\0"
 
+no_open_file_code:
+.ascii "0001: \0"
+
+no_open_file_msg:
+.ascii "Can't Open Input file\0"
+
 .section .bss
 .lcomm record_buffer, RECORD_SIZE
 
@@ -39,6 +45,18 @@ int $LINUX_SYSCALL
 # save input file descriptor
 movl %eax, ST_IN_FD(%ebp)
 
+# error checking
+cmpl $0, %eax
+jge continue_processing
+
+# send the error
+pushl $no_open_file_msg
+pushl $no_open_file_code
+call error_exit
+addl $8, %esp
+
+continue_processing:
+
 # open the output file
 movl $SYS_OPEN, %eax
 movl $out_file_name, %ebx
@@ -48,6 +66,18 @@ int $LINUX_SYSCALL
 
 # save output file descriptor
 movl %eax, ST_OUT_FD(%ebp)
+
+# error checking
+cmpl $0, %eax
+jge continue_processing2
+
+# send the error
+pushl $no_open_file_msg
+pushl $no_open_file_code
+call error_exit
+addl $8, %esp
+
+continue_processing2:
 
 loop_begin:
 pushl ST_IN_FD(%ebp)
