@@ -4,7 +4,7 @@ LD = ld -m elf_i386
 # bundle all
 all: exit maximum power factorial factorial2 libfactorial square toupper \
 	toupper2 heynow write_records read_records add_year add_year_inplace \
-	helloworld printf_example
+	helloworld printf_example alloc read_records_using_alloc \
 
 exit: exit.s
 	$(AS) exit.s -o exit.o
@@ -87,6 +87,14 @@ printf_example: printf_example.s
 	$(AS) printf_example.s -o printf_example.o
 	$(LD) -dynamic-linker /lib/ld-linux.so.2 -o printf_example printf_example.o -lc
 
+alloc: alloc.s
+	$(AS) alloc.s -o alloc.o
+
+read_records_using_alloc: write_newline count_chars read_record alloc read_records_using_alloc.s
+	$(AS) read_records_using_alloc.s -o read_records_using_alloc.o
+	$(LD) write_newline.o count_chars.o read_record.o \
+		  read_records_using_alloc.o alloc.o -o read_records_using_alloc
+
 # clean auto generate file
 clean:
 	rm -f exit.o
@@ -126,3 +134,6 @@ clean:
 	rm -f helloworld
 	rm -f printf_example.o
 	rm -f printf_example
+	rm -f alloc.o
+	rm -f read_records_using_alloc.o
+	rm -f read_records_using_alloc
