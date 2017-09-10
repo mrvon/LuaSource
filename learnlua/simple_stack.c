@@ -6,7 +6,9 @@
 #include "lua.h"
 #include "lualib.h"
 
-void test_stack() {
+#include "stack_dump.h"
+
+void run_stack() {
     lua_State* L = luaL_newstate();
 
     lua_pushstring(L, "World");
@@ -49,7 +51,7 @@ void test_stack() {
     stack_dump(L);
 }
 
-void test_reg() {
+void run_reg() {
     lua_State* L = luaL_newstate();
 
     // variable with a unique address
@@ -109,4 +111,10 @@ void test_reg() {
     lua_pushlightuserdata(L, (void*)&key_3);    // push address
     lua_rawget(L, LUA_REGISTRYINDEX);           // retrieve value
     fprintf(stdout, "%s", lua_tostring(L, -1)); // convert to string
+}
+
+int main() {
+    run_stack();
+    run_reg();
+    return 0;
 }

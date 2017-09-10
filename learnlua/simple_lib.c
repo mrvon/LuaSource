@@ -175,6 +175,12 @@ static int l_split_ex(lua_State* L) {
 }
 
 static int l_concat(lua_State* L) {
+    int num_of_argument = lua_gettop(L);
+    lua_concat(L, num_of_argument);
+    return 1;
+}
+
+static int l_tconcat(lua_State* L) {
     luaL_Buffer b;
     int i = 0;
     int n = 0;
@@ -191,12 +197,6 @@ static int l_concat(lua_State* L) {
 
     luaL_pushresult(&b);
 
-    return 1;
-}
-
-static int l_concat(lua_State* L) {
-    int num_of_argument = lua_gettop(L);
-    lua_concat(L, num_of_argument);
     return 1;
 }
 
@@ -301,22 +301,22 @@ static int l_test(lua_State* L) {
 }
 
 static const struct luaL_Reg simple_lib[] = {
-    { "l_sin", l_sin },
-    { "l_summation", l_summation },
-    { "l_pack", l_pack },
-    { "l_reverse", l_reverse },
-    { "l_foreach", l_foreach },
-    { "l_map", l_map },
-    { "l_split", l_split },
-    { "l_split_ex", l_split_ex },
-    { "l_concat", l_concat },
-    { "l_filter", l_filter },
-    { "l_concat", l_concat },
-    { "l_getn", l_getn },
-    { "l_create_counter", l_create_counter },
-    { "l_tuple", l_tuple },
-    { "l_dir", l_dir },
-    { "l_test", l_test },
+    { "sin", l_sin },
+    { "summation", l_summation },
+    { "pack", l_pack },
+    { "reverse", l_reverse },
+    { "foreach", l_foreach },
+    { "map", l_map },
+    { "split", l_split },
+    { "split_ex", l_split_ex },
+    { "concat", l_concat },
+    { "tconcat", l_tconcat },
+    { "filter", l_filter },
+    { "getn", l_getn },
+    { "create_counter", l_create_counter },
+    { "tuple", l_tuple },
+    { "dir", l_dir },
+    { "test", l_test },
     { NULL, NULL },
 };
 
