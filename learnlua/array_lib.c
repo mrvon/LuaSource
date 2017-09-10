@@ -1,25 +1,24 @@
-#include "lua.h"
 #include "lauxlib.h"
-#include "lualib.h"
 #include "limits.h"
+#include "lua.h"
 
 #define BITS_PER_WORD (CHAR_BIT * sizeof(unsigned int))
 #define INDEX_WORD(i) ((unsigned int)(i) / BITS_PER_WORD)
 #define INDEX_BIT(i) (1 << ((unsigned int)(i) % BITS_PER_WORD))
 
 #define METATABLE_NAME "LuaBook.Array"
-#define CHECK_ARRAY(L, index) (BitArray*)luaL_checkudata(L, index, METATABLE_NAME)
+#define CHECK_ARRAY(L, index)                                                  \
+    (BitArray*)luaL_checkudata(L, index, METATABLE_NAME)
 
 typedef struct BitArray {
     int size;
     unsigned int values[1];
 } BitArray;
 
-static int newarray(lua_State *L)
-{
+static int newarray(lua_State* L) {
     int i;
     size_t nbytes;
-    BitArray *a;
+    BitArray* a;
 
     int n = luaL_checkint(L, 1);
     luaL_argcheck(L, n >= 1, 1, "invalid size");
@@ -38,14 +37,13 @@ static int newarray(lua_State *L)
     return 1;
 }
 
-static int unionarray(lua_State *L)
-{
+static int unionarray(lua_State* L) {
     int i;
     int j;
     int nbytes;
 
-    BitArray* a = (BitArray*) CHECK_ARRAY(L, 1);
-    BitArray* b = (BitArray*) CHECK_ARRAY(L, 2);
+    BitArray* a = (BitArray*)CHECK_ARRAY(L, 1);
+    BitArray* b = (BitArray*)CHECK_ARRAY(L, 2);
 
     if (a->size < b->size) {
         BitArray* tmp = a;
@@ -55,15 +53,14 @@ static int unionarray(lua_State *L)
 
     nbytes = sizeof(BitArray) + INDEX_WORD(a->size - 1) * sizeof(unsigned int);
 
-    BitArray* c = (BitArray*) lua_newuserdata(L, nbytes);
+    BitArray* c = (BitArray*)lua_newuserdata(L, nbytes);
     c->size = a->size;
 
     j = INDEX_WORD(b->size - 1);
     for (i = 0; i <= INDEX_WORD(a->size - 1); ++i) {
         if (i > j) {
             c->values[i] = a->values[i];
-        }
-        else {
+        } else {
             c->values[i] = a->values[i] | b->values[i];
         }
     }
@@ -73,14 +70,13 @@ static int unionarray(lua_State *L)
     return 1;
 }
 
-static int intersectionarray(lua_State *L)
-{
+static int intersectionarray(lua_State* L) {
     int i;
     int j;
     int nbytes;
 
-    BitArray* a = (BitArray*) CHECK_ARRAY(L, 1);
-    BitArray* b = (BitArray*) CHECK_ARRAY(L, 2);
+    BitArray* a = (BitArray*)CHECK_ARRAY(L, 1);
+    BitArray* b = (BitArray*)CHECK_ARRAY(L, 2);
 
     if (a->size < b->size) {
         BitArray* tmp = a;
@@ -90,15 +86,14 @@ static int intersectionarray(lua_State *L)
 
     nbytes = sizeof(BitArray) + INDEX_WORD(a->size - 1) * sizeof(unsigned int);
 
-    BitArray* c = (BitArray*) lua_newuserdata(L, nbytes);
+    BitArray* c = (BitArray*)lua_newuserdata(L, nbytes);
     c->size = a->size;
 
     j = INDEX_WORD(b->size - 1);
     for (i = 0; i <= INDEX_WORD(a->size - 1); ++i) {
         if (i > j) {
             c->values[i] = a->values[i];
-        }
-        else {
+        } else {
             c->values[i] = a->values[i] & b->values[i];
         }
     }
@@ -108,9 +103,8 @@ static int intersectionarray(lua_State *L)
     return 1;
 }
 
-static unsigned int* getindex(lua_State *L, unsigned int *mask)
-{
-    BitArray* a = (BitArray*) CHECK_ARRAY(L, 1);
+static unsigned int* getindex(lua_State* L, unsigned int* mask) {
+    BitArray* a = (BitArray*)CHECK_ARRAY(L, 1);
     int index = luaL_checkint(L, 2) - 1;
 
     luaL_argcheck(L, a != NULL, 1, "'array' expected");
@@ -121,8 +115,7 @@ static unsigned int* getindex(lua_State *L, unsigned int *mask)
     return &a->values[INDEX_WORD(index)];
 }
 
-static int setarray(lua_State *L)
-{
+static int setarray(lua_State* L) {
     unsigned int mask;
     unsigned int* base = getindex(L, &mask);
 
@@ -130,16 +123,14 @@ static int setarray(lua_State *L)
 
     if (lua_toboolean(L, 3)) {
         (*base) |= mask;
-    }
-    else {
+    } else {
         (*base) &= ~mask;
     }
 
     return 0;
 }
 
-static int getarray(lua_State *L)
-{
+static int getarray(lua_State* L) {
 
     unsigned int mask;
     unsigned int* base = getindex(L, &mask);
@@ -148,18 +139,16 @@ static int getarray(lua_State *L)
     return 1;
 }
 
-static int getsize(lua_State *L)
-{
-    BitArray* a = (BitArray*) CHECK_ARRAY(L, 1);
+static int getsize(lua_State* L) {
+    BitArray* a = (BitArray*)CHECK_ARRAY(L, 1);
     lua_pushinteger(L, a->size);
     return 1;
 }
 
-static int array2string(lua_State *L)
-{
+static int array2string(lua_State* L) {
     luaL_Buffer b;
     int i;
-    BitArray* a = (BitArray*) CHECK_ARRAY(L, 1);
+    BitArray* a = (BitArray*)CHECK_ARRAY(L, 1);
 
     luaL_buffinit(L, &b);
 
@@ -170,10 +159,9 @@ static int array2string(lua_State *L)
     luaL_addstring(&b, "{ ");
 
     for (i = a->size - 1; i >= 0; --i) {
-        if(a->values[INDEX_WORD(i)] & INDEX_BIT(i)) {
+        if (a->values[INDEX_WORD(i)] & INDEX_BIT(i)) {
             luaL_addstring(&b, "1");
-        }
-        else {
+        } else {
             luaL_addstring(&b, "0");
         }
     }
@@ -186,22 +174,21 @@ static int array2string(lua_State *L)
 }
 
 static const struct luaL_Reg array_lib_f[] = {
-    {"new", newarray},
-    {"union", unionarray},
-    {"intersection", intersectionarray},
-	{NULL, NULL},
+    { "new", newarray },
+    { "union", unionarray },
+    { "intersection", intersectionarray },
+    { NULL, NULL },
 };
 
 static const struct luaL_Reg array_lib_m[] = {
-    {"__newindex", setarray},
-    {"__index", getarray},
-    {"__len", getsize},
-    {"__tostring", array2string},
-	{NULL, NULL},
+    { "__newindex", setarray },
+    { "__index", getarray },
+    { "__len", getsize },
+    { "__tostring", array2string },
+    { NULL, NULL },
 };
 
-int luaopen_array_lib(lua_State *L)
-{
+int luaopen_array_lib(lua_State* L) {
     luaL_newmetatable(L, METATABLE_NAME);
     luaL_setfuncs(L, array_lib_m, 0);
     luaL_newlib(L, array_lib_f);

@@ -1,16 +1,17 @@
-#include <lua.h>
-#include <lauxlib.h>
-#include <zlib.h>
 #include <assert.h>
+#include <zlib.h>
+
+#include <lauxlib.h>
+#include <lua.h>
 
 /*
  * (string) / (msg, sz)
  * (msg, sz)
  */
-static int ldeflate(lua_State *L) {
+static int ldeflate(lua_State* L) {
     luaL_Buffer buff;
     z_stream stream;
-    void *src_buff;
+    void* src_buff;
     unsigned long src_len;
     int ret;
 
@@ -79,10 +80,10 @@ static int ldeflate(lua_State *L) {
  * (string) / (msg, sz)
  * (msg, sz)
  */
-static int linflate(lua_State *L) {
+static int linflate(lua_State* L) {
     luaL_Buffer buff;
     z_stream stream;
-    void *src_buff;
+    void* src_buff;
     unsigned long src_len;
     int ret;
 
@@ -137,15 +138,15 @@ static int linflate(lua_State *L) {
         ret = inflate(&stream, Z_NO_FLUSH);
         assert(ret != Z_STREAM_ERROR);
 
-        switch(ret) {
-            case Z_NEED_DICT:
-                ret = Z_DATA_ERROR;
-                /* fall through */
-            case Z_DATA_ERROR:
-            case Z_MEM_ERROR:
-                inflateEnd(&stream);
-                lua_pushnil(L);
-                return ret;
+        switch (ret) {
+        case Z_NEED_DICT:
+            ret = Z_DATA_ERROR;
+        /* fall through */
+        case Z_DATA_ERROR:
+        case Z_MEM_ERROR:
+            inflateEnd(&stream);
+            lua_pushnil(L);
+            return ret;
         }
 
         luaL_addsize(&buff, LUAL_BUFFERSIZE - stream.avail_out);
@@ -161,20 +162,18 @@ static int linflate(lua_State *L) {
 /*
  * (string)
  */
-static int lversion(lua_State *L) {
+static int lversion(lua_State* L) {
     const char* str = zlibVersion();
     lua_pushstring(L, str);
     return 1;
 }
 
-static struct luaL_Reg zlib[] = {
-  {"deflate", ldeflate},
-  {"inflate", linflate},
-  {"version", lversion},
-  {NULL, NULL}
-};
+static struct luaL_Reg zlib[] = { { "deflate", ldeflate },
+                                  { "inflate", linflate },
+                                  { "version", lversion },
+                                  { NULL, NULL } };
 
-int luaopen_zlib (lua_State *L) {
+int luaopen_zlib(lua_State* L) {
     lua_newtable(L);
     luaL_setfuncs(L, zlib, 0);
     return 1;
