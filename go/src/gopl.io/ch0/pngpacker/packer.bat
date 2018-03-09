@@ -1,8 +1,0 @@
-RD /S /Q "test\algo1"
-RD /S /Q "test\algo2"
-RD /S /Q "test\algo3"
-RD /S /Q "test\algo4"
-RD /S /Q "test\algo5"
-RD /S /Q "test\algo11"
-RD /S /Q "test\algo12"
-packer.exe "test\00_1000Cloth_Attack1" "temp" "test\algo%%d\%%d.plist" "test\algo%%d\test%%d.png"
