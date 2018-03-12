@@ -1,5 +1,5 @@
 # bundle all
-all: server trivial_client raw_sender raw_receiver
+all: server trivial_client raw_sender raw_receiver getaddrinfo
 
 # socket server
 server: socket_server.c
@@ -14,9 +14,13 @@ raw_sender: raw_sender.c
 raw_receiver: raw_receiver.c
 	cc -o $@ raw_receiver.c
 
+getaddrinfo: getaddrinfo.c
+	cc -o $@ getaddrinfo.c
+
 # clean auto generate file
 clean:
 	rm -f server
 	rm -f trivial_client
 	rm -f raw_sender
 	rm -f raw_receiver
+	rm -f getaddrinfo
