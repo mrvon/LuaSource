@@ -86,3 +86,36 @@ debug.upvaluejoin(test, 2, test_2, 2)
 assert(debug.upvalueid(test, 2) == debug.upvalueid(test_2, 2))
 
 test()
+
+local function inspect_local()
+    print("---------------- local")
+    local level = 2
+    local pre_frame = debug.getinfo(level)
+    if pre_frame == nil then
+        return
+    end
+
+    local i = 1
+    while true do
+        localname, localval = debug.getlocal(level, i)
+        if localname == nil then
+            break
+        end
+        i = i + 1
+        inspect(localname)
+        inspect(localval)
+
+        if localname == "name" then
+            debug.setlocal(level, i, "come on baby")
+        end
+    end
+    print("---------------- >")
+end
+
+local function test_3(x, y, z)
+    local name = "come on"
+    local fuck = "super"
+    inspect_local()
+end
+
+test_3()
