@@ -1,7 +1,0 @@
--x
-c
--DLUA_COMPAT_5_2
--DLUA_USE_LINUX
--Wall
--Wextra
--std=gnu99
