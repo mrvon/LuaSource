@@ -16,9 +16,11 @@ print(timestamp)
 
 -- UNIXTIME=0 转换为日期(UTC+8)
 print(inspect(os.date("*t", 0)))
+print(inspect(os.date("%c", 0)))
 
 -- UNIXTIME=0 转换为日期(UTC+0)
 print(inspect(os.date("!*t", 0)))
+print(inspect(os.date("!%c", 0)))
 
 -- 在程序里面统一使用UTC+0 简化问题
 -- timestamp -> date
