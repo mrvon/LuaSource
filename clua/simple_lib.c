@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lauxlib.h"
-#include "lua.h"
-#include "lualib.h"
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
 
 static int l_sin(lua_State* L) {
     double d = luaL_checknumber(L, 1); // get argument
@@ -227,7 +227,7 @@ static int l_create_counter(lua_State* L) {
 }
 
 static int tuple(lua_State* L) {
-    int count_of_argument = luaL_optint(L, 1, 0);
+    int count_of_argument = luaL_optinteger(L, 1, 0);
     if (count_of_argument == 0) { // no argument
         int i = 0;
         // push each valid upvalue onto the stack

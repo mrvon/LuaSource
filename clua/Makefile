@@ -1,4 +1,5 @@
 CC = gcc
+LIBS = -llua -lm -ldl
 
 # bundle all
 all:                   \
@@ -21,16 +22,16 @@ stack_dump: stack_dump.c
 	$(CC) -c stack_dump.c -o stack_dump.o
 
 simple_interpreter: simple_interpreter.c
-	$(CC) -o $@ simple_interpreter.c -llua
+	$(CC) -o $@ simple_interpreter.c $(LIBS)
 
 read_conf: read_conf.c stack_dump
-	$(CC) -o $@ read_conf.c stack_dump.o -llua
+	$(CC) -o $@ read_conf.c stack_dump.o $(LIBS)
 
 simple_stack: simple_stack.c stack_dump
-	$(CC) -o $@ simple_stack.c stack_dump.o -llua
+	$(CC) -o $@ simple_stack.c stack_dump.o $(LIBS)
 
 simple_lib: simple_lib.c
-	$(CC) -fPIC --shared -o simple_lib.so simple_lib.c -llua
+	$(CC) -fPIC --shared -o simple_lib.so simple_lib.c
 
 zlib: zlib.c
-	$(CC) -fPIC --shared -o zlib.so zlib.c -llua -lz
+	$(CC) -fPIC --shared -o zlib.so zlib.c -lz
