@@ -300,6 +300,29 @@ static int l_test(lua_State* L) {
     return 0;
 }
 
+static int foreach_finishcall(lua_State *L, int status, lua_KContext ctx) {
+    if (status == LUA_OK) {
+        lua_pushnil(L);
+    } else { // LUA_YIELD
+        lua_pop(L, 1);
+    }
+    while (lua_next(L, 1) != 0) {
+        lua_pushvalue(L, 2);
+        lua_pushvalue(L, -3);
+        lua_pushvalue(L, -3);
+        lua_callk(L, 2, 0, 0, foreach_finishcall);
+        lua_pop(L, 1);
+    }
+    return 0;
+}
+
+// lua foreach_c_yieldable.lua
+static int l_foreach_c_yieldable(lua_State* L) {
+    luaL_checktype(L, 1, LUA_TTABLE);
+    luaL_checktype(L, 2, LUA_TFUNCTION);
+    return foreach_finishcall(L, LUA_OK, 0);
+}
+
 static const struct luaL_Reg simple_lib[] = {
     { "sin", l_sin },
     { "summation", l_summation },
@@ -317,6 +340,7 @@ static const struct luaL_Reg simple_lib[] = {
     { "tuple", l_tuple },
     { "dir", l_dir },
     { "test", l_test },
+    { "foreach_c_yieldable", l_foreach_c_yieldable },
     { NULL, NULL },
 };
 
